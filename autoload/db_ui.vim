@@ -1,9 +1,45 @@
 let s:dbs = {}
 let s:buffers = {}
-let s:temp_tree = []
-let s:temp_line = 1
-let s:tree = []
+let s:buffer_counter = {}
 let s:icons = { 'db': ' ', 'table': ' 🗉 ', 'buffer': '* ' }
+
+let s:tree = { 'line': 1, 'content': [] }
+
+function! s:tree.add(text, type, icon, ...) abort
+  let extra_opts = a:0 > 0 ? a:1 : {}
+  call add(self.content, extend({'line': self.line, 'text': a:text, 'icon': a:icon, 'type': a:type }, extra_opts))
+  let self.line += 1
+endfunction
+
+function! s:tree.render() abort
+  let view = winsaveview()
+  let self.content = []
+  let self.line = 1
+  if !empty(s:buffers)
+    call self.add('Buffers:', 'noaction', '')
+    for [bufnr, bufname] in items(s:buffers)
+      call self.add(substitute(bufname, '^[^\[]*', '', ''), 'buffer', s:icons.buffer, { 'bufname': bufname })
+    endfor
+    call self.add('', 'noaction', '')
+  endif
+  call self.add('Databases:', 'noaction', '')
+  for [db_name, db] in items(s:dbs)
+    call self.add(db_name, 'db', s:icons.db)
+    if db.expanded
+      for table in db.tables
+        call self.add(table, 'table', s:icons.table, {'db_name': db_name })
+      endfor
+    endif
+  endfor
+
+  let content = map(copy(self.content), 'v:val.icon.v:val.text')
+
+  setlocal modifiable
+  silent 1,$delete _
+  call setline(1, content)
+  setlocal nomodifiable
+  call winrestview(view)
+endfunction
 
 function! s:open_db_ui() abort
   let buffer = bufnr('__dbui__')
@@ -12,7 +48,7 @@ function! s:open_db_ui() abort
     return
   endif
   silent! exe 'vertical topleft new __dbui__'
-  silent! exe 'vertical topleft resize 40'
+  silent! exe 'vertical topleft resize '.g:db_ui_winwidth
   setlocal filetype=__dbui__ buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap cursorline nospell nomodifiable winfixwidth
 
   let db_names = keys(g:dbs)
@@ -24,12 +60,12 @@ function! s:open_db_ui() abort
     endif
   endfor
 
-  call s:render()
-  nnoremap <silent><buffer> <Plug>(DBUI_Toggle) :call <sid>toggle_line()<CR>
-  nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call <sid>render()<CR>
+  call s:tree.render()
+  nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>toggle_line()<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call <sid>tree.render()<CR>
   augroup db_ui
     autocmd! * <buffer>
-    autocmd BufEnter <buffer> call s:render()
+    autocmd BufEnter <buffer> call s:tree.render()
   augroup END
   syntax clear
   for [icon_name, icon] in items(s:icons)
@@ -40,9 +76,15 @@ function! s:open_db_ui() abort
   hi default link dbui_table String
   hi default link dbui_buffer Operator
   hi default link dbui_titles Constant
+  silent! doautocmd User DBUIOpened
 endfunction
 
 function! s:focus_window() abort
+  if winnr('$') ==? 1
+    vertical new
+    return
+  endif
+
   let found = 0
   for win in range(1, winnr('$'))
     let buf = winbufnr(win)
@@ -54,60 +96,60 @@ function! s:focus_window() abort
   endfor
 
   if !found
-    vertical new
+    2wincmd w
   endif
 endfunction
 
 function s:open_buffer(buffer_name, table)
   call s:focus_window()
-  let buffer = bufnr(a:buffer_name)
-  if buffer > -1
-    silent! exe 'b '.buffer
+  let bufnr = bufnr(a:buffer_name)
+  if bufnr > -1
+    silent! exe 'b '.bufnr
     return
   endif
 
   silent! exe 'edit '.a:buffer_name
   let content = printf('select * from "%s" LIMIT 200;', a:table)
-  let s:buffers[a:buffer_name] = {'bufnr': buffer, 'content': content, 'table': a:table }
-  setlocal filetype=sql buftype=nofile nolist noswapfile nowrap cursorline nospell modifiable
+  let s:buffers[bufnr(a:buffer_name)] = a:buffer_name
+  setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
   silent 1,$delete _
   call setline(1, content)
 endfunction
 
 function! s:open_db_ui_query(db, table) abort
-  let buffer_name = printf('db_ui_%s_%s', a:db.name, a:table)
+  let buffer_basename = printf('[%s] %s', a:db.name, a:table)
+  if has_key(s:buffer_counter, buffer_basename)
+    let new_name = buffer_basename.'-'.s:buffer_counter[buffer_basename]
+    let s:buffer_counter[buffer_basename] += 1
+    let buffer_basename = new_name
+  else
+    let s:buffer_counter[buffer_basename] = 1
+  endif
+  let buffer_name = printf('%s.%s', tempname(), buffer_basename)
   call s:open_buffer(buffer_name, a:table)
 
   let b:db_ui_table = a:table
   let b:db_ui = a:db
-  nnoremap <silent><buffer> <Plug>(DBUI_Execute) :call <sid>execute_query()<CR>
   augroup db_ui_query
     autocmd! * <buffer>
-    autocmd BufDelete,BufWipeout <buffer> call remove(s:buffers, bufname(str2nr(expand('<abuf>'))))
+    autocmd BufWritePost <buffer> silent! exe '%DB '.b:db_ui.url
+    autocmd BufDelete,BufWipeout <buffer> silent! call remove(s:buffers, str2nr(expand('<abuf>')))
   augroup END
 endfunction
 
-function s:remove(buffer) abort
-endfunction
-
-function! s:execute_query() abort
-  let s:buffers[bufname()].content = getline(1, '$')
-  silent! exe '%DB '.b:db_ui.url
-endfunction
-
 function! s:toggle_line() abort
-  let item = s:tree[line('.') - 1]
+  let item = s:tree.content[line('.') - 1]
   if item.type ==? 'db'
     call s:toggle_db(item)
-    return s:render()
+    return s:tree.render()
   endif
 
   if item.type ==? 'table'
-    return s:toggle_table(item)
+    return s:open_db_ui_query(s:dbs[item.db_name], item.text)
   endif
 
   if item.type ==? 'buffer'
-    return s:open_buffer(item.text, item.table)
+    return s:open_buffer(item.bufname, '')
   endif
 
   if item.type ==? 'noaction'
@@ -130,52 +172,6 @@ function! s:toggle_db(item) abort
     let db.conn = db#connect(db.url)
     let db.tables = db#adapter#call(db.conn, 'tables', [db.conn], [])
   endif
-endfunction
-
-function! s:toggle_table(item) abort
-  let db = s:dbs[a:item.db_name]
-
-  if empty(db)
-    throw 'DB for selected table not found.'
-  endif
-  call s:open_db_ui_query(db, a:item.text)
-endfunction
-
-function s:add_to_tree(text, type, icon, ...)
-  let extra_opts = a:0 > 0 ? a:1 : {}
-  call add(s:temp_tree, extend({'line': s:temp_line, 'text': a:text, 'icon': a:icon, 'type': a:type }, extra_opts))
-  let s:temp_line += 1
-endfunction
-
-function s:render() abort
-  let s:temp_tree = []
-  let s:temp_line = 1
-  let current_line = line('.')
-  if !empty(s:buffers)
-    call s:add_to_tree('Buffers:', 'noaction', '')
-    for [bufname, buf] in items(s:buffers)
-      call s:add_to_tree(bufname, 'buffer', s:icons.buffer, {'table': buf.table })
-    endfor
-    call s:add_to_tree('', 'noaction', '')
-  endif
-  call s:add_to_tree('Databases:', 'noaction', '')
-  for [db_name, db] in items(s:dbs)
-    call s:add_to_tree(db_name, 'db', s:icons.db)
-    if db.expanded
-      for table in db.tables
-        call s:add_to_tree(table, 'table', s:icons.table, {'db_name': db_name })
-      endfor
-    endif
-  endfor
-
-  let s:tree = s:temp_tree
-  let content = map(copy(s:tree), 'v:val.icon.v:val.text')
-
-  setlocal modifiable
-  silent 1,$delete _
-  call setline(1, content)
-  setlocal nomodifiable
-  call cursor(current_line, 0)
 endfunction
 
 function! db_ui#open() abort
