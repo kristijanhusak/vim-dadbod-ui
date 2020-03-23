@@ -5,6 +5,7 @@ let g:loaded_dbui = 1
 
 let g:db_ui_winwidth = get(g:, 'db_ui_winwidth', 40)
 let g:db_ui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')
+let g:db_ui_save_location = get(g:, 'db_ui_save_location', fnamemodify('~/.local/share/db_ui', ':p'))
 let g:db_ui_icons = extend({
       \ 'db_collapsed': '[+]',
       \ 'db_expanded': '[-]',
@@ -16,6 +17,7 @@ command! DBUI call db_ui#open()
 
 augroup dbui
   autocmd!
+  autocmd FileType sql nmap <buffer> <Leader>W <Plug>(DBUI_SaveQuery)
   autocmd FileType dbui nmap <buffer> o <Plug>(DBUI_SelectLine)
   autocmd FileType dbui nmap <buffer> R <Plug>(DBUI_Redraw)
 augroup END

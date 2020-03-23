@@ -2,7 +2,7 @@ syntax clear
 for [icon_name, icon] in items(g:db_ui_icons)
   exe 'syn match dbui_'.icon_name. ' /^[[:blank:]]*'.escape(icon, '*[]\/').'/'
 endfor
-syn match dbui_titles /^\(Buffers\|Databases\):$/
+syn match dbui_titles /^\(Buffers\|Databases\|Saved scripts\):$/
 
 hi default link dbui_db_expanded Directory
 hi default link dbui_db_collapsed Directory
