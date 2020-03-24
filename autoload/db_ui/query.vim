@@ -68,7 +68,7 @@ function s:open_buffer(db, buffer_name, ...)
   setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
   augroup db_ui_query
     autocmd! * <buffer>
-    autocmd BufWritePost <buffer> call s:execute_query()
+    autocmd BufWritePost <buffer> ++nested call s:execute_query()
     autocmd BufDelete,BufWipeout <buffer> silent! call remove(g:db_ui_drawer[b:db_ui_database.name].buffers.list, bufname(str2nr(expand('<abuf>'))))
   augroup END
 
