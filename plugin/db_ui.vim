@@ -7,10 +7,12 @@ let g:db_ui_winwidth = get(g:, 'db_ui_winwidth', 40)
 let g:db_ui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')
 let g:db_ui_save_location = get(g:, 'db_ui_save_location', fnamemodify('~/.local/share/db_ui', ':p'))
 let g:db_ui_icons = extend({
-      \ 'db_collapsed': '[+]',
-      \ 'db_expanded': '[-]',
-      \ 'table': '>',
-      \ 'buffer': '*',
+      \ 'expanded': '▾',
+      \ 'collapsed': '▸',
+      \ 'saved_sql': '*',
+      \ 'new_query': '+',
+      \ 'tables': '~',
+      \ 'buffers': '»'
       \ }, get(g:, 'db_ui_icons', {}))
 
 command! DBUI call db_ui#open()

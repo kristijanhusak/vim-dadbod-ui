@@ -1,29 +1,17 @@
-let g:db_ui_drawer = { 'line': 1, 'content': [], 'dbs': {}, 'buffers': {}, 'saved_sql': [] }
+let g:db_ui_drawer = { 'content': [], 'dbs': {}, 'save_path': '', 'buffers': {} }
 
 function! db_ui#drawer#open() abort
-  let buffer = bufnr('dbui')
-  if buffer > -1
-    silent! exe 'b'.buffer
+  let g:db_ui_drawer.save_path = substitute(get(g:, 'db_ui_save_location', ''), '\/$', '', '')
+  let dbui_winnr = bufwinnr('dbui')
+  if dbui_winnr > -1
+    silent! exe dbui_winnr.'wincmd w'
     return
   endif
   silent! exe 'vertical topleft new dbui'
   silent! exe 'vertical topleft resize '.g:db_ui_winwidth
   setlocal filetype=dbui buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap cursorline nospell nomodifiable winfixwidth
 
-  let db_names = keys(g:dbs)
-  for db_name in db_names
-    if !has_key(g:db_ui_drawer.dbs, db_name)
-      let g:db_ui_drawer.dbs[db_name] = {
-            \ 'url': g:dbs[db_name],
-            \ 'conn': '',
-            \ 'expanded': 0,
-            \ 'tables': [],
-            \ 'name': db_name
-            \ }
-    endif
-  endfor
-
-  call s:load_saved_sql()
+  call s:populate_dbs()
   call g:db_ui_drawer.render()
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>toggle_line()<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call g:db_ui_drawer.render()<CR>
@@ -34,41 +22,33 @@ function! db_ui#drawer#open() abort
   silent! doautocmd User DBUIOpened
 endfunction
 
-function! g:db_ui_drawer.add(text, type, icon, ...) abort
-  let extra_opts = a:0 > 0 ? a:1 : {}
-  call add(self.content, extend({'text': a:text, 'icon': a:icon, 'type': a:type }, extra_opts))
+function! s:populate_dbs() abort
+  let db_names = keys(g:dbs)
+  for db_name in db_names
+    if !has_key(g:db_ui_drawer.dbs, db_name)
+      let g:db_ui_drawer.dbs[db_name] = {
+            \ 'url': g:dbs[db_name],
+            \ 'conn': '',
+            \ 'expanded': 0,
+            \ 'tables': {'expanded': 0 , 'list': [] },
+            \ 'saved_sql': { 'expanded': 0, 'list': [] },
+            \ 'buffers': { 'expanded': 0, 'list': [] },
+            \ 'save_path': printf('%s/%s', g:db_ui_drawer.save_path, db_name),
+            \ 'name': db_name,
+            \ }
+    endif
+  endfor
 endfunction
 
 function! g:db_ui_drawer.render() abort
   let view = winsaveview()
   let self.content = []
-  if !empty(self.buffers)
-    call self.add('Buffers:', 'noaction', '')
-    for [bufnr, bufname] in items(self.buffers)
-      call self.add(substitute(bufname, '^[^\[]*', '', ''), 'buffer', g:db_ui_icons.buffer, { 'bufname': bufname })
-    endfor
-    call self.add('', 'noaction', '')
-  endif
 
-  if (!empty(self.saved_sql))
-    call self.add('Saved scripts:', 'noaction', '')
-    for filename in self.saved_sql
-      call self.add(fnamemodify(filename, ':t'), 'saved_sql', g:db_ui_icons.buffer, { 'bufname': filename })
-    endfor
-    call self.add('', 'noaction', '')
-  endif
-  call self.add('Databases:', 'noaction', '')
   for [db_name, db] in items(self.dbs)
-    let icon = db.expanded ? g:db_ui_icons.db_expanded : g:db_ui_icons.db_collapsed
-    call self.add(db_name, 'db', icon)
-    if db.expanded
-      for table in db.tables
-        call self.add(table, 'table', repeat(' ', shiftwidth()).g:db_ui_icons.table, {'db_name': db_name })
-      endfor
-    endif
+    call self.add_db(db_name, db)
   endfor
 
-  let content = map(copy(self.content), 'v:val.icon.(!empty(v:val.icon) ? " " : "").v:val.text')
+  let content = map(copy(self.content), 'repeat(" ", shiftwidth() * v:val.level).v:val.icon.(!empty(v:val.icon) ? " " : "").v:val.label')
 
   setlocal modifiable
   silent 1,$delete _
@@ -77,48 +57,87 @@ function! g:db_ui_drawer.render() abort
   call winrestview(view)
 endfunction
 
+function! g:db_ui_drawer.add(label, action, type, icon, db_name, level, ...)
+  let opts = extend({'label': a:label, 'action': a:action, 'type': a:type, 'icon': a:icon, 'db_name': a:db_name, 'level': a:level }, get(a:, '1', {}))
+  call add(self.content, opts)
+endfunction
+
+function! g:db_ui_drawer.add_db(db_name, db) abort
+  call self.add(a:db.name, 'toggle', 'db', s:get_icon(a:db), a:db_name, 0)
+  if !a:db.expanded
+    return a:db
+  endif
+
+  call self.add('New query', 'open', 'query', g:db_ui_icons.new_query, a:db_name, 1)
+  if !empty(a:db.buffers.list)
+    call self.add('Buffers', 'toggle', 'buffers', s:get_icon(a:db.buffers), a:db_name, 1)
+    if a:db.buffers.expanded
+      for buf in a:db.buffers.list
+        let buflabel = buf
+        if buf =~? '^'.a:db.save_path
+          let buflabel = fnamemodify(buf, ':t')
+        else
+          let buflabel = substitute(buf, '^[^\]]*\]\s*', '', '').' *'
+        endif
+        call self.add(buflabel, 'open', 'buffer', g:db_ui_icons.buffers, a:db_name, 2, { 'file_path': buf })
+      endfor
+    endif
+  endif
+  call self.add('Saved sql', 'toggle', 'saved_sql', s:get_icon(a:db.saved_sql), a:db_name, 1)
+  if a:db.saved_sql.expanded
+    for saved_sql in a:db.saved_sql.list
+      call self.add(fnamemodify(saved_sql, ':t'), 'open', 'buffer', g:db_ui_icons.saved_sql, a:db_name, 2, { 'file_path': saved_sql })
+    endfor
+  endif
+
+  call self.add('Tables', 'toggle', 'tables', s:get_icon(a:db.tables), a:db_name, 1)
+  if a:db.tables.expanded
+    for table in a:db.tables.list
+      call self.add(table, 'open', 'table', g:db_ui_icons.tables, a:db_name, 2)
+    endfor
+  endif
+endfunction
+
 function! s:toggle_line() abort
   let item = g:db_ui_drawer.content[line('.') - 1]
-  if item.type ==? 'db'
-    call s:toggle_db(item)
+  let db = g:db_ui_drawer.dbs[item.db_name]
+  if item.action ==? 'toggle'
+    if item.type ==? 'db'
+      let db.expanded = !db.expanded
+      call s:toggle_db(db)
+    else
+      let db[item.type].expanded = !db[item.type].expanded
+    endif
     return g:db_ui_drawer.render()
   endif
 
-  if item.type ==? 'table'
-    return db_ui#query#open_table(item)
-  endif
-
-  if item.type ==? 'buffer' || item.type ==? 'saved_sql'
-    return db_ui#query#open_buffer(item.bufname, '')
-  endif
-
-  if item.type ==? 'noaction'
-    return
-  endif
-
-  return db_ui#utils#echo_err('Unknown line.')
+  return db_ui#query#open(item)
 endfunction
 
-function! s:toggle_db(item) abort
-  let db = g:db_ui_drawer.dbs[a:item.text]
-  let db.expanded = !db.expanded
+function! s:toggle_db(db) abort
+  if !a:db.expanded
+    return a:db
+  endif
 
-  if !empty(db.conn) || !db.expanded
-    return db
+  let a:db.saved_sql.list = split(glob(printf('%s/*', a:db.save_path)), "\n")
+
+  if !empty(a:db.conn)
+    return a:db
   endif
 
   try
-    let db.conn = db#connect(db.url)
-    let db.tables = db#adapter#call(db.conn, 'tables', [db.conn], [])
+    let a:db.conn = db#connect(a:db.url)
+    let a:db.tables.list = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
   catch /.*/
-    let db.expanded = 0
-    return db_ui#utils#echo_err('Error connecting to db '.db.name.': '.v:exception)
+    let a:db.expanded = 0
+    return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
   endtry
 endfunction
 
-function! s:load_saved_sql() abort
-  if empty(g:db_ui_save_location)
-    return 0
+function! s:get_icon(item) abort
+  if a:item.expanded
+    return g:db_ui_icons.expanded
   endif
-  let g:db_ui_drawer.saved_sql = split(glob(g:db_ui_save_location.'*'), "\n")
+
+  return g:db_ui_icons.collapsed
 endfunction
