@@ -70,27 +70,27 @@ function! g:db_ui_drawer.add_db(db_name, db) abort
 
   call self.add('New query', 'open', 'query', g:db_ui_icons.new_query, a:db_name, 1)
   if !empty(a:db.buffers.list)
-    call self.add('Buffers', 'toggle', 'buffers', s:get_icon(a:db.buffers), a:db_name, 1)
+    call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', s:get_icon(a:db.buffers), a:db_name, 1)
     if a:db.buffers.expanded
       for buf in a:db.buffers.list
         let buflabel = buf
         if buf =~? '^'.a:db.save_path
           let buflabel = fnamemodify(buf, ':t')
         else
-          let buflabel = substitute(buf, '^[^\]]*\]\s*', '', '').' *'
+          let buflabel = substitute(fnamemodify(buf, ':e'), '^'.a:db_name.'-', '', '').' *'
         endif
         call self.add(buflabel, 'open', 'buffer', g:db_ui_icons.buffers, a:db_name, 2, { 'file_path': buf })
       endfor
     endif
   endif
-  call self.add('Saved sql', 'toggle', 'saved_sql', s:get_icon(a:db.saved_sql), a:db_name, 1)
+  call self.add('Saved sql ('.len(a:db.saved_sql.list).')', 'toggle', 'saved_sql', s:get_icon(a:db.saved_sql), a:db_name, 1)
   if a:db.saved_sql.expanded
     for saved_sql in a:db.saved_sql.list
       call self.add(fnamemodify(saved_sql, ':t'), 'open', 'buffer', g:db_ui_icons.saved_sql, a:db_name, 2, { 'file_path': saved_sql })
     endfor
   endif
 
-  call self.add('Tables', 'toggle', 'tables', s:get_icon(a:db.tables), a:db_name, 1)
+  call self.add('Tables ('.len(a:db.tables.list).')', 'toggle', 'tables', s:get_icon(a:db.tables), a:db_name, 1)
   if a:db.tables.expanded
     for table in a:db.tables.list
       call self.add(table, 'open', 'table', g:db_ui_icons.tables, a:db_name, 2)
@@ -126,10 +126,11 @@ function! s:toggle_db(db) abort
   endif
 
   try
+    call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
     let a:db.tables.list = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
+    call db_ui#utils#echo_msg('Connected.')
   catch /.*/
-    let a:db.expanded = 0
     return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
   endtry
 endfunction

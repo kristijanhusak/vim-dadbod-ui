@@ -12,7 +12,7 @@ function! db_ui#query#open(item) abort
     let table = a:item.label
   endif
 
-  let buffer_basename = printf('[%s] %s', db.name, suffix)
+  let buffer_basename = substitute(printf('%s-%s', db.name, suffix), '[^A-Za-z0-9_\-]', '', 'g')
   if has_key(s:buffer_counter, buffer_basename)
     let new_name = buffer_basename.'-'.s:buffer_counter[buffer_basename]
     let s:buffer_counter[buffer_basename] += 1
@@ -68,7 +68,7 @@ function s:open_buffer(db, buffer_name, ...)
   setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
   augroup db_ui_query
     autocmd! * <buffer>
-    autocmd BufWritePost <buffer> silent! exe '%DB '.b:db_ui_database.url
+    autocmd BufWritePost <buffer> call s:execute_query()
     autocmd BufDelete,BufWipeout <buffer> silent! call remove(g:db_ui_drawer[b:db_ui_database.name].buffers.list, bufname(str2nr(expand('<abuf>'))))
   augroup END
 
@@ -81,9 +81,15 @@ function s:open_buffer(db, buffer_name, ...)
   call setline(1, content)
 endfunction
 
+function! s:execute_query() abort
+  call db_ui#utils#echo_msg('Executing query...')
+  silent! exe '%DB '.b:db_ui_database.url
+  call db_ui#utils#echo_msg('Done.')
+endfunction
+
 function! s:save_query() abort
   if !isdirectory(b:db_ui_database.save_path)
-    call mkdir(dir, 'p')
+    call mkdir(b:db_ui_database.save_path, 'p')
   endif
 
   call inputsave()

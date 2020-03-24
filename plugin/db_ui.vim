@@ -22,4 +22,5 @@ augroup dbui
   autocmd FileType sql nmap <buffer> <Leader>W <Plug>(DBUI_SaveQuery)
   autocmd FileType dbui nmap <buffer> o <Plug>(DBUI_SelectLine)
   autocmd FileType dbui nmap <buffer> R <Plug>(DBUI_Redraw)
+  autocmd BufReadPost *.dbout setlocal nowrap
 augroup END
