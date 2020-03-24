@@ -13,7 +13,8 @@ function! db_ui#drawer#open() abort
 
   call s:populate_dbs()
   call g:db_ui_drawer.render()
-  nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>toggle_line()<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>toggle_line('edit')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_SelectLineVsplit) :call <sid>toggle_line('vertical botright split')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call g:db_ui_drawer.render()<CR>
   augroup db_ui
     autocmd! * <buffer>
@@ -98,7 +99,7 @@ function! g:db_ui_drawer.add_db(db_name, db) abort
   endif
 endfunction
 
-function! s:toggle_line() abort
+function! s:toggle_line(edit_action) abort
   let item = g:db_ui_drawer.content[line('.') - 1]
   let db = g:db_ui_drawer.dbs[item.db_name]
   if item.action ==? 'toggle'
@@ -111,7 +112,7 @@ function! s:toggle_line() abort
     return g:db_ui_drawer.render()
   endif
 
-  return db_ui#query#open(item)
+  return db_ui#query#open(item, a:edit_action)
 endfunction
 
 function! s:toggle_db(db) abort

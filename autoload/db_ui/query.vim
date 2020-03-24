@@ -1,9 +1,9 @@
 let s:buffer_counter = {}
 
-function! db_ui#query#open(item) abort
+function! db_ui#query#open(item, edit_action) abort
   let db = g:db_ui_drawer.dbs[a:item.db_name]
   if a:item.type ==? 'buffer'
-    return s:open_buffer(db, a:item.file_path)
+    return s:open_buffer(db, a:item.file_path, a:edit_action)
   endif
   let suffix = 'query'
   let table = ''
@@ -21,7 +21,7 @@ function! db_ui#query#open(item) abort
     let s:buffer_counter[buffer_basename] = 1
   endif
   let buffer_name = printf('%s.%s', tempname(), buffer_basename)
-  call s:open_buffer(db, buffer_name, table)
+  call s:open_buffer(db, buffer_name, a:edit_action, table)
   nnoremap <silent><Plug>(DBUI_SaveQuery) :call <sid>save_query()<CR>
 endfunction
 
@@ -46,16 +46,19 @@ function! s:focus_window() abort
   endif
 endfunction
 
-function s:open_buffer(db, buffer_name, ...)
-  call s:focus_window()
+function s:open_buffer(db, buffer_name, edit_action, ...)
   let table = get(a:, 1, '')
-  let bufnr = bufnr(a:buffer_name)
-  if bufnr > -1
-    silent! exe 'b '.bufnr
-    return
+  if a:edit_action ==? 'edit'
+    call s:focus_window()
+    let bufnr = bufnr(a:buffer_name)
+    if bufnr > -1
+      call s:focus_window()
+      silent! exe 'b '.bufnr
+      return
+    endif
   endif
 
-  silent! exe 'edit '.a:buffer_name
+  silent! exe a:edit_action.' '.a:buffer_name
   let b:db_ui_database = {'name': a:db.name, 'url': a:db.url, 'save_path': a:db.save_path }
   let db_buffers = g:db_ui_drawer.dbs[a:db.name].buffers
 
