@@ -100,6 +100,7 @@ These are the default mappings for `dbui` drawer:
 
 * o / <CR> - Open/Toggle Drawer options (`<Plug>(DBUI_SelectLine)`)
 * S - Open in vertical split (`<Plug>(DBUI_SelectLineVsplit)`)
+* d - Delete buffer or saved sql (`<Plug>(DBUI_DeleteLine)`)
 * R - Redraw (`<Plug>(DBUI_Redraw)`)
 
 For queries, filetype is automatically set to `sql`. Also, one mappings is added for the `sql` filetype:
@@ -112,5 +113,11 @@ autocmd FileType dbui nmap <buffer> v <Plug>(DBUI_SelectLineVsplit)
 ```
 
 If you don't want any mappings to be added, add this to vimrc:
-```
+```vimL
 let g:db_ui_disable-mappings = 1
+```
+
+## TODO
+
+* [ ] Test on Windows
+* [ ] Test with more db types

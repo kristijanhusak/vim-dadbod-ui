@@ -72,7 +72,7 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
   augroup db_ui_query
     autocmd! * <buffer>
     autocmd BufWritePost <buffer> ++nested call s:execute_query()
-    autocmd BufDelete,BufWipeout <buffer> silent! call remove(g:db_ui_drawer[b:db_ui_database.name].buffers.list, bufname(str2nr(expand('<abuf>'))))
+    autocmd BufDelete,BufWipeout <buffer> silent! call s:remove_buffer(str2nr(expand('<abuf>')))
   augroup END
 
   if empty(table)
@@ -82,6 +82,12 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
   let content = substitute(g:db_ui_default_query, '{table}', table, 'g')
   silent 1,$delete _
   call setline(1, content)
+endfunction
+
+function! s:remove_buffer(bufnr)
+  let db = getbufvar(a:bufnr, 'db_ui_database')
+  let list = g:db_ui_drawer.dbs[db.name].buffers.list
+  return remove(list, index(list, bufname(a:bufnr)))
 endfunction
 
 function! s:execute_query() abort
@@ -105,4 +111,5 @@ function! s:save_query() abort
   endif
 
   exe 'write '.full_name
+  let g:db_ui_drawer.dbs[b:db_ui_database.name].saved_sql.list = split(glob(printf('%s/*', b:db_ui_database.save_path)), "\n")
 endfunction

@@ -22,7 +22,7 @@ function! s:set_mapping(key, plug) abort
   endif
 
   if !hasmapto(a:plug)
-    silent! exe 'nmap <buffer> '.a:key.' '.a:plug
+    silent! exe 'nmap <buffer><nowait> '.a:key.' '.a:plug
   endif
 endfunction
 
@@ -33,6 +33,7 @@ augroup dbui
   autocmd FileType dbui call s:set_mapping('<CR>', '<Plug>(DBUI_SelectLine)')
   autocmd FileType dbui call s:set_mapping('S', '<Plug>(DBUI_SelectLineVsplit)')
   autocmd FileType dbui call s:set_mapping('R', '<Plug>(DBUI_Redraw)')
+  autocmd FileType dbui call s:set_mapping('d', '<Plug>(DBUI_DeleteLine)')
 augroup END
 
 command! DBUI call db_ui#open()

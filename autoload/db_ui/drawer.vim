@@ -14,6 +14,7 @@ function! db_ui#drawer#open() abort
   call s:populate_dbs()
   call g:db_ui_drawer.render()
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>toggle_line('edit')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_DeleteLine) :call <sid>delete_line()<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLineVsplit) :call <sid>toggle_line('vertical botright split')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call g:db_ui_drawer.render()<CR>
   augroup db_ui
@@ -87,7 +88,7 @@ function! g:db_ui_drawer.add_db(db_name, db) abort
   call self.add('Saved sql ('.len(a:db.saved_sql.list).')', 'toggle', 'saved_sql', s:get_icon(a:db.saved_sql), a:db_name, 1)
   if a:db.saved_sql.expanded
     for saved_sql in a:db.saved_sql.list
-      call self.add(fnamemodify(saved_sql, ':t'), 'open', 'buffer', g:db_ui_icons.saved_sql, a:db_name, 2, { 'file_path': saved_sql })
+      call self.add(fnamemodify(saved_sql, ':t'), 'open', 'buffer', g:db_ui_icons.saved_sql, a:db_name, 2, { 'file_path': saved_sql, 'saved': 1 })
     endfor
   endif
 
@@ -113,6 +114,27 @@ function! s:toggle_line(edit_action) abort
   endif
 
   return db_ui#query#open(item, a:edit_action)
+endfunction
+
+function! s:delete_line() abort
+  let item = g:db_ui_drawer.content[line('.') - 1]
+  if item.action !=? 'open' || item.type !=? 'buffer'
+    return
+  endif
+
+  let db = g:db_ui_drawer.dbs[item.db_name]
+
+  if has_key(item, 'saved')
+    let choice = confirm('Are you sure you want to delete this saved sql?', "&Yes\n&No")
+    if choice ==? 1
+      call delete(item.file_path)
+      call remove(db.saved_sql.list, index(db.saved_sql.list, item.file_path))
+      call db_ui#utils#echo_msg('Deleted.')
+    endif
+  endif
+
+  silent! exe 'bw'.bufnr(item.file_path)
+  call g:db_ui_drawer.render()
 endfunction
 
 function! s:toggle_db(db) abort
