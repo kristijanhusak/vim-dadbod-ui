@@ -48,6 +48,7 @@ endfunction
 
 function s:open_buffer(db, buffer_name, edit_action, ...)
   let table = get(a:, 1, '')
+  let was_single_win = winnr('$') ==? 1
   if a:edit_action ==? 'edit'
     call s:focus_window()
     let bufnr = bufnr(a:buffer_name)
@@ -59,6 +60,11 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
   endif
 
   silent! exe a:edit_action.' '.a:buffer_name
+  if was_single_win
+    exe bufwinnr('dbui').'wincmd w'
+    exe 'vertical resize '.g:db_ui_winwidth
+    wincmd p
+  endif
   let b:db_ui_database = {'name': a:db.name, 'url': a:db.url, 'save_path': a:db.save_path }
   let db_buffers = g:db_ui_drawer.dbs[a:db.name].buffers
 
