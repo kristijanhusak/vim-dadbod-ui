@@ -24,8 +24,8 @@ endfunction
 
 " This is just an example. Keep this out of version control
 let g:dbs = {
-  'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db'
-}
+\  'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db'
+\ }
 ```
 
 After installation, run `:DBUI`, which should open up a drawer with all databases provided.
