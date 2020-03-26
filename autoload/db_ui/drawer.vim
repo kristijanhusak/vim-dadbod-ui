@@ -28,11 +28,14 @@ function! s:populate_dbs() abort
   let db_names = keys(g:dbs)
   for db_name in db_names
     if !has_key(g:db_ui_drawer.dbs, db_name)
+      let scheme = get(db#url#parse(g:dbs[db_name]), 'scheme', '')
       let g:db_ui_drawer.dbs[db_name] = {
             \ 'url': g:dbs[db_name],
             \ 'conn': '',
+            \ 'scheme': scheme,
+            \ 'table_helpers': db_ui#table_helpers#get(scheme),
             \ 'expanded': 0,
-            \ 'tables': {'expanded': 0 , 'list': [] },
+            \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
             \ 'saved_sql': { 'expanded': 0, 'list': [] },
             \ 'buffers': { 'expanded': 0, 'list': [] },
             \ 'save_path': printf('%s/%s', g:db_ui_drawer.save_path, db_name),
@@ -92,10 +95,15 @@ function! g:db_ui_drawer.add_db(db_name, db) abort
     endfor
   endif
 
-  call self.add('Tables ('.len(a:db.tables.list).')', 'toggle', 'tables', s:get_icon(a:db.tables), a:db_name, 1)
+  call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', s:get_icon(a:db.tables), a:db_name, 1)
   if a:db.tables.expanded
     for table in a:db.tables.list
-      call self.add(table, 'open', 'table', g:db_ui_icons.tables, a:db_name, 2)
+      call self.add(table, 'toggle', 'tables.items.'.table, s:get_icon(a:db.tables.items[table]), a:db_name, 2)
+      if a:db.tables.items[table].expanded
+        for [helper_name, helper] in items(a:db.table_helpers)
+          call self.add(helper_name, 'open', 'table', g:db_ui_icons.tables, a:db_name, 3, {'table': table, 'content': helper })
+        endfor
+      endif
     endfor
   endif
 endfunction
@@ -108,7 +116,8 @@ function! s:toggle_line(edit_action) abort
       let db.expanded = !db.expanded
       call s:toggle_db(db)
     else
-      let db[item.type].expanded = !db[item.type].expanded
+      let i = s:get_nested(db, item.type)
+      let i.expanded = !i.expanded
     endif
     return g:db_ui_drawer.render()
   endif
@@ -152,6 +161,9 @@ function! s:toggle_db(db) abort
     call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
     let a:db.tables.list = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
+    for table in a:db.tables.list
+      let a:db.tables.items[table] = {'expanded': 0 }
+    endfor
     call db_ui#utils#echo_msg('Connected.')
   catch /.*/
     return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
@@ -164,4 +176,20 @@ function! s:get_icon(item) abort
   endif
 
   return g:db_ui_icons.collapsed
+endfunction
+
+function! s:get_nested(obj, val, ...) abort
+  let default = get(a:, '1', 0)
+  let items = split(a:val, '\.')
+  let result = copy(a:obj)
+
+  for item in items
+    if !has_key(result, item)
+      let result = default
+      break
+    endif
+    let result = result[item]
+  endfor
+
+  return result
 endfunction

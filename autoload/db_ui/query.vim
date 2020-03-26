@@ -8,8 +8,8 @@ function! db_ui#query#open(item, edit_action) abort
   let suffix = 'query'
   let table = ''
   if a:item.type !=? 'query'
-    let suffix = a:item.label
-    let table = a:item.label
+    let suffix = a:item.table.'-'.a:item.label
+    let table = a:item.table
   endif
 
   let buffer_basename = substitute(printf('%s-%s', db.name, suffix), '[^A-Za-z0-9_\-]', '', 'g')
@@ -21,7 +21,7 @@ function! db_ui#query#open(item, edit_action) abort
     let s:buffer_counter[buffer_basename] = 1
   endif
   let buffer_name = printf('%s.%s', tempname(), buffer_basename)
-  call s:open_buffer(db, buffer_name, a:edit_action, table)
+  call s:open_buffer(db, buffer_name, a:edit_action, table, get(a:item, 'content'))
   nnoremap <silent><Plug>(DBUI_SaveQuery) :call <sid>save_query()<CR>
 endfunction
 
@@ -48,6 +48,7 @@ endfunction
 
 function s:open_buffer(db, buffer_name, edit_action, ...)
   let table = get(a:, 1, '')
+  let default_content = get(a:, 2, g:db_ui_default_query)
   let was_single_win = winnr('$') ==? 1
   if a:edit_action ==? 'edit'
     call s:focus_window()
@@ -85,9 +86,9 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
     return
   endif
 
-  let content = substitute(g:db_ui_default_query, '{table}', table, 'g')
+  let content = substitute(default_content, '{table}', table, 'g')
   silent 1,$delete _
-  call setline(1, content)
+  call setline(1, split(content, "\n"))
 endfunction
 
 function! s:remove_buffer(bufnr)
