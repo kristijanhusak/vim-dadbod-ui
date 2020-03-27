@@ -6,6 +6,7 @@ let s:basic_constraint_query = "
       \       ON tc.constraint_name = kcu.constraint_name\n
       \     JOIN information_schema.constraint_column_usage AS ccu\n
       \       ON ccu.constraint_name = tc.constraint_name\n"
+
 let s:postgres = {
       \ 'List': g:db_ui_default_query,
       \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}'",
@@ -14,11 +15,25 @@ let s:postgres = {
       \ 'Primary Keys': s:basic_constraint_query."WHERE constraint_type = 'PRIMARY KEY'\nand tc.table_name = '{table}'",
       \ }
 
+let s:sqlite = {
+      \ 'List': g:db_ui_default_query,
+      \ 'Indexes': "SELECT * FROM pragma_index_list('{table}')",
+      \ 'Foreign Keys': "SELECT * FROM pragma_foreign_key_list('{table}')",
+      \ 'Primary Keys': "SELECT * FROM pragma_index_list('{table}') WHERE origin = 'pk'"
+      \ }
+
+let s:mysql = {
+      \ 'List': 'SELECT * from {table} LIMIT 200',
+      \ 'Indexes': 'SHOW INDEXES FROM {table}',
+      \ 'Foreign Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{dbname}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'FOREIGN KEY'",
+      \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{dbname}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
+      \ }
+
 let s:helpers = {
       \ 'postgresql': extend(s:postgres, get(g:db_ui_table_helpers, 'postgres', {})),
-      \ 'mysql': extend({ 'List': g:db_ui_default_query }, get(g:db_ui_table_helpers, 'mysql', {})),
+      \ 'mysql': extend(s:mysql, get(g:db_ui_table_helpers, 'mysql', {})),
       \ 'oracle': extend({ 'List': g:db_ui_default_query }, get(g:db_ui_table_helpers, 'oracle', {})),
-      \ 'sqlite': extend({ 'List': g:db_ui_default_query }, get(g:db_ui_table_helpers, 'sqlite', {})),
+      \ 'sqlite': extend(s:sqlite, get(g:db_ui_table_helpers, 'sqlite', {})),
       \ 'sqlserver': extend({ 'List': g:db_ui_default_query }, get(g:db_ui_table_helpers, 'sqlserver', {})),
       \ 'mongodb': extend({ 'List': 'db.{table}.find()'}, get(g:db_ui_table_helpers, 'mongodb', {})),
       \  }

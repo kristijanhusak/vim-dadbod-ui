@@ -87,6 +87,7 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
   endif
 
   let content = substitute(default_content, '{table}', table, 'g')
+  let content = substitute(content, '{dbname}', a:db.name, 'g')
   silent 1,$delete _
   call setline(1, split(content, "\n"))
 endfunction
