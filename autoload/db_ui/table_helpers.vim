@@ -30,18 +30,18 @@ let s:mysql = {
       \ }
 
 let s:helpers = {
-      \ 'postgresql': extend(s:postgres, get(g:db_ui_table_helpers, 'postgresql', {})),
-      \ 'mysql': extend(s:mysql, get(g:db_ui_table_helpers, 'mysql', {})),
-      \ 'oracle': extend({ 'List': g:db_ui_default_query }, get(g:db_ui_table_helpers, 'oracle', {})),
-      \ 'sqlite': extend(s:sqlite, get(g:db_ui_table_helpers, 'sqlite', {})),
-      \ 'sqlserver': extend({ 'List': g:db_ui_default_query }, get(g:db_ui_table_helpers, 'sqlserver', {})),
-      \ 'mongodb': extend({ 'List': 'db.{table}.find()'}, get(g:db_ui_table_helpers, 'mongodb', {})),
+      \ 'postgresql': s:postgres,
+      \ 'mysql': s:mysql,
+      \ 'oracle': { 'List': g:db_ui_default_query },
+      \ 'sqlite': s:sqlite,
+      \ 'sqlserver': { 'List': g:db_ui_default_query },
+      \ 'mongodb': { 'List': 'db.{table}.find()'},
       \  }
 
 let s:all = {}
 
 for scheme in db#adapter#schemes()
-  let s:all[scheme] = get(s:helpers, scheme, { 'List': '' })
+  let s:all[scheme] = extend(get(s:helpers, scheme, { 'List': '' }), get(g:db_ui_table_helpers, scheme, {}))
 endfor
 
 let s:all.postgres = s:all.postgresql
