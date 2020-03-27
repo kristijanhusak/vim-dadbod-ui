@@ -56,16 +56,13 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
     if bufnr > -1
       call s:focus_window()
       silent! exe 'b '.bufnr
+      call s:resize_if_single(was_single_win)
       return
     endif
   endif
 
   silent! exe a:edit_action.' '.a:buffer_name
-  if was_single_win
-    exe bufwinnr('dbui').'wincmd w'
-    exe 'vertical resize '.g:db_ui_winwidth
-    wincmd p
-  endif
+  call s:resize_if_single(was_single_win)
   let b:db_ui_database = {'name': a:db.name, 'url': a:db.url, 'save_path': a:db.save_path }
   let db_buffers = g:db_ui_drawer.dbs[a:db.name].buffers
 
@@ -92,6 +89,14 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
   call setline(1, split(content, "\n"))
   if g:db_ui_auto_execute_table_helpers
     write
+  endif
+endfunction
+
+function! s:resize_if_single(is_single_win) abort
+  if a:is_single_win
+    exe bufwinnr('dbui').'wincmd w'
+    exe 'vertical resize '.g:db_ui_winwidth
+    wincmd p
   endif
 endfunction
 
