@@ -90,6 +90,9 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
   let content = substitute(content, '{dbname}', a:db.name, 'g')
   silent 1,$delete _
   call setline(1, split(content, "\n"))
+  if g:db_ui_auto_execute_table_helpers
+    write
+  endif
 endfunction
 
 function! s:remove_buffer(bufnr)

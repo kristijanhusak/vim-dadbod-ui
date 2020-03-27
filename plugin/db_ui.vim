@@ -8,6 +8,7 @@ let g:db_ui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{tabl
 let g:db_ui_save_location = get(g:, 'db_ui_save_location', fnamemodify('~/.local/share/db_ui', ':p'))
 let g:db_ui_disable_mappings = get(g:, 'db_ui_disable_mappings', 0)
 let g:db_ui_table_helpers = get(g:, 'db_ui_table_helpers', {})
+let g:db_ui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpers', 0)
 let g:db_ui_icons = extend({
       \ 'expanded': '▾',
       \ 'collapsed': '▸',
