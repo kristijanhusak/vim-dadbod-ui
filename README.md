@@ -23,19 +23,26 @@ function! PackagerInit() abort
 endfunction
 
 " This is just an example. Keep this out of version control
-let g:dbs = [
-\  {
-\    'name': 'dev',
-\    'url': 'postgres://postgres:mypassword@localhost:5432/my-dev-db'
-\  }
-\]
+let g:dbs = {
+\  'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db'
+\ }
 ```
 
 After installation, run `:DBUI`, which should open up a drawer with all databases provided.
 When you finish writing your query, just write the file (`:w`) and it will automatically execute the query for that database and it will automatically execute the query for selected database.
 
 ## Databases
-Provide list with all databases that you want to use through `g:dbs` variable:
+Provide list with all databases that you want to use through `g:dbs` variable as an array of objects or an object:
+
+```vimL
+let g:dbs = {
+\ 'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db',
+\ 'staging': 'postgres://postgres:mypassword@localhost:5432/my-staging-db',
+\ 'wp': 'mysql://root@localhost/wp_awesome',
+\ }
+```
+
+Or if you want them to be sorted in the order you define them, this way is also available:
 
 ```vimL
 let g:dbs = [
@@ -44,8 +51,6 @@ let g:dbs = [
 \ { 'name': 'wp', 'url': 'mysql://root@localhost/wp_awesome' },
 \ ]
 ```
-
-Note: Old dictionary structure is still supported, but it will probably be deprecated at some point.
 
 Just make sure to **NOT COMMIT** these. I suggest using project local vim config (`:help exrc`)
 
