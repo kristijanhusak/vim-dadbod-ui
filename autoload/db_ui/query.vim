@@ -98,7 +98,7 @@ endfunction
 function! s:remove_buffer(bufnr)
   let db = getbufvar(a:bufnr, 'db_ui_database')
   let list = g:db_ui_drawer.dbs[db.name].buffers.list
-  return remove(list, index(list, bufname(a:bufnr)))
+  return filter(list, 'v:val !=? bufname(a:bufnr)')
 endfunction
 
 function! s:execute_query() abort

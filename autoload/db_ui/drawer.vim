@@ -142,7 +142,7 @@ function! s:delete_line() abort
     endif
   endif
 
-  silent! exe 'bw'.bufnr(item.file_path)
+  silent! exe 'bw!'.bufnr(item.file_path)
   call g:db_ui_drawer.render()
 endfunction
 
