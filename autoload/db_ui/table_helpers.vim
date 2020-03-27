@@ -30,7 +30,7 @@ let s:mysql = {
       \ }
 
 let s:helpers = {
-      \ 'postgresql': extend(s:postgres, get(g:db_ui_table_helpers, 'postgres', {})),
+      \ 'postgresql': extend(s:postgres, get(g:db_ui_table_helpers, 'postgresql', {})),
       \ 'mysql': extend(s:mysql, get(g:db_ui_table_helpers, 'mysql', {})),
       \ 'oracle': extend({ 'List': g:db_ui_default_query }, get(g:db_ui_table_helpers, 'oracle', {})),
       \ 'sqlite': extend(s:sqlite, get(g:db_ui_table_helpers, 'sqlite', {})),

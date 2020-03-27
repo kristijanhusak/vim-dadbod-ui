@@ -3,7 +3,7 @@
 Simple UI for [vim-dadbod](https://github.com/tpope/vim-dadbod).
 It allows simple navigation through databases and allows saving queries for later use.
 
-![screenshot](https://i.imgur.com/siBjM6K.png)
+![screenshot](https://i.imgur.com/fhGqC9U.png)
 
 This is still work in progress.
 Currently tested only on Linux Vim 8+ and Neovim with PostgreSQL.
@@ -45,6 +45,45 @@ let g:dbs = {
 Just make sure to **NOT COMMIT** these. I suggest using project local vim config (`:help exrc`)
 
 ## Settings
+### Table helpers
+Table helper is a predefined query that is available for each table in the list.
+Currently, default helper that each scheme has for it's tables is `List`, which for most schemes defaults to `g:db_ui_default_query`.
+Postgres, Mysql and Sqlite has some additional helpers defined, like "Indexes", "Foreign Keys", "Primary Keys".
+
+Predefined query can inject current db name and table name via `{table}` and `{dbname}`.
+
+To add your own for a specific scheme, provide it through .`g:db_ui_table_helpers`.
+
+For example, to add a "count rows" helper for postgres, you would add this as a config:
+
+```vimL
+let g:db_ui_table_helpers = {
+\   'postgresql': {
+\     'Count': 'select count(*) from "{table}"'
+\   }
+\ }
+```
+
+Or if you want to override any of the defaults, provide the same name as part of config:
+```vimL
+let g:db_ui_table_helpers = {
+\   'postgresql': {
+\     'List': 'select * from "{table}" order by id asc'
+\   }
+\ }
+```
+
+### Auto execute query
+If this is set to `1`, opening any of the table helpers will also automatically execute the query.
+
+Default value is: `0`
+
+To enable it, add this to vimrc:
+
+```vimL
+let g:db_ui_auto_execute_table_helpers = 1
+```
+
 ### Icons
 These are the default icons used:
 
@@ -76,6 +115,9 @@ let g:db_ui_winwidth = 30
 ```
 
 ### Default query
+
+**DEPRECATED**: Use [Table helpers](#table-helpers) instead.
+
 When opening up a table, buffer will be prepopulated with some basic select, which defaults to:
 ```sql
 select * from table LIMIT 200;
