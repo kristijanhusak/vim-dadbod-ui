@@ -1,4 +1,4 @@
-let g:db_ui_drawer = { 'content': [], 'dbs': {}, 'save_path': '', 'buffers': {} }
+let g:db_ui_drawer = { 'content': [], 'dbs': {}, 'dbs_list': [], 'save_path': '', 'buffers': {}, 'initialized': 0 }
 
 function! db_ui#drawer#open() abort
   let g:db_ui_drawer.save_path = substitute(get(g:, 'db_ui_save_location', ''), '\/$', '', '')
@@ -11,7 +11,10 @@ function! db_ui#drawer#open() abort
   silent! exe 'vertical topleft resize '.g:db_ui_winwidth
   setlocal filetype=dbui buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap cursorline nospell nomodifiable winfixwidth
 
-  call s:populate_dbs()
+  if !g:db_ui_drawer.initialized
+    call s:populate_dbs()
+  endif
+  let g:db_ui_drawer.initialized = 1
   call g:db_ui_drawer.render()
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>toggle_line('edit')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_DeleteLine) :call <sid>delete_line()<CR>
@@ -25,12 +28,21 @@ function! db_ui#drawer#open() abort
 endfunction
 
 function! s:populate_dbs() abort
-  let db_names = keys(g:dbs)
-  for db_name in db_names
-    if !has_key(g:db_ui_drawer.dbs, db_name)
-      let scheme = get(db#url#parse(g:dbs[db_name]), 'scheme', '')
-      let g:db_ui_drawer.dbs[db_name] = {
-            \ 'url': g:dbs[db_name],
+  if type(g:dbs) ==? type({})
+    let db_list = []
+    for [db_name, db_url] in items(g:dbs)
+      call add(db_list, {'name': db_name, 'url': db_url })
+    endfor
+    let g:db_ui_drawer.dbs_list = db_list
+  else
+    let g:db_ui_drawer.dbs_list = copy(g:dbs)
+  endif
+
+  for db in g:db_ui_drawer.dbs_list
+    if !has_key(g:db_ui_drawer.dbs, db.name)
+      let scheme = get(db#url#parse(db.url), 'scheme', '')
+      let g:db_ui_drawer.dbs[db.name] = {
+            \ 'url': db.url,
             \ 'conn': '',
             \ 'scheme': scheme,
             \ 'table_helpers': db_ui#table_helpers#get(scheme),
@@ -38,8 +50,8 @@ function! s:populate_dbs() abort
             \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
             \ 'saved_sql': { 'expanded': 0, 'list': [] },
             \ 'buffers': { 'expanded': 0, 'list': [] },
-            \ 'save_path': printf('%s/%s', g:db_ui_drawer.save_path, db_name),
-            \ 'name': db_name,
+            \ 'save_path': printf('%s/%s', g:db_ui_drawer.save_path, db.name),
+            \ 'name': db.name,
             \ }
     endif
   endfor
@@ -49,8 +61,8 @@ function! g:db_ui_drawer.render() abort
   let view = winsaveview()
   let self.content = []
 
-  for [db_name, db] in items(self.dbs)
-    call self.add_db(db_name, db)
+  for db in self.dbs_list
+    call self.add_db(db.name, self.dbs[db.name])
   endfor
 
   let content = map(copy(self.content), 'repeat(" ", shiftwidth() * v:val.level).v:val.icon.(!empty(v:val.icon) ? " " : "").v:val.label')
