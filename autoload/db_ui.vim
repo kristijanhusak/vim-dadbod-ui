@@ -109,3 +109,12 @@ function! s:parse_url(url) abort
     return {}
   endtry
 endfunction
+
+function! db_ui#reset_state() abort
+  let g:db_ui_drawer.content = []
+  let g:db_ui_drawer.dbs = {}
+  let g:db_ui_drawer.dbs_list = []
+  let g:db_ui_drawer.save_path = ''
+  let g:db_ui_drawer.buffers = {}
+  let g:db_ui_drawer.initialized = 0
+endfunction

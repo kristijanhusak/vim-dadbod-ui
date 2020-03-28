@@ -1,0 +1,12 @@
+Execute:
+  let g:db_ui_env_variable_url = 'DATABASE_URL'
+  let $DATABASE_URL = 'sqlite:spec/dbui_test.db'
+
+Execute:
+  :DBUI
+  AssertEqual 'dbui', &filetype
+  AssertEqual getline(1), printf('%s %s', g:db_ui_icons.collapsed, 'dbui_test.db')
+  let g:db_ui_env_variable_url = 'DBUI_URL'
+  unlet $DATABASE_URL
+
+Include: cleanup.vader

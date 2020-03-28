@@ -1,0 +1,4 @@
+Execute:
+  call db_ui#reset_state()
+  unlet! g:dbs
+  windo if &ft ==? 'dbui' || bufname('%') =~? '\(dbui_test\|\.dbout\)' | bw! | endif

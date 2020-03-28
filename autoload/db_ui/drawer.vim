@@ -158,6 +158,11 @@ function! db_ui#drawer#populate_tables(db) abort
   endif
 
   let a:db.tables.list = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
+  " Fix issue with sqlite tables listing as single string with spaces
+  if a:db.scheme =~? '^sqlite' && len(a:db.tables.list) ==? 1
+    let a:db.tables.list = map(split(copy(a:db.tables.list[0])), 'trim(v:val)')
+  endif
+
   for table in a:db.tables.list
     if !has_key(a:db.tables.items, table)
       let a:db.tables.items[table] = {'expanded': 0 }

@@ -1,0 +1,6 @@
+Execute:
+  let g:db_ui_messages = []
+  :redir => g:db_ui_messages
+  :DBUI
+  :redir END
+  AssertEqual get(filter(split(g:db_ui_messages, "\n"), '!empty(v:val)'), 0), 'No databases found. Define g:dbs variable or provide DBUI_URL env variable.'

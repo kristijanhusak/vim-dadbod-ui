@@ -1,0 +1,25 @@
+Include: setup.vader
+
+Do (Open new query):
+  :DBUI\<CR>ojo
+
+Then:
+  AssertEqual 'sql', &filetype
+  Assert empty(getline(1))
+
+Do (Open contacts table List query):
+  :DBUI\<CR>4jojojo
+
+Expect sql:
+  SELECT * from "contacts" LIMIT 200;
+
+Do (Write query):
+  :DBUI\<CR>
+  /contacts-List\<CR>
+  o
+  :w\<CR>
+
+Then:
+  AssertEqual 1, len(filter(range(1, winnr('$')), 'getwinvar(v:val, "&previewwindow") ==? 1'))
+
+Include: cleanup.vader

@@ -1,0 +1,24 @@
+Include: setup.vader
+
+Execute:
+  let g:db_ui_disable_mappings = 1
+  :DBUI
+
+Expect dbui:
+  ▸ dbui_test
+  ▸ dbui_testing
+
+Do:
+  :DBUI\<CR>
+
+Then:
+  AssertThrows normal o
+
+Expect dbui:
+  ▸ dbui_test
+  ▸ dbui_testing
+
+Execute:
+  let g:db_ui_disable_mappings = 0
+
+Include: cleanup.vader

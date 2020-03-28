@@ -1,0 +1,25 @@
+Include: setup.vader
+
+Execute:
+  let g:db_ui_table_helpers = {
+    \ 'sqlite': { 'List': 'SELECT * FROM {table}', 'Count': 'select count(*) from {table}' }
+    \ }
+
+Do (Open contacts table List query):
+  :DBUI\<CR>o3jojojo
+
+Expect sql:
+  SELECT * FROM contacts
+
+Do (Open custom count helper):
+  :DBUI\<CR>
+  /Count\<CR>
+  o
+
+Expect sql:
+  select count(*) from contacts
+
+Execute:
+  let g:db_ui_table_helpers = {}
+
+Include: cleanup.vader

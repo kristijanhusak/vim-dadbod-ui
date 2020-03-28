@@ -1,0 +1,28 @@
+Include: setup.vader
+
+Execute:
+  let g:db_ui_icons.expanded = '[-]'
+  let g:db_ui_icons.collapsed = '[+]'
+
+Do:
+  :DBUI\<CR>
+
+Expect dbui:
+  [+] dbui_test
+  [+] dbui_testing
+
+Do:
+  :DBUI\<CR>o
+
+Expect dbui:
+  [-] dbui_test
+    + New query
+    [+] Saved sql (0)
+    [+] Tables (2)
+  [+] dbui_testing
+
+Execute:
+  let g:db_ui_icons.expanded = '▾'
+  let g:db_ui_icons.collapsed = '▸'
+
+Include: cleanup.vader

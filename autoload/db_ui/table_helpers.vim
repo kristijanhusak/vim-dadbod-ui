@@ -41,12 +41,12 @@ let s:helpers = {
 let s:all = {}
 
 for scheme in db#adapter#schemes()
-  let s:all[scheme] = extend(get(s:helpers, scheme, { 'List': '' }), get(g:db_ui_table_helpers, scheme, {}))
+  let s:all[scheme] = get(s:helpers, scheme, {})
 endfor
 
 let s:all.postgres = s:all.postgresql
 let s:all.sqlite3 = s:all.sqlite
 
 function db_ui#table_helpers#get(scheme) abort
-  return get(s:all, a:scheme, {'List': '' })
+  return extend(get(s:all, a:scheme, { 'List': '' }), get(g:db_ui_table_helpers, a:scheme, {}))
 endfunction
