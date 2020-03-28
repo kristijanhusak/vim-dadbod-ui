@@ -5,7 +5,9 @@ let g:loaded_dbui = 1
 
 let g:db_ui_winwidth = get(g:, 'db_ui_winwidth', 40)
 let g:db_ui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')
-let g:db_ui_save_location = get(g:, 'db_ui_save_location', fnamemodify('~/.local/share/db_ui', ':p'))
+let g:db_ui_save_location = get(g:, 'db_ui_save_location', '~/.local/share/db_ui')
+let g:db_ui_env_variable_url = get(g:, 'db_ui_env_variable_url', 'DBUI_URL')
+let g:db_ui_env_variable_name = get(g:, 'db_ui_env_variable_name', 'DBUI_NAME')
 let g:db_ui_disable_mappings = get(g:, 'db_ui_disable_mappings', 0)
 let g:db_ui_table_helpers = get(g:, 'db_ui_table_helpers', {})
 let g:db_ui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpers', 0)

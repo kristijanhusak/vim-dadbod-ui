@@ -22,7 +22,7 @@ function! PackagerInit() abort
   call packager#add('kristijanhusak/vim-dadbod-ui')
 endfunction
 
-" This is just an example. Keep this out of version control
+" This is just an example. Keep this out of version control. Check for more examples below.
 let g:dbs = {
 \  'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db'
 \ }
@@ -32,6 +32,19 @@ After installation, run `:DBUI`, which should open up a drawer with all database
 When you finish writing your query, just write the file (`:w`) and it will automatically execute the query for that database and it will automatically execute the query for selected database.
 
 ## Databases
+There are 2 ways to provide database connections to UI:
+
+1. Through environment variable (with optional [dotenv.vim](https://github.com/tpope/vim-dotenv) support)
+if `$DBUI_URL` env variable exists, it will be added as a connection. Name for the connection will be parsed from the url.
+If you want to use a custom name, pass `$DBUI_NAME` alongside the url.
+Env variables that will be read can be customized like this:
+
+```vimL
+let g:db_ui_env_variable_url = 'DATABASE_URL'
+let g:db_ui_env_variable_name = 'DATABASE_NAME'
+```
+
+2. Via `g:dbs` variable
 Provide list with all databases that you want to use through `g:dbs` variable as an array of objects or an object:
 
 ```vimL
@@ -51,8 +64,24 @@ let g:dbs = [
 \ { 'name': 'wp', 'url': 'mysql://root@localhost/wp_awesome' },
 \ ]
 ```
-
 Just make sure to **NOT COMMIT** these. I suggest using project local vim config (`:help exrc`)
+
+If both env variable and g:dbs exists, they will be read in this order:
+1. Env variable
+2. g:dbs
+
+If connection names is clashing, first one takes the precedence. For example, if you have these defined:
+
+```
+let $DBUI_URL = 'postgres://postgres:mypassword@localhost:5432/my-dev-db'
+let g:dbs = {
+  'my-dev-db': 'postgres://postgres:mypassword@localhost:5432/my-other-dev-db'
+}
+```
+
+Surviving one will be `$DBUI_URL`. If you want to keep both, either provide `$DBUI_NAME` for the first connection,
+or change the name for the one in `g:dbs`.
+Env variable has precedence over g:dbs to allow having project level connections always available.
 
 ## Settings
 ### Table helpers

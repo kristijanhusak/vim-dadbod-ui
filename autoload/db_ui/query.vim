@@ -12,17 +12,21 @@ function! db_ui#query#open(item, edit_action) abort
     let table = a:item.table
   endif
 
-  let buffer_basename = substitute(printf('%s-%s', db.name, suffix), '[^A-Za-z0-9_\-]', '', 'g')
-  if has_key(s:buffer_counter, buffer_basename)
-    let new_name = buffer_basename.'-'.s:buffer_counter[buffer_basename]
-    let s:buffer_counter[buffer_basename] += 1
-    let buffer_basename = new_name
-  else
-    let s:buffer_counter[buffer_basename] = 1
-  endif
-  let buffer_name = printf('%s.%s', tempname(), buffer_basename)
+  let buffer_name = printf('%s.%s', tempname(), s:generate_buffer_basename(db.name, suffix))
   call s:open_buffer(db, buffer_name, a:edit_action, table, get(a:item, 'content'))
   nnoremap <silent><Plug>(DBUI_SaveQuery) :call <sid>save_query()<CR>
+endfunction
+
+function! s:generate_buffer_basename(db_name, suffix) abort
+  let buffer_basename = substitute(printf('%s-%s', a:db_name, a:suffix), '[^A-Za-z0-9_\-]', '', 'g')
+  if !has_key(s:buffer_counter, buffer_basename)
+    let s:buffer_counter[buffer_basename] = 1
+    return buffer_basename
+  endif
+
+  let new_name = buffer_basename.'-'.s:buffer_counter[buffer_basename]
+  let s:buffer_counter[buffer_basename] += 1
+  return new_name
 endfunction
 
 function! s:focus_window() abort
@@ -56,6 +60,7 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
     if bufnr > -1
       call s:focus_window()
       silent! exe 'b '.bufnr
+      setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
       call s:resize_if_single(was_single_win)
       return
     endif
@@ -113,6 +118,10 @@ function! s:execute_query() abort
 endfunction
 
 function! s:save_query() abort
+  if empty(b:db_ui_database.save_path)
+    return db_ui#utils#echo_err('Save location is empty. Please provide valid directory to g:db_ui_save_location')
+  endif
+
   if !isdirectory(b:db_ui_database.save_path)
     call mkdir(b:db_ui_database.save_path, 'p')
   endif

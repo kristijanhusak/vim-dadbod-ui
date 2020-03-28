@@ -1,7 +1,4 @@
-let g:db_ui_drawer = { 'content': [], 'dbs': {}, 'dbs_list': [], 'save_path': '', 'buffers': {}, 'initialized': 0 }
-
 function! db_ui#drawer#open() abort
-  let g:db_ui_drawer.save_path = substitute(get(g:, 'db_ui_save_location', ''), '\/$', '', '')
   let dbui_winnr = bufwinnr('dbui')
   if dbui_winnr > -1
     silent! exe dbui_winnr.'wincmd w'
@@ -11,15 +8,11 @@ function! db_ui#drawer#open() abort
   silent! exe 'vertical topleft resize '.g:db_ui_winwidth
   setlocal filetype=dbui buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap cursorline nospell nomodifiable winfixwidth
 
-  if !g:db_ui_drawer.initialized
-    call s:populate_dbs()
-  endif
-  let g:db_ui_drawer.initialized = 1
   call g:db_ui_drawer.render()
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>toggle_line('edit')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_DeleteLine) :call <sid>delete_line()<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLineVsplit) :call <sid>toggle_line('vertical botright split')<CR>
-  nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call g:db_ui_drawer.render()<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call g:db_ui_drawer.render(1)<CR>
   augroup db_ui
     autocmd! * <buffer>
     autocmd BufEnter <buffer> call g:db_ui_drawer.render()
@@ -27,37 +20,14 @@ function! db_ui#drawer#open() abort
   silent! doautocmd User DBUIOpened
 endfunction
 
-function! s:populate_dbs() abort
-  if type(g:dbs) ==? type({})
-    let db_list = []
-    for [db_name, db_url] in items(g:dbs)
-      call add(db_list, {'name': db_name, 'url': db_url })
-    endfor
-    let g:db_ui_drawer.dbs_list = db_list
-  else
-    let g:db_ui_drawer.dbs_list = copy(g:dbs)
+function! g:db_ui_drawer.render(...) abort
+  let redraw = a:0 > 0
+
+  if redraw
+    let g:db_ui_drawer.initialized = 0
+    call db_ui#open()
   endif
 
-  for db in g:db_ui_drawer.dbs_list
-    if !has_key(g:db_ui_drawer.dbs, db.name)
-      let scheme = get(db#url#parse(db.url), 'scheme', '')
-      let g:db_ui_drawer.dbs[db.name] = {
-            \ 'url': db.url,
-            \ 'conn': '',
-            \ 'scheme': scheme,
-            \ 'table_helpers': db_ui#table_helpers#get(scheme),
-            \ 'expanded': 0,
-            \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
-            \ 'saved_sql': { 'expanded': 0, 'list': [] },
-            \ 'buffers': { 'expanded': 0, 'list': [] },
-            \ 'save_path': printf('%s/%s', g:db_ui_drawer.save_path, db.name),
-            \ 'name': db.name,
-            \ }
-    endif
-  endfor
-endfunction
-
-function! g:db_ui_drawer.render() abort
   let view = winsaveview()
   let self.content = []
 
@@ -163,7 +133,9 @@ function! s:toggle_db(db) abort
     return a:db
   endif
 
-  let a:db.saved_sql.list = split(glob(printf('%s/*', a:db.save_path)), "\n")
+  if !empty(a:db.save_path)
+    let a:db.saved_sql.list = split(glob(printf('%s/*', a:db.save_path)), "\n")
+  endif
 
   if !empty(a:db.conn)
     return a:db
@@ -172,14 +144,26 @@ function! s:toggle_db(db) abort
   try
     call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
-    let a:db.tables.list = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
-    for table in a:db.tables.list
-      let a:db.tables.items[table] = {'expanded': 0 }
-    endfor
     call db_ui#utils#echo_msg('Connected.')
+    call db_ui#drawer#populate_tables(a:db)
   catch /.*/
     return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
   endtry
+endfunction
+
+function! db_ui#drawer#populate_tables(db) abort
+  let a:db.tables.list = []
+  if empty(a:db.conn)
+    return a:db
+  endif
+
+  let a:db.tables.list = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
+  for table in a:db.tables.list
+    if !has_key(a:db.tables.items, table)
+      let a:db.tables.items[table] = {'expanded': 0 }
+    endif
+  endfor
+  return a:db
 endfunction
 
 function! s:get_icon(item) abort
