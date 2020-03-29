@@ -14,6 +14,6 @@ jobs:
         sudo apt-get install sqlite3 libsqlite3-dev
     - uses: rhysd/action-setup-vim@v1
       with:
-        version: v8.2.0126
+        version: v8.1.0123
     - name: Run tests
       run: ./run.sh
