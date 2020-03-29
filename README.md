@@ -46,13 +46,13 @@ let g:db_ui_env_variable_name = 'DATABASE_NAME'
 
 Optionally you can leverage [dotenv.vim](https://github.com/tpope/vim-dotenv)
 to specific any number of connections in an `.env` file by using a specific
-prefix (defaults to `DBUI_`). The latter part of the env variable becomes the
+prefix (defaults to `DB_UI_`). The latter part of the env variable becomes the
 name of the connection (lowercased)
 
 ```bash
 # .env
-DBUI_DEV=...          # becomes the `dev` connection
-DBUI_PRODUCTION=...   # becomes the `production` connection
+DB_UI_DEV=...          # becomes the `dev` connection
+DB_UI_PRODUCTION=...   # becomes the `production` connection
 ```
 
 The prefix can be customized like this:
