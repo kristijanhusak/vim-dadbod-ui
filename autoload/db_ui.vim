@@ -18,7 +18,9 @@ function! db_ui#open() abort
 
   if empty(g:db_ui_drawer.dbs_list)
     return db_ui#utils#echo_err(
-          \ printf('No databases found. Define g:dbs variable or specify one like %s<NAME> in your .env file.', g:db_ui_env_variable_prefix)
+          \ printf('No databases found.
+          \ Define the g:dbs variable, a $DBUI_URL env variable or
+          \ use the prefix %s in your .env file.', g:db_ui_dotenv_variable_prefix)
           \ )
   endif
   let g:db_ui_drawer.initialized = 1
@@ -28,6 +30,7 @@ endfunction
 function! s:populate_dbs() abort
   let db_list = []
   call s:populate_from_dotenv(db_list)
+  call s:populate_from_env(db_list)
   call s:populate_from_global_variable(db_list)
   let g:db_ui_drawer.dbs_list = db_list
 
@@ -80,7 +83,7 @@ function! s:populate_from_global_variable(db_list) abort
 endfunction
 
 function! s:populate_from_dotenv(db_list) abort
-  let prefix = g:db_ui_env_variable_prefix
+  let prefix = g:db_ui_dotenv_variable_prefix
   for [name, url] in items(exists('*DotenvGet') ? DotenvGet() : {})
     if stridx(name, prefix) != -1
       let db_name = tolower(join(split(name, prefix)))
@@ -91,6 +94,24 @@ endfunction
 
 function! s:env(var) abort
   return exists('*DotenvGet') ? DotenvGet(a:var) : eval('$'.a:var)
+endfunction
+
+function! s:populate_from_env(db_list) abort
+  let env_url = s:env(g:db_ui_env_variable_url)
+  if empty(env_url)
+    return a:db_list
+  endif
+  let env_name = s:env(g:db_ui_env_variable_name)
+  if empty(env_name)
+    let env_name = get(split(env_url, '/'), -1, '')
+  endif
+
+  if empty(env_name)
+    return db_ui#utils#echo_err(
+          \ printf('Found %s variable for db url, but unable to parse the name. Please provide name via %s', g:db_ui_env_variable_url, g:db_ui_env_variable_name))
+  endif
+
+  call add(a:db_list, {'name': env_name, 'url': env_url })
 endfunction
 
 function! s:parse_url(url) abort
