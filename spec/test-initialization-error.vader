@@ -3,4 +3,4 @@ Execute:
   :redir => g:db_ui_messages
   :DBUI
   :redir END
-  AssertEqual get(filter(split(g:db_ui_messages, "\n"), '!empty(v:val)'), 0), 'No databases found. Define g:dbs variable or provide DBUI_URL env variable.'
+  AssertEqual get(filter(split(g:db_ui_messages, "\n"), '!empty(v:val)'), 0), 'No databases found. Define the g:dbs variable, a $DBUI_URL env variable or use the prefix DB_UI_ in your .env file.'

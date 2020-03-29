@@ -34,14 +34,31 @@ When you finish writing your query, just write the file (`:w`) and it will autom
 ## Databases
 There are 2 ways to provide database connections to UI:
 
-1. Through environment variable (with optional [dotenv.vim](https://github.com/tpope/vim-dotenv) support)
-if `$DBUI_URL` env variable exists, it will be added as a connection. Name for the connection will be parsed from the url.
+1. Through environment variables
+If `$DBUI_URL` env variable exists, it will be added as a connection. Name for the connection will be parsed from the url.
 If you want to use a custom name, pass `$DBUI_NAME` alongside the url.
 Env variables that will be read can be customized like this:
 
 ```vimL
 let g:db_ui_env_variable_url = 'DATABASE_URL'
 let g:db_ui_env_variable_name = 'DATABASE_NAME'
+```
+
+Optionally you can leverage [dotenv.vim](https://github.com/tpope/vim-dotenv)
+to specific any number of connections in an `.env` file by using a specific
+prefix (defaults to `DB_UI_`). The latter part of the env variable becomes the
+name of the connection (lowercased)
+
+```bash
+# .env
+DB_UI_DEV=...          # becomes the `dev` connection
+DB_UI_PRODUCTION=...   # becomes the `production` connection
+```
+
+The prefix can be customized like this:
+
+```vimL
+let g:db_ui_dotenv_variable_prefix = 'MYPREFIX_'
 ```
 
 2. Via `g:dbs` variable
