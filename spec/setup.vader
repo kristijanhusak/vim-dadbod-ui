@@ -1,5 +1,0 @@
-Execute:
-  let g:dbs = {
-    \ 'dbui_test': 'sqlite:spec/dbui_test.db',
-    \ 'dbui_testing': 'sqlite:spec/dbui_test.db'
-    \ }

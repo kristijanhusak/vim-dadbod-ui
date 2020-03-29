@@ -1,5 +1,5 @@
 syntax clear
-for [icon_name, icon] in items(g:db_ui_icons)
+for [icon_name, icon] in items(g:dbui_icons)
   exe 'syn match dbui_'.icon_name. ' /^[[:blank:]]*'.escape(icon, '*[]\/~').'/'
 endfor
 

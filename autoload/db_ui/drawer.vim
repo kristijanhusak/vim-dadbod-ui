@@ -5,7 +5,7 @@ function! db_ui#drawer#open() abort
     return
   endif
   silent! exe 'vertical topleft new dbui'
-  silent! exe 'vertical topleft resize '.g:db_ui_winwidth
+  silent! exe 'vertical topleft resize '.g:dbui_winwidth
   setlocal filetype=dbui buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap cursorline nospell nomodifiable winfixwidth
 
   call g:db_ui_drawer.render()
@@ -55,7 +55,7 @@ function! g:db_ui_drawer.add_db(db_name, db) abort
     return a:db
   endif
 
-  call self.add('New query', 'open', 'query', g:db_ui_icons.new_query, a:db_name, 1)
+  call self.add('New query', 'open', 'query', g:dbui_icons.new_query, a:db_name, 1)
   if !empty(a:db.buffers.list)
     call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', s:get_icon(a:db.buffers), a:db_name, 1)
     if a:db.buffers.expanded
@@ -66,14 +66,14 @@ function! g:db_ui_drawer.add_db(db_name, db) abort
         else
           let buflabel = substitute(fnamemodify(buf, ':e'), '^'.a:db_name.'-', '', '').' *'
         endif
-        call self.add(buflabel, 'open', 'buffer', g:db_ui_icons.buffers, a:db_name, 2, { 'file_path': buf })
+        call self.add(buflabel, 'open', 'buffer', g:dbui_icons.buffers, a:db_name, 2, { 'file_path': buf })
       endfor
     endif
   endif
   call self.add('Saved sql ('.len(a:db.saved_sql.list).')', 'toggle', 'saved_sql', s:get_icon(a:db.saved_sql), a:db_name, 1)
   if a:db.saved_sql.expanded
     for saved_sql in a:db.saved_sql.list
-      call self.add(fnamemodify(saved_sql, ':t'), 'open', 'buffer', g:db_ui_icons.saved_sql, a:db_name, 2, { 'file_path': saved_sql, 'saved': 1 })
+      call self.add(fnamemodify(saved_sql, ':t'), 'open', 'buffer', g:dbui_icons.saved_sql, a:db_name, 2, { 'file_path': saved_sql, 'saved': 1 })
     endfor
   endif
 
@@ -83,7 +83,7 @@ function! g:db_ui_drawer.add_db(db_name, db) abort
       call self.add(table, 'toggle', 'tables.items.'.table, s:get_icon(a:db.tables.items[table]), a:db_name, 2)
       if a:db.tables.items[table].expanded
         for [helper_name, helper] in items(a:db.table_helpers)
-          call self.add(helper_name, 'open', 'table', g:db_ui_icons.tables, a:db_name, 3, {'table': table, 'content': helper })
+          call self.add(helper_name, 'open', 'table', g:dbui_icons.tables, a:db_name, 3, {'table': table, 'content': helper })
         endfor
       endif
     endfor
@@ -173,10 +173,10 @@ endfunction
 
 function! s:get_icon(item) abort
   if a:item.expanded
-    return g:db_ui_icons.expanded
+    return g:dbui_icons.expanded
   endif
 
-  return g:db_ui_icons.collapsed
+  return g:dbui_icons.collapsed
 endfunction
 
 function! s:get_nested(obj, val, ...) abort

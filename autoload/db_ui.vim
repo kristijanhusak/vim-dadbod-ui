@@ -8,8 +8,8 @@ let g:db_ui_drawer = {
       \ }
 
 function! db_ui#open() abort
-  if !empty(g:db_ui_save_location)
-    let g:db_ui_drawer.save_path = substitute(fnamemodify(g:db_ui_save_location, ':p'), '\/$', '', '')
+  if !empty(g:dbui_save_location)
+    let g:db_ui_drawer.save_path = substitute(fnamemodify(g:dbui_save_location, ':p'), '\/$', '', '')
   endif
 
   if !g:db_ui_drawer.initialized
@@ -20,7 +20,7 @@ function! db_ui#open() abort
     return db_ui#utils#echo_err(
           \ printf('No databases found.
           \ Define the g:dbs variable, a $DBUI_URL env variable or
-          \ use the prefix %s in your .env file.', g:db_ui_dotenv_variable_prefix)
+          \ use the prefix %s in your .env file.', g:dbui_dotenv_variable_prefix)
           \ )
   endif
   let g:db_ui_drawer.initialized = 1
@@ -83,7 +83,7 @@ function! s:populate_from_global_variable(db_list) abort
 endfunction
 
 function! s:populate_from_dotenv(db_list) abort
-  let prefix = g:db_ui_dotenv_variable_prefix
+  let prefix = g:dbui_dotenv_variable_prefix
   for [name, url] in items(exists('*DotenvGet') ? DotenvGet() : {})
     if stridx(name, prefix) != -1
       let db_name = tolower(join(split(name, prefix)))
@@ -97,11 +97,11 @@ function! s:env(var) abort
 endfunction
 
 function! s:populate_from_env(db_list) abort
-  let env_url = s:env(g:db_ui_env_variable_url)
+  let env_url = s:env(g:dbui_env_variable_url)
   if empty(env_url)
     return a:db_list
   endif
-  let env_name = s:env(g:db_ui_env_variable_name)
+  let env_name = s:env(g:dbui_env_variable_name)
   if empty(env_name)
     let env_name = get(split(env_url, '/'), -1, '')
   endif

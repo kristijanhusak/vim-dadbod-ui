@@ -52,7 +52,7 @@ endfunction
 
 function s:open_buffer(db, buffer_name, edit_action, ...)
   let table = get(a:, 1, '')
-  let default_content = get(a:, 2, g:db_ui_default_query)
+  let default_content = get(a:, 2, g:dbui_default_query)
   let was_single_win = winnr('$') ==? 1
   if a:edit_action ==? 'edit'
     call s:focus_window()
@@ -92,7 +92,7 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
   let content = substitute(content, '{dbname}', a:db.name, 'g')
   silent 1,$delete _
   call setline(1, split(content, "\n"))
-  if g:db_ui_auto_execute_table_helpers
+  if g:dbui_auto_execute_table_helpers
     write
   endif
 endfunction
@@ -100,7 +100,7 @@ endfunction
 function! s:resize_if_single(is_single_win) abort
   if a:is_single_win
     exe bufwinnr('dbui').'wincmd w'
-    exe 'vertical resize '.g:db_ui_winwidth
+    exe 'vertical resize '.g:dbui_winwidth
     wincmd p
   endif
 endfunction

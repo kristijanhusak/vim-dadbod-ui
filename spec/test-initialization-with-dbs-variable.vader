@@ -1,8 +1,0 @@
-Include: setup.vader
-
-Execute:
-  :DBUI
-  AssertEqual 'dbui', &filetype
-  AssertEqual getline(1), printf('%s %s', g:db_ui_icons.collapsed, 'dbui_test')
-
-Include: cleanup.vader

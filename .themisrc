@@ -1,0 +1,35 @@
+call themis#option('runtimepath', './vim-dadbod')
+filetype plugin indent on
+syntax enable
+let g:mapleader = ','
+set shiftwidth=2
+set softtabstop=2
+set tabstop=2
+set expandtab
+set breakindent
+set smartindent
+
+function! SetupTestDbs() abort
+let g:dbs = [
+  \ {'name': 'dadbod_ui_test', 'url': 'sqlite:test/dadbod_ui_test.db' },
+  \ {'name': 'dadbod_ui_testing', 'url': 'sqlite:test/dadbod_ui_test.db' },
+  \ ]
+endfunction
+
+function! Cleanup() abort
+  call db_ui#reset_state()
+  unlet! g:dbs
+  windo if &ft ==? 'dbui' || bufname('%') =~? '\(dadbod_ui_test\|\.dbout\)' | bw! | endif
+endfunction
+
+function! SetOptionVariable(name, value) abort
+  unlet! g:loaded_dbui
+  let g:{a:name} = a:value
+  runtime plugin/db_ui.vim
+endfunction
+
+function! UnsetOptionVariable(name) abort
+  unlet! g:loaded_dbui
+  unlet! let g:{a:name}
+  runtime plugin/db_ui.vim
+endfunction

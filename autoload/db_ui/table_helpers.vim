@@ -8,7 +8,7 @@ let s:basic_constraint_query = "
       \       ON ccu.constraint_name = tc.constraint_name\n"
 
 let s:postgres = {
-      \ 'List': g:db_ui_default_query,
+      \ 'List': g:dbui_default_query,
       \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}'",
       \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'",
       \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'",
@@ -16,7 +16,7 @@ let s:postgres = {
       \ }
 
 let s:sqlite = {
-      \ 'List': g:db_ui_default_query,
+      \ 'List': g:dbui_default_query,
       \ 'Indexes': "SELECT * FROM pragma_index_list('{table}')",
       \ 'Foreign Keys': "SELECT * FROM pragma_foreign_key_list('{table}')",
       \ 'Primary Keys': "SELECT * FROM pragma_index_list('{table}') WHERE origin = 'pk'"
@@ -32,9 +32,9 @@ let s:mysql = {
 let s:helpers = {
       \ 'postgresql': s:postgres,
       \ 'mysql': s:mysql,
-      \ 'oracle': { 'List': g:db_ui_default_query },
+      \ 'oracle': { 'List': g:dbui_default_query },
       \ 'sqlite': s:sqlite,
-      \ 'sqlserver': { 'List': g:db_ui_default_query },
+      \ 'sqlserver': { 'List': g:dbui_default_query },
       \ 'mongodb': { 'List': 'db.{table}.find()'},
       \  }
 
@@ -48,5 +48,5 @@ let s:all.postgres = s:all.postgresql
 let s:all.sqlite3 = s:all.sqlite
 
 function db_ui#table_helpers#get(scheme) abort
-  return extend(get(s:all, a:scheme, { 'List': '' }), get(g:db_ui_table_helpers, a:scheme, {}))
+  return extend(get(s:all, a:scheme, { 'List': '' }), get(g:dbui_table_helpers, a:scheme, {}))
 endfunction

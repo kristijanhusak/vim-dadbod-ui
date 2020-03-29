@@ -3,16 +3,16 @@ if exists('g:loaded_dbui')
 endif
 let g:loaded_dbui = 1
 
-let g:db_ui_winwidth = get(g:, 'db_ui_winwidth', 40)
-let g:db_ui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')
-let g:db_ui_save_location = get(g:, 'db_ui_save_location', '~/.local/share/db_ui')
-let g:db_ui_dotenv_variable_prefix = get(g:, 'db_ui_dotenv_variable_prefix', 'DB_UI_')
-let g:db_ui_env_variable_url = get(g:, 'db_ui_env_variable_url', 'DBUI_URL')
-let g:db_ui_env_variable_name = get(g:, 'db_ui_env_variable_name', 'DBUI_NAME')
-let g:db_ui_disable_mappings = get(g:, 'db_ui_disable_mappings', 0)
-let g:db_ui_table_helpers = get(g:, 'db_ui_table_helpers', {})
-let g:db_ui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpers', 0)
-let g:db_ui_icons = extend({
+let g:dbui_winwidth = get(g:, 'db_ui_winwidth', 40)
+let g:dbui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')
+let g:dbui_save_location = get(g:, 'db_ui_save_location', '~/.local/share/db_ui')
+let g:dbui_dotenv_variable_prefix = get(g:, 'db_ui_dotenv_variable_prefix', 'DB_UI_')
+let g:dbui_env_variable_url = get(g:, 'db_ui_env_variable_url', 'DBUI_URL')
+let g:dbui_env_variable_name = get(g:, 'db_ui_env_variable_name', 'DBUI_NAME')
+let g:dbui_disable_mappings = get(g:, 'db_ui_disable_mappings', 0)
+let g:dbui_table_helpers = get(g:, 'db_ui_table_helpers', {})
+let g:dbui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpers', 0)
+let g:dbui_icons = extend({
       \ 'expanded': '▾',
       \ 'collapsed': '▸',
       \ 'saved_sql': '*',
@@ -22,7 +22,7 @@ let g:db_ui_icons = extend({
       \ }, get(g:, 'db_ui_icons', {}))
 
 function! s:set_mapping(key, plug) abort
-  if g:db_ui_disable_mappings
+  if g:dbui_disable_mappings
     return
   endif
 
