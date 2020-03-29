@@ -80,9 +80,12 @@ function! s:populate_from_global_variable(db_list) abort
 endfunction
 
 function! s:populate_from_dotenv(db_list) abort
+  let prefix = g:db_ui_env_variable_prefix
   for [name, url] in items(exists('*DotenvGet') ? DotenvGet() : {})
-    let db_name = tolower(join(split(name, g:db_ui_env_variable_prefix)))
-    call add(a:db_list, {'name': db_name, 'url': url })
+    if stridx(name, prefix) != -1
+      let db_name = tolower(join(split(name, prefix)))
+      call add(a:db_list, {'name': db_name, 'url': url })
+    endif
   endfor
 endfunction
 
