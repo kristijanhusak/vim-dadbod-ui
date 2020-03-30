@@ -32,9 +32,13 @@ After installation, run `:DBUI`, which should open up a drawer with all database
 When you finish writing your query, just write the file (`:w`) and it will automatically execute the query for that database and it will automatically execute the query for selected database.
 
 ## Databases
-There are 2 ways to provide database connections to UI:
+There are 3 ways to provide database connections to UI:
 
-1. Through environment variables
+1. [Through environment variables](#through-environment-variables)
+2. [Via g:dbs global variable](#via-gdbs-global-variable)
+3. [Via :DBUIAddConnection command](#via-dbuiaddconnection-command)
+
+#### Through environment variables
 If `$DBUI_URL` env variable exists, it will be added as a connection. Name for the connection will be parsed from the url.
 If you want to use a custom name, pass `$DBUI_NAME` alongside the url.
 Env variables that will be read can be customized like this:
@@ -61,7 +65,7 @@ The prefix can be customized like this:
 let g:db_ui_dotenv_variable_prefix = 'MYPREFIX_'
 ```
 
-2. Via `g:dbs` variable
+#### Via g:dbs global variable
 Provide list with all databases that you want to use through `g:dbs` variable as an array of objects or an object:
 
 ```vimL
@@ -83,22 +87,15 @@ let g:dbs = [
 ```
 Just make sure to **NOT COMMIT** these. I suggest using project local vim config (`:help exrc`)
 
-If both env variable and g:dbs exists, they will be read in this order:
-1. Env variable
-2. g:dbs
+#### Via :DBUIAddConnection command
 
-If connection names is clashing, first one takes the precedence. For example, if you have these defined:
+Using `:DBUIAddConnection` command or pressing `A` in dbui drawer opens up a prompt to enter database url and name,
+that will be saved in db_ui_save_location config file. These connections are available from everywhere.
 
-```
-let $DBUI_URL = 'postgres://postgres:mypassword@localhost:5432/my-dev-db'
-let g:dbs = {
-  'my-dev-db': 'postgres://postgres:mypassword@localhost:5432/my-other-dev-db'
-}
-```
-
-Surviving one will be `$DBUI_URL`. If you want to keep both, either provide `$DBUI_NAME` for the first connection,
-or change the name for the one in `g:dbs`.
-Env variable has precedence over g:dbs to allow having project level connections always available.
+#### Connection related notes
+It is possible to have two connections with same name, but from different source.
+for example, you can have `my-db` in env variable, in `g:dbs` and in saved connections.
+To view from which source the database is, press `H` in drawer.
 
 ## Settings
 ### Table helpers
@@ -162,6 +159,15 @@ let g:db_ui_icons = {
     \ }
 ```
 
+### Help text
+To hide `Press ? for help` add this to vimrc:
+
+```
+let g:db_ui_show_help = 0
+```
+
+Pressing `?` will show/hide help no matter if this option is set or not.
+
 ### Drawer width
 
 What should be the drawer width when opened. Default is `40`.
@@ -200,6 +206,8 @@ These are the default mappings for `dbui` drawer:
 * S - Open in vertical split (`<Plug>(DBUI_SelectLineVsplit)`)
 * d - Delete buffer or saved sql (`<Plug>(DBUI_DeleteLine)`)
 * R - Redraw (`<Plug>(DBUI_Redraw)`)
+* A - Add connection (`<Plug>(DBUI_AddConnection)`)
+* H - Toggle database details (`<Plug>(DBUI_ToggleDetails)`)
 
 For queries, filetype is automatically set to `sql`. Also, one mappings is added for the `sql` filetype:
 

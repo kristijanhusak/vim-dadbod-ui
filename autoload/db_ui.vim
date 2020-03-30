@@ -18,14 +18,11 @@ function! db_ui#open() abort
     call s:populate_dbs()
   endif
 
-  " TODO:
-  " 1. Update readme
-  " 2. Update error message
-  " 3. Better handle of conflicts
   if empty(g:db_ui_drawer.dbs_list)
     return db_ui#utils#echo_err(
           \ printf('No databases found.
-          \ Define the g:dbs variable, a $DBUI_URL env variable or
+          \ use :DBUIAddConnection command to add a new connection
+          \ or define the g:dbs variable, a $DBUI_URL env variable or
           \ use the prefix %s in your .env file.', g:dbui_dotenv_variable_prefix)
           \ )
   endif
