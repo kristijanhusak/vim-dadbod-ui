@@ -9,6 +9,8 @@ endfunction
 function! s:suite.after() abort
   call delete(self.env_filename)
   unlet self.env_filename
+  unlet $DB_UI_DEV_DB
+  unlet $DB_UI_PROD_DB
   call Cleanup()
 endfunction
 
@@ -18,4 +20,5 @@ function! s:suite.should_read_dotenv_variables()
   call s:expect(&filetype).to_equal('dbui')
   call s:expect(getline(1)).to_equal(printf('%s %s', g:dbui_icons.collapsed, 'prod_db'))
   call s:expect(getline(2)).to_equal(printf('%s %s', g:dbui_icons.collapsed, 'dev_db'))
+  bw! LICENSE
 endfunction

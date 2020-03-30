@@ -14,7 +14,6 @@ endfunction
 function! s:suite.should_open_contacts_table_list_query() abort
   :DBUI
   norm o3jojojo
-  call s:expect(getline(1)).to_equal('SELECT * from "contacts" LIMIT 200;')
   call s:expect(bufname('.dbout')).not.to_be_empty()
   call s:expect(getwinvar(bufwinnr('.dbout'), '&previewwindow')).to_equal(1)
 endfunction
