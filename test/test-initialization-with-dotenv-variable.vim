@@ -1,0 +1,21 @@
+let s:suite = themis#suite('Test initialization with dotenv variables')
+let s:expect = themis#helper('expect')
+
+function! s:suite.before() abort
+  let self.env_filename = '.env'
+  call writefile(['DB_UI_DEV_DB:sqlite:test/dadbod_ui_test.db', 'DB_UI_PROD_DB:sqlite:test/dadbod_ui_test.db'], self.env_filename)
+endfunction
+
+function! s:suite.after() abort
+  call delete(self.env_filename)
+  unlet self.env_filename
+  call Cleanup()
+endfunction
+
+function! s:suite.should_read_dotenv_variables()
+  edit LICENSE
+  :DBUI
+  call s:expect(&filetype).to_equal('dbui')
+  call s:expect(getline(1)).to_equal(printf('%s %s', g:dbui_icons.collapsed, 'prod_db'))
+  call s:expect(getline(2)).to_equal(printf('%s %s', g:dbui_icons.collapsed, 'dev_db'))
+endfunction
