@@ -1,0 +1,22 @@
+let s:suite = themis#suite('Connections')
+let s:expect = themis#helper('expect')
+
+function! s:suite.before() abort
+  let g:dbs = [
+        \ {'name': 'db-ui-database', 'url': 'sqlite:test/dadbod_ui_test.db'},
+        \ {'name': 'db-ui-database', 'url': 'sqlite:test/dadbod_ui_test.db'},
+        \ ]
+endfunction
+
+function! s:suite.after() abort
+  call Cleanup()
+endfunction
+
+function! s:suite.should_return_error_on_duplicate_connnections_from_same_source() abort
+  let g:db_ui_messages = []
+  :redir => g:db_ui_messages
+  :DBUI
+  :redir END
+  call s:expect(get(filter(split(g:db_ui_messages, "\n"), '!empty(v:val)'), 0)).to_equal(
+        \ '[DBUI] Warning: Duplicate connection name "db-ui-database" in "g:dbs" source. First one added has precedence.')
+endfunction

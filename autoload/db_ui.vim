@@ -153,7 +153,7 @@ endfunction
 function s:add_if_not_exists(db_list, name, url, source) abort
   let existing = get(filter(copy(a:db_list), 'v:val.name ==? a:name && v:val.source ==? a:source'), 0, {})
   if !empty(existing)
-    return db_ui#utils#echo_warning(printf('Warning: Failed to add connection "%s" from source "%s" that already exists in source "%s"', a:name, a:source, existing.source))
+    return db_ui#utils#echo_warning(printf('Warning: Duplicate connection name "%s" in "%s" source. First one added has precedence.', a:name, a:source))
   endif
   return add(a:db_list, {'name': a:name, 'url': a:url, 'source': a:source })
 endfunction

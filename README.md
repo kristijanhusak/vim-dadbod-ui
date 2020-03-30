@@ -90,12 +90,13 @@ Just make sure to **NOT COMMIT** these. I suggest using project local vim config
 #### Via :DBUIAddConnection command
 
 Using `:DBUIAddConnection` command or pressing `A` in dbui drawer opens up a prompt to enter database url and name,
-that will be saved in db_ui_save_location config file. These connections are available from everywhere.
+that will be saved in `g:db_ui_save_location` connections file. These connections are available from everywhere.
 
 #### Connection related notes
 It is possible to have two connections with same name, but from different source.
 for example, you can have `my-db` in env variable, in `g:dbs` and in saved connections.
 To view from which source the database is, press `H` in drawer.
+If there are duplicate connection names from same source, warning will be shown and first one added will be preserved.
 
 ## Settings
 ### Table helpers
