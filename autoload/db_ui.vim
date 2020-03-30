@@ -4,7 +4,8 @@ let g:db_ui_drawer = {
       \ 'dbs_list': [],
       \ 'save_path': '',
       \ 'buffers': {},
-      \ 'initialized': 0
+      \ 'initialized': 0,
+      \ 'show_details': 0,
       \ }
 
 if !empty(g:dbui_save_location)
@@ -40,10 +41,11 @@ function! s:populate_dbs() abort
   let g:db_ui_drawer.dbs_list = db_list
 
   for db in g:db_ui_drawer.dbs_list
-    if !has_key(g:db_ui_drawer.dbs, db.name)
-      let g:db_ui_drawer.dbs[db.name] = s:generate_new_db_entry(db)
+    let key_name = printf('%s_%s', db.name, db.source)
+    if !has_key(g:db_ui_drawer.dbs, key_name)
+      let g:db_ui_drawer.dbs[key_name] = s:generate_new_db_entry(db)
     else
-      let g:db_ui_drawer.dbs[db.name] = db_ui#drawer#populate_tables(g:db_ui_drawer.dbs[db.name])
+      let g:db_ui_drawer.dbs[key_name] = db_ui#drawer#populate_tables(g:db_ui_drawer.dbs[key_name])
     endif
   endfor
 endfunction
@@ -66,6 +68,7 @@ function! s:generate_new_db_entry(db) abort
         \ 'buffers': { 'expanded': 0, 'list': [] },
         \ 'save_path': save_path,
         \ 'name': a:db.name,
+        \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
         \ }
 endfunction
 
@@ -76,13 +79,13 @@ function! s:populate_from_global_variable(db_list) abort
 
   if type(g:dbs) ==? type({})
     for [db_name, db_url] in items(g:dbs)
-      call s:add_if_not_exists(a:db_list, db_name, db_url, 'global_variable')
+      call s:add_if_not_exists(a:db_list, db_name, db_url, 'g:dbs')
     endfor
     return a:db_list
   endif
 
   for db in g:dbs
-    call s:add_if_not_exists(a:db_list, db.name, db.url, 'global_variable')
+    call s:add_if_not_exists(a:db_list, db.name, db.url, 'g:dbs')
   endfor
 
   return a:db_list
@@ -143,14 +146,14 @@ function! s:populate_from_connections_file(db_list) abort
   let file = json_decode(join(readfile(config_path), "\n"))
 
   for conn in file
-    call s:add_if_not_exists(a:db_list, conn.name, conn.url, 'connections_file')
+    call s:add_if_not_exists(a:db_list, conn.name, conn.url, 'file')
   endfor
 
   return a:db_list
 endfunction
 
 function s:add_if_not_exists(db_list, name, url, source) abort
-  let existing = get(filter(copy(a:db_list), 'v:val.name ==? a:name'), 0, {})
+  let existing = get(filter(copy(a:db_list), 'v:val.name ==? a:name && v:val.source ==? a:source'), 0, {})
   if !empty(existing)
     return db_ui#utils#echo_warning(printf('Warning: Failed to add connection "%s" from source "%s" that already exists in source "%s"', a:name, a:source, existing.source))
   endif

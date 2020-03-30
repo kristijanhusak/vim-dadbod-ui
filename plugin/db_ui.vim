@@ -39,6 +39,7 @@ augroup dbui
   autocmd FileType dbui call s:set_mapping('R', '<Plug>(DBUI_Redraw)')
   autocmd FileType dbui call s:set_mapping('d', '<Plug>(DBUI_DeleteLine)')
   autocmd FileType dbui call s:set_mapping('A', '<Plug>(DBUI_AddConnection)')
+  autocmd FileType dbui call s:set_mapping('H', '<Plug>(DBUI_ToggleDetails)')
 augroup END
 
 command! DBUI call db_ui#open()

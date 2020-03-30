@@ -1,7 +1,7 @@
 let s:buffer_counter = {}
 
 function! db_ui#query#open(item, edit_action) abort
-  let db = g:db_ui_drawer.dbs[a:item.db_name]
+  let db = g:db_ui_drawer.dbs[a:item.db_key_name]
   if a:item.type ==? 'buffer'
     return s:open_buffer(db, a:item.file_path, a:edit_action)
   endif
@@ -68,8 +68,8 @@ function s:open_buffer(db, buffer_name, edit_action, ...)
 
   silent! exe a:edit_action.' '.a:buffer_name
   call s:resize_if_single(was_single_win)
-  let b:db_ui_database = {'name': a:db.name, 'url': a:db.url, 'save_path': a:db.save_path }
-  let db_buffers = g:db_ui_drawer.dbs[a:db.name].buffers
+  let b:db_ui_database = {'name': a:db.name, 'key_name': a:db.key_name, 'url': a:db.url, 'save_path': a:db.save_path }
+  let db_buffers = g:db_ui_drawer.dbs[a:db.key_name].buffers
 
   if index(db_buffers.list, a:buffer_name) ==? -1
     if empty(db_buffers.list)
@@ -107,7 +107,7 @@ endfunction
 
 function! s:remove_buffer(bufnr)
   let db = getbufvar(a:bufnr, 'db_ui_database')
-  let list = g:db_ui_drawer.dbs[db.name].buffers.list
+  let list = g:db_ui_drawer.dbs[db.key_name].buffers.list
   return filter(list, 'v:val !=? bufname(a:bufnr)')
 endfunction
 
@@ -134,5 +134,5 @@ function! s:save_query() abort
   endif
 
   exe 'write '.full_name
-  let g:db_ui_drawer.dbs[b:db_ui_database.name].saved_sql.list = split(glob(printf('%s/*', b:db_ui_database.save_path)), "\n")
+  let g:db_ui_drawer.dbs[b:db_ui_database.key_name].saved_sql.list = split(glob(printf('%s/*', b:db_ui_database.save_path)), "\n")
 endfunction
