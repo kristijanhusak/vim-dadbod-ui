@@ -10,6 +10,8 @@ set tabstop=2
 set expandtab
 set breakindent
 set smartindent
+let s:location_path = expand('%:p:h')
+let g:db_ui_save_location = s:location_path
 
 function! SetupTestDbs() abort
 let g:dbs = [
@@ -27,11 +29,13 @@ endfunction
 function! SetOptionVariable(name, value) abort
   unlet! g:loaded_dbui
   let g:{a:name} = a:value
+let g:db_ui_save_location = s:location_path
   runtime plugin/db_ui.vim
 endfunction
 
 function! UnsetOptionVariable(name) abort
   unlet! g:loaded_dbui
   unlet! let g:{a:name}
+let g:db_ui_save_location = s:location_path
   runtime plugin/db_ui.vim
 endfunction

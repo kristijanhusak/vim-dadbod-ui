@@ -126,9 +126,7 @@ function! s:save_query() abort
     call mkdir(b:db_ui_database.save_path, 'p')
   endif
 
-  call inputsave()
-  let name = input('Save as: ')
-  call inputrestore()
+  let name = db_ui#utils#input('Save as: ', '')
 
   let full_name = printf('%s/%s', b:db_ui_database.save_path, name)
   if filereadable(full_name)

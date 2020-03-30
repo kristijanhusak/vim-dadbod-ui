@@ -7,5 +7,5 @@ function! s:suite.should_return_error_on_no_connnections() abort
   :DBUI
   :redir END
   call s:expect(get(filter(split(g:db_ui_messages, "\n"), '!empty(v:val)'), 0)).to_equal(
-        \ 'No databases found. Define the g:dbs variable, a $DBUI_URL env variable or use the prefix DB_UI_ in your .env file.')
+        \ '[DBUI] No databases found. Define the g:dbs variable, a $DBUI_URL env variable or use the prefix DB_UI_ in your .env file.')
 endfunction

@@ -13,6 +13,7 @@ function! db_ui#drawer#open() abort
   nnoremap <silent><buffer> <Plug>(DBUI_DeleteLine) :call <sid>delete_line()<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLineVsplit) :call <sid>toggle_line('vertical botright split')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call g:db_ui_drawer.render(1)<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_AddConnection) :call db_ui#connections#add()<CR>
   augroup db_ui
     autocmd! * <buffer>
     autocmd BufEnter <buffer> call g:db_ui_drawer.render()
@@ -21,11 +22,27 @@ function! db_ui#drawer#open() abort
 endfunction
 
 function! g:db_ui_drawer.render(...) abort
+  let restore_win = 0
+  if &filetype !=? 'dbui'
+    let winnr = bufwinnr('dbui')
+    if winnr > -1
+      let restore_win = 1
+      exe winnr.'wincmd w'
+    endif
+  endif
+
+  if &filetype !=? 'dbui'
+    return
+  endif
+
   let redraw = a:0 > 0
 
   if redraw
     let g:db_ui_drawer.initialized = 0
     call db_ui#open()
+    if restore_win
+      wincmd p
+    endif
   endif
 
   let view = winsaveview()
@@ -109,6 +126,15 @@ endfunction
 
 function! s:delete_line() abort
   let item = g:db_ui_drawer.content[line('.') - 1]
+
+  if item.action ==? 'toggle' && item.type ==? 'db'
+    let db = g:db_ui_drawer.dbs[item.db_name]
+    if db.source !=? 'connections_file'
+      return db_ui#utils#echo_err('Cannot delete this connection.')
+    endif
+    return db_ui#connections#delete(db)
+  endif
+
   if item.action !=? 'open' || item.type !=? 'buffer'
     return
   endif

@@ -38,6 +38,8 @@ augroup dbui
   autocmd FileType dbui call s:set_mapping('S', '<Plug>(DBUI_SelectLineVsplit)')
   autocmd FileType dbui call s:set_mapping('R', '<Plug>(DBUI_Redraw)')
   autocmd FileType dbui call s:set_mapping('d', '<Plug>(DBUI_DeleteLine)')
+  autocmd FileType dbui call s:set_mapping('A', '<Plug>(DBUI_AddConnection)')
 augroup END
 
 command! DBUI call db_ui#open()
+command! DBUIAddConnection call db_ui#connections#add()
