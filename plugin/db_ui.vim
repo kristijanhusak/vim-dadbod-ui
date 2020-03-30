@@ -12,6 +12,7 @@ let g:dbui_env_variable_name = get(g:, 'db_ui_env_variable_name', 'DBUI_NAME')
 let g:dbui_disable_mappings = get(g:, 'db_ui_disable_mappings', 0)
 let g:dbui_table_helpers = get(g:, 'db_ui_table_helpers', {})
 let g:dbui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpers', 0)
+let g:dbui_show_help = get(g:, 'db_ui_show_help', 1)
 let g:dbui_icons = extend({
       \ 'expanded': '▾',
       \ 'collapsed': '▸',

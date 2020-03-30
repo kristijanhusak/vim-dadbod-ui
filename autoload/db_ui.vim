@@ -6,6 +6,7 @@ let g:db_ui_drawer = {
       \ 'buffers': {},
       \ 'initialized': 0,
       \ 'show_details': 0,
+      \ 'show_help': 0,
       \ }
 
 if !empty(g:dbui_save_location)

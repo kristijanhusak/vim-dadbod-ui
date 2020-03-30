@@ -15,11 +15,17 @@ function! db_ui#drawer#open() abort
   nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call g:db_ui_drawer.render(1)<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_AddConnection) :call db_ui#connections#add()<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_ToggleDetails) :call <sid>toggle_details()<CR>
+  nnoremap <silent><buffer> ? :call <sid>toggle_help()<CR>
   augroup db_ui
     autocmd! * <buffer>
     autocmd BufEnter <buffer> call g:db_ui_drawer.render()
   augroup END
   silent! doautocmd User DBUIOpened
+endfunction
+
+function! s:toggle_help() abort
+  let g:db_ui_drawer.show_help = !g:db_ui_drawer.show_help
+  return g:db_ui_drawer.render()
 endfunction
 
 function! s:toggle_details() abort
@@ -54,6 +60,8 @@ function! g:db_ui_drawer.render(...) abort
   let view = winsaveview()
   let self.content = []
 
+  call self.render_help()
+
   for db in self.dbs_list
     let key_name = printf('%s_%s', db.name, db.source)
     call self.add_db(self.dbs[key_name])
@@ -66,6 +74,24 @@ function! g:db_ui_drawer.render(...) abort
   call setline(1, content)
   setlocal nomodifiable
   call winrestview(view)
+endfunction
+
+function! g:db_ui_drawer.render_help() abort
+  if g:dbui_show_help
+    call self.add('" Press ? for help', 'noaction', 'help', '', '', 0)
+    call self.add('', 'noaction', 'help', '', '', 0)
+  endif
+
+  if self.show_help
+    call self.add('" o - Open/Toggle selected item', 'noaction', 'help', '', '', 0)
+    call self.add('" S - Open/Toggle selected item in vertical split', 'noaction', 'help', '', '', 0)
+    call self.add('" d - Delete selected item', 'noaction', 'help', '', '', 0)
+    call self.add('" R - Redraw', 'noaction', 'help', '', '', 0)
+    call self.add('" A - Add connection', 'noaction', 'help', '', '', 0)
+    call self.add('" H - Toggle database details', 'noaction', 'help', '', '', 0)
+    call self.add('" <Leader>W - Save currently opened query', 'noaction', 'help', '', '', 0)
+    call self.add('', 'noaction', 'help', '', '', 0)
+  endif
 endfunction
 
 function! g:db_ui_drawer.add(label, action, type, icon, db_key_name, level, ...)
@@ -120,6 +146,9 @@ endfunction
 
 function! s:toggle_line(edit_action) abort
   let item = g:db_ui_drawer.content[line('.') - 1]
+  if item.action ==? 'noaction'
+    return
+  endif
   let db = g:db_ui_drawer.dbs[item.db_key_name]
   if item.action ==? 'toggle'
     if item.type ==? 'db'
@@ -137,6 +166,10 @@ endfunction
 
 function! s:delete_line() abort
   let item = g:db_ui_drawer.content[line('.') - 1]
+
+  if item.action ==? 'noaction'
+    return
+  endif
 
   if item.action ==? 'toggle' && item.type ==? 'db'
     let db = g:db_ui_drawer.dbs[item.db_key_name]

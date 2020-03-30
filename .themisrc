@@ -12,6 +12,7 @@ set breakindent
 set smartindent
 let s:location_path = expand('%:p:h')
 let g:db_ui_save_location = s:location_path
+let g:db_ui_show_help = 0
 
 function! SetupTestDbs() abort
 let g:dbs = [
