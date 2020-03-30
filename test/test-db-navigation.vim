@@ -1,4 +1,4 @@
-let s:suite = themis#suite('Test db navigation')
+let s:suite = themis#suite('Db navigation')
 let s:expect = themis#helper('expect')
 
 function! s:suite.before() abort

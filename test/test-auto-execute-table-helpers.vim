@@ -1,4 +1,4 @@
-let s:suite = themis#suite('Test auto execute table helpers')
+let s:suite = themis#suite('Auto execute table helpers')
 let s:expect = themis#helper('expect')
 
 function! s:suite.before() abort

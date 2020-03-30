@@ -1,4 +1,4 @@
-let s:suite = themis#suite('Test initialization with env variable')
+let s:suite = themis#suite('Initialization with env variable')
 let s:expect = themis#helper('expect')
 
 function! s:suite.before() abort

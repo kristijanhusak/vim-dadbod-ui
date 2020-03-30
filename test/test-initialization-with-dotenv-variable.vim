@@ -1,4 +1,4 @@
-let s:suite = themis#suite('Test initialization with dotenv variables')
+let s:suite = themis#suite('Initialization with dotenv variables')
 let s:expect = themis#helper('expect')
 
 function! s:suite.before() abort

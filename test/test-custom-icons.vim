@@ -1,4 +1,4 @@
-let s:suite = themis#suite('Test custom icons')
+let s:suite = themis#suite('Custom icons')
 let s:expect = themis#helper('expect')
 
 function! s:suite.before() abort

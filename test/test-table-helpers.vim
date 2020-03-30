@@ -1,4 +1,4 @@
-let s:suite = themis#suite('')
+let s:suite = themis#suite('Table helpers')
 let s:expect = themis#helper('expect')
 
 function! s:suite.before() abort

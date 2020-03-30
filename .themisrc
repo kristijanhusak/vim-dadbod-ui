@@ -1,5 +1,6 @@
 call themis#option('runtimepath', './vim-dadbod')
 call themis#option('runtimepath', './vim-dotenv')
+call themis#option('reporter', 'spec')
 filetype plugin indent on
 syntax enable
 let g:mapleader = ','

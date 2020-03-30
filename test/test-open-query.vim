@@ -1,4 +1,4 @@
-let s:suite = themis#suite('Test open query')
+let s:suite = themis#suite('Open query')
 let s:expect = themis#helper('expect')
 
 function! s:suite.before() abort

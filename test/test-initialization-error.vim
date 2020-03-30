@@ -1,4 +1,4 @@
-let s:suite = themis#suite('Test initialization error')
+let s:suite = themis#suite('Initialization error')
 let s:expect = themis#helper('expect')
 
 function! s:suite.should_return_error_on_no_connnections() abort
