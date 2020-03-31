@@ -1,4 +1,4 @@
-let s:suite = themis#suite('Add connection')
+let s:suite = themis#suite('Add/Delete connection')
 let s:expect = themis#helper('expect')
 
 function s:suite.after() abort

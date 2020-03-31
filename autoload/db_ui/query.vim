@@ -132,7 +132,7 @@ function! s:query.resize_if_single(is_single_win) abort
 endfunction
 
 function! s:query.remove_buffer(bufnr)
-  let db_key_name = getbufvar(a:bufnr, 'db_ui_key_name')
+  let db_key_name = getbufvar(a:bufnr, 'db_key_name')
   let list = self.drawer.dbui.dbs[db_key_name].buffers.list
   return filter(list, 'v:val !=? bufname(a:bufnr)')
 endfunction

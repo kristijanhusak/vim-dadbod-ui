@@ -30,3 +30,8 @@ function! s:suite.should_save_query_to_file()
   call s:expect(filereadable(printf('%s/%s/%s', g:db_ui_save_location, 'dadbod_ui_test', 'test-saved-query'))).to_be_true()
 endfunction
 
+function! s:suite.should_delete_saved_query() abort
+  norm gg5jd
+  call s:expect(search('test-saved-query')).to_equal(0)
+  call s:expect(filereadable(printf('%s/%s/%s', g:db_ui_save_location, 'dadbod_ui_test', 'test-saved-query'))).to_be_false()
+endfunction
