@@ -1,9 +1,8 @@
 let s:connections_instance = {}
 let s:connections = {}
 
-function! db_ui#connections#new(...)
-  let drawer = a:0 > 0 ? a:1 : {}
-  let s:connections_instance = s:connections.new(drawer)
+function! db_ui#connections#new(drawer)
+  let s:connections_instance = s:connections.new(a:drawer)
   return s:connections_instance
 endfunction
 

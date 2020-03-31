@@ -141,7 +141,7 @@ function! s:query.execute_query() abort
   call db_ui#utils#echo_msg('Executing query...')
   let db = self.drawer.dbui.dbs[b:db_key_name]
   silent! exe '%DB '.db.url
-  call db_ui#utils#echo_msg('Done.')
+  call db_ui#utils#echo_msg('Executing query...Done.')
 endfunction
 
 function! s:query.save_query() abort

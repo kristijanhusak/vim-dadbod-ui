@@ -94,7 +94,9 @@ function! s:drawer.render(...) abort
   let redraw = a:0 > 0
 
   if redraw
+    call db_ui#utils#echo_msg('Refreshing all databases...')
     call self.dbui.populate_dbs()
+    call db_ui#utils#echo_msg('Refreshing all databases...Done.')
   endif
 
   let view = winsaveview()
@@ -192,19 +194,25 @@ function! s:drawer.toggle_line(edit_action) abort
   if item.action ==? 'noaction'
     return
   endif
-  let db = self.dbui.dbs[item.db_key_name]
-  if item.action ==? 'toggle'
-    if item.type ==? 'db'
-      let db.expanded = !db.expanded
-      call self.toggle_db(db)
-    else
-      let i = self.get_nested(db, item.type)
-      let i.expanded = !i.expanded
-    endif
-    return self.render()
+
+  if item.action ==? 'open'
+    return self.open_query(item, a:edit_action)
   endif
 
-  return self.open_query(item, a:edit_action)
+  let db = self.dbui.dbs[item.db_key_name]
+
+  let tree = db
+  if item.type !=? 'db'
+    let tree = self.get_nested(db, item.type)
+  endif
+
+  let tree.expanded = !tree.expanded
+
+  if item.type ==? 'db'
+    call self.toggle_db(db)
+  endif
+
+  return self.render()
 endfunction
 
 function! s:drawer.open_query(item, edit_action)
@@ -262,7 +270,7 @@ function! s:drawer.toggle_db(db) abort
   try
     call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
-    call db_ui#utils#echo_msg('Connected.')
+    call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected.')
     call self.populate_tables(a:db)
   catch /.*/
     return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
