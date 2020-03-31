@@ -1,23 +1,48 @@
+let s:connections_instance = {}
+let s:connections = {}
+
+function! db_ui#connections#new(...)
+  let drawer = a:0 > 0 ? a:1 : {}
+  let s:connections_instance = s:connections.new(drawer)
+  return s:connections_instance
+endfunction
+
 function! db_ui#connections#add() abort
+  if empty(s:connections_instance)
+    let s:connections_instance = s:connections.new({})
+  endif
+
+  return s:connections_instance.add()
+endfunction
+
+function! s:connections.new(drawer) abort
+  let instance = copy(self)
+  let instance.drawer = a:drawer
+  let s:connections_instance = instance
+
+  return s:connections_instance
+endfunction
+
+function! s:connections.add() abort
   if empty(g:dbui_save_location)
     return db_ui#utils#echo_err('Please set up valid save location via g:db_ui_save_location')
   endif
 
-  return s:add_full_url()
+  return self.add_full_url()
 endfunction
 
-function! db_ui#connections#delete(db) abort
+function! s:connections.delete(db) abort
   let confirm_delete = confirm(printf('Are you sure you want to delete connection %s?', a:db.name), "&Yes\n&No\n&Cancel")
   if confirm_delete !=? 1
     return
   endif
 
-  let file = s:read()
+  let file = self.read()
   call filter(file, {i, conn -> !(conn.name ==? a:db.name && conn.url ==? a:db.url )})
-  return s:write(file)
+  return self.write(file)
 endfunction
 
-function! s:add_full_url() abort
+function! s:connections.add_full_url() abort
   let url = db_ui#utils#input('Enter connection url: ', '')
 
   try
@@ -29,16 +54,16 @@ function! s:add_full_url() abort
   let saved = 0
 
   while !saved
-    let name = s:enter_db_name(url)
+    let name = self.enter_db_name(url)
     if !empty(name)
-      let saved = s:save(name, url)
+      let saved = self.save(name, url)
     endif
   endwhile
 
   return saved
 endfunction
 
-function! s:enter_db_name(url) abort
+function! s:connections.enter_db_name(url) abort
   let name = db_ui#utils#input('Enter name: ', split(a:url, '/')[-1])
 
   if empty(name)
@@ -49,35 +74,35 @@ function! s:enter_db_name(url) abort
   return name
 endfunction
 
-function! s:get_file() abort
+function! s:connections.get_file() abort
   let save_folder = substitute(fnamemodify(g:dbui_save_location, ':p'), '\/$', '', '')
   return printf('%s/%s', save_folder, 'connections.json')
 endfunction
 
-function s:save(name, url) abort
-  let file = s:get_file()
+function s:connections.save(name, url) abort
+  let file = self.get_file()
   if !filereadable(file)
     call writefile(['[]'], file)
   endif
 
-  let file = s:read()
+  let file = self.read()
   let existing_connection = filter(copy(file), 'v:val.name ==? a:name')
   if !empty(existing_connection)
     call db_ui#utils#echo_err('Connection with that name already exists. Please enter different name.')
     return 0
   endif
   call add(file, {'name': a:name, 'url': a:url})
-  return s:write(file)
+  return self.write(file)
 endfunction
 
-function! s:read() abort
-  return json_decode(join(readfile(s:get_file()), "\n"))
+function! s:connections.read() abort
+  return json_decode(join(readfile(self.get_file()), "\n"))
 endfunction
 
-function! s:write(file) abort
-  call writefile([json_encode(a:file)], s:get_file())
-  if exists('g:db_ui_drawer') && has_key(g:db_ui_drawer, 'render')
-    call g:db_ui_drawer.render(1)
+function! s:connections.write(file) abort
+  call writefile([json_encode(a:file)], self.get_file())
+  if !empty(self.drawer)
+    call self.drawer.render(1)
   endif
   return 1
 endfunction

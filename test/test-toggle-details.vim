@@ -6,7 +6,6 @@ function! s:suite.before() abort
 endfunction
 
 function! s:suite.after() abort
-  let g:db_ui_drawer.show_details = 0
   call Cleanup()
 endfunction
 
