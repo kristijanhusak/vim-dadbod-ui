@@ -16,7 +16,7 @@ let g:dbui_show_help = get(g:, 'db_ui_show_help', 1)
 let g:dbui_icons = extend({
       \ 'expanded': '▾',
       \ 'collapsed': '▸',
-      \ 'saved_sql': '*',
+      \ 'saved_query': '*',
       \ 'new_query': '+',
       \ 'tables': '~',
       \ 'buffers': '»'
@@ -35,7 +35,7 @@ endfunction
 augroup dbui
   autocmd!
   autocmd FileType sql call s:set_mapping('<Leader>W', '<Plug>(DBUI_SaveQuery)')
-  autocmd FileType sql call s:set_mapping('<Leader>E', '<Plug>(DBUI_EditVariables)')
+  autocmd FileType sql call s:set_mapping('<Leader>E', '<Plug>(DBUI_EditBindParameters)')
   autocmd FileType dbui call s:set_mapping('o', '<Plug>(DBUI_SelectLine)')
   autocmd FileType dbui call s:set_mapping('S', '<Plug>(DBUI_SelectLineVsplit)')
   autocmd FileType dbui call s:set_mapping('R', '<Plug>(DBUI_Redraw)')

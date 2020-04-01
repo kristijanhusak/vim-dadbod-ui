@@ -24,9 +24,9 @@ function! s:suite.should_save_query_to_file()
   call s:expect(getline(1)).to_equal('SELECT * from "contacts" LIMIT 200;')
   normal ,W
   :DBUI
-  /Saved sql
+  /Saved queries
   norm oj
-  call s:expect(getline('.')).to_equal('    '.g:dbui_icons.saved_sql.' test-saved-query')
+  call s:expect(getline('.')).to_equal('    '.g:dbui_icons.saved_query.' test-saved-query')
   call s:expect(filereadable(printf('%s/%s/%s', g:db_ui_save_location, 'dadbod_ui_test', 'test-saved-query'))).to_be_true()
 endfunction
 

@@ -1,0 +1,398 @@
+*dadbod-ui.txt* *vim-dadbod-ui*
+
+        Simple UI for https://github.com/tpope/vim-dadbod
+
+Author: Kristijan <husakkristijan at gmail.com>
+License: MIT
+
+vim-dadbod-ui			    *vim-dadbod-ui*
+
+1. Introduction				    |vim-dadbod-ui-introduction|
+2. Install				    |vim-dadbod-ui-install|
+3. Commands 		    		    |vim-dadbod-ui-commands|
+4. Connections 			            |vim-dadbod-ui-connections|
+  4.1 Through environment variables 	    |vim-dadbod-ui-connections-env|
+  4.2 Via `g:dbs` global variable 	    |vim-dadbod-ui-connections-g:dbs|
+  4.3 Using `DBUIAddConnection` comand 	    |vim-dadbod-ui-connections-add|
+5. Mappings				    |vim-dadbod-ui-mappings|
+6. Table helpers 		   	    |vim-dadbod-ui-table-helpers|
+7. Bind parameters 		   	    |vim-dadbod-ui-bind-parameters|
+8. Settings				    |vim-dadbod-ui-settings|
+
+==============================================================================
+1. Introduction					*vim-dadbod-ui-introduction*
+
+Vim dadbod UI is simple UI for tpope's awesome vim-dadbod plugin.
+
+Main features:
+
+1. Navigate through multiple databases and it's tables
+2. Several ways to define your connections
+3. Save queries on single location for later use
+4. Define custom table helpers
+5. Inject bind parameters
+
+==============================================================================
+2. Install					*vim-dadbod-ui-install*
+
+Requirements:
+- https://github.com/tpope/vim-dadbod
+
+Install with your favorite package manager. If you don't have one, I suggest
+`vim-packager` https://github.com/Kristijanhusak/vim-packager:
+>
+  function! PackagerInit() abort
+    packadd vim-packager
+    call packager#init()
+    call packager#add('kristijanhusak/vim-packager', { 'type': 'opt' })
+    call packager#add('tpope/vim-dadbod')
+    call packager#add('kristijanhusak/vim-dadbod-ui')
+  endfunction
+<
+
+Define a connection |vim-dadbod-ui-connections|
+Execute `:DBUI` command
+
+==============================================================================
+3. Commands 					*vim-dadbod-ui-commands*
+
+					      *DBUI*
+DBUI
+		Open drawer with available connections. If it doesn't find any
+		connections, it will return an error.
+
+		`:DBUI`
+
+					      *DBUIAddConnection*
+DBUIAddConnection
+		Open a prompt to enter new connection, by providing database
+		url and connection name. Once entered, it will be saved in
+		connections file located in |g:db_ui_save_location| folder.
+		This can also be triggered using key `A` from the drawer. See
+		|<Plug>(DBUI_AddConnection)|
+
+		`:DBUIAddConnection`
+
+==============================================================================
+4. Connections 					*vim-dadbod-ui-connections*
+
+There are multiple ways to set up your database connections:
+
+1. Through environment variables |vim-dadbod-ui-connections-env|
+2. Via `g:dbs` global variable |vim-dadbod-ui-connections-g:dbs|
+3. Via |DBUIAddConnection| command
+
+It is possible to combine all 3 types, but it's not possible to have same
+connection name from same source.
+
+==============================================================================
+4.1 Through environment variables		*vim-dadbod-ui-connections-env*
+
+There are 2 ways to define connections using environment variables:
+
+1. Using regular environment variable
+This option reads environment variable(s) called `$DBUI_URL` and `$DBUI_NAME`.
+`$DBUI_URL` contains connection url
+`$DBUI_NAME` contains connection name
+if only `$DBUI_URL` is defined,`$DBUI_NAME` is parsed from connection url.
+To change name of the variables that are read, change
+|g:db_ui_env_variable_url| and |g:db_ui_env_variable_name|.
+Note that this option can also leverage `dotenv.vim` since it exports dotenv
+variables as regular environment variables.
+
+2. Using https://github.com/tpope/vim-dotenv
+This option allows defining multiple connections with multiple env variables
+inside your `.env`. For example, this would create two connections:
+
+* `DB_UI_DEV=postgres://postgres:rootpw@localhost:5432/dev-db`
+* `DB_UI_PRODUCTION=postgres://postgres:rootpw@localhost:5432/dev-db`
+
+One will be called `dev`, and another one `production`. Connection name is
+parsed from the variable name (everything after `DB_UI_` lowercased). To
+change the prefix, change `g:db_ui_dotenv_variable_prefix` value.
+
+
+==============================================================================
+4.2 Via `g:dbs` global variable		*vim-dadbod-ui-connections-g:dbs*
+
+This option gives a bit more flexibility, but it's harder to keep it out of
+version control.
+This can be defined as a object, or as an array of objects:
+
+Object example:
+>
+  let g:dbs = {
+  \ 'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db',
+  \ 'staging': 'postgres://postgres:mypassword@localhost:5432/my-staging-db',
+  \ 'wp': 'mysql://root@localhost/wp_awesome',
+  \ }
+<
+Array of objects example:
+>
+  let g:dbs = [
+  \ { 'name': 'dev', 'url': 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
+  \ { 'name': 'staging', 'url': 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
+  \ { 'name': 'wp', 'url': 'mysql://root@localhost/wp_awesome' },
+  \ ]
+<
+Currently, only difference between these two methods is that array ensures
+order, while order of connections with g:dbs as object has arbitrary order.
+
+If you use this method, make sure to `keep it out of version control` .
+One way to ensure it's not commited is to use `exrc` option, which allows
+creating project level vimrc to hold this configuration. After that, add that
+file to your global gitignore file, and you're safe.
+
+==============================================================================
+4.3 Using `DBUIAddConnection` command	*vim-dadbod-ui-connections-add*
+
+Executing |DBUIAddConnection| opens up a prompt to enter connection that will
+be saved in a `connections.json` file in |g:db_ui_save_location| folder. These
+connections will be available from everywhere. If you want to delete certain
+connection, open up DBUI drawer and press `d` (|<Plug>(DBUI_DeleteLine|) on
+the connection you want to delete.
+
+==============================================================================
+
+5. Mappings					*vim-dadbod-ui-mappings*
+
+					      *<Plug>(DBUI_SelectLine)*
+<Plug>(DBUI_SelectLine)
+		This mapping is used for toggling and opening everything in
+		the DBUI drawer.
+		By default, mapped to `o`.
+
+					      *<Plug>(DBUI_SelectLineVsplit)*
+<Plug>(DBUI_SelectLineVsplit)
+		This mapping is used for opening all non-toggle items from
+		DBUI drawer in a vertical split.
+		By default, mapped to `S`.
+
+					      *<Plug>(DBUI_DeleteLine)*
+<Plug>(DBUI_DeleteLine)
+		This mapping is used deleting certain items from the DBUI
+		drawer. It will work on these:
+		1. Buffers
+		2. Saved queries
+		3. Connections added via |DBUIAddConnection|
+		Confirm prompt is opened before deleting to avoid accidents.
+		By default, mapped to `d`.
+
+					      *<Plug>(DBUI_AddConnection)*
+<Plug>(DBUI_AddConnection)
+		This mapping is used adding a new connection. It is same as
+		executing |DBUIAddConnection| command.
+		By default, mapped to `A`.
+
+					      *<Plug>(DBUI_ToggleDetails)*
+<Plug>(DBUI_ToggleDetails)
+		This mapping is used for toggling small note beside all
+		connections to see where this connection is defined.
+		For example, if you have connection called `dev` in `g:dbs`
+		variable, and connection called `production` in your
+		connections file, you will see something like this:
+>
+		    > dev (g:dbs)
+		    > production (file)
+<
+
+					      *<Plug>(DBUI_Redraw)*
+<Plug>(DBUI_Redraw)
+		This mapping is used for redrawing the DBUI drawer. It will
+		refresh the tables on all connections that were opened. This
+		is usually not needed, only when tables are
+		added/edited/deleted via query.
+		By default, mapped to `R`
+
+					      *<Plug>(DBUI_SaveQuery)*
+<Plug>(DBUI_SaveQuery)
+		This mapping is used in `sql` files to save the query in
+		`g:db_ui_save_location` for later use, since all queries are
+		written to temp folder by default. Once saved, it will be
+		available in the connection tree under `Saved queries` .
+
+					      *<Plug>(DBUI_EditBindParameters)*
+<Plug>(DBUI_EditBindParameters)
+		This mapping is used in `sql` files to edit bind parameters if
+		there are any. See |vim-dadbod-ui-bind-parameters|.
+		By default, mapped to `<Leader>E`
+
+					      *?*
+?
+		This mapping is used to show help in the DBUI drawer, that
+		contains mappings that are available. To hide
+		`Press ? for help`, see |g:db_ui_show_help|
+
+==============================================================================
+6. Table helpers				*vim-dadbod-ui-table-helpers*
+
+Table helper is a predefined query that is easily available for each table.
+By default, all database schemes available in `vim-dadbod` have a `List` table
+helper, which is just a simple query to list the data from the table.
+Certain schemes (postgesql, mysql, sqlite) have few more helpers, like
+`Indexes`, `Forein Keys`, `Primary Keys`, etc.
+
+To define your own helper for a specific scheme, add it through
+`g:db_ui_table_helpers` variable like this:
+
+>
+ 	let g:db_ui_table_helpers = {
+	\ 	'postgresql': {
+	\ 		'Count': 'select count(*) from {table}'
+	\ 	}
+ 	\ }
+<
+This will make `Count` table helper available for all postgresql connections
+for each table. Two variables are available as part of the table helper
+content: `{table}` and `{dbname}`. You can also override the defaults by
+passing in the matching helper name. To override `List`, do this:
+
+>
+ 	let g:db_ui_table_helpers = {
+	\ 	'postgresql': {
+	\ 		'List': 'select * from {table} order by id asc'
+	\ 	}
+ 	\ }
+
+==============================================================================
+7. Bind parameters				*vim-dadbod-ui-bind-parameters*
+
+Bind parameters are variables that can be injected into the query at execution
+time. For example, when executing this query
+>
+	select * from contacts where id = :contactId
+<
+A prompt will pop up to enter a value for `:contactId`. Once you enter the
+value, it will execute the query with that value injected. It will not modify
+the content of the buffer, but replace the parameter with value on execution
+time. This will happen for every other time that you run the query from this
+buffer with that parameter name. Values for parameters are saved in the buffer
+variable.
+To edit or delete a bind parameter, use |<Plug>(DBUI_EditBindParameters)|
+mapping (by default `<Leader>E`). It will open a list of all parameters
+defined, where you can selecting and then edit/delete it.
+In cases where a certain value from query is read as bind parameter (For
+example, your sql contains a string that really needs to check for some value
+with a colon prefix), just leave the bind parameter empty, and it will be
+considered a raw value (not replaced).
+For example, if you have this query:
+>
+	select * from posts where body LIKE '%:thething%'
+<
+`:thething` will be considered a bind parameter. Do not define a value, and it
+will be ignored.
+
+To pass an empty string, use two single quotes as value. Example:
+>
+	select * from posts where subject != :subject
+<
+On prompt, entering `''` will run this query:
+>
+	select * from posts where subject != ''
+<
+
+Certain values are parsed so they are injected as right type:
+
+1. Numbers - If the content of parameter is only a number, it will not be
+quoted
+2. Booleans - `true` and `false` are not quoted
+
+Every other value is automatically quoted. If you want to force quotes on a
+certain value (for example, to check the number as a string), just add quotes
+when defining the value and it will be treated as string.
+
+==============================================================================
+
+8. Settings					*vim-dadbod-ui-settings*
+
+					      *g:db_ui_save_location*
+g:db_ui_save_location
+		Path to folder where all connections and saved queries will be
+		stored. It can be ralative or absolute path. Do not add a
+		leading slash.
+
+		Default value: `~/.local/share/db_ui`
+
+					      *g:db_ui_table_helpers*
+g:db_ui_table_helpers
+		Dictionary containing custom table helpers. For more, see
+		|vim-dadbod-ui-table-helpers|
+
+		Default value: `{}`
+
+					   *g:db_ui_auto_execute_table_helpers*
+g:db_ui_auto_execute_table_helpers
+		If this is set to `1`, opening any table helper will
+		automatically write the query and execute it.
+
+		Default value: `0`
+
+					      *g:db_ui_env_variable_url*
+g:db_ui_env_variable_url
+		This value defines which environment variable is read for
+		|vim-dadbod-ui-connections-env| connection url.
+
+		Default value: `DBUI_URL`
+
+					      *g:db_ui_env_variable_name*
+g:db_ui_env_variable_name
+		This value defines which environment variable is read for
+		|vim-dadbod-ui-connections-env| connection name.
+
+		Default value: `DBUI_NAME`
+
+					      *g:db_ui_dotenv_variable_prefix*
+g:db_ui_dotenv_variable_prefix
+		This value defines a prefix that is read for
+		|vim-dadbod-ui-connections-env| `dotenv.vim` method.
+
+		Default value: `DB_UI_`
+
+					      *g:db_ui_winwidth*
+g:db_ui_winwidth
+		Number of columns used for default DBUI drawer width.
+
+		Default value: `30`
+
+					      *g:db_ui_disable_mappings*
+g:db_ui_disable_mappings
+		If this is set to `1`, no default mappings are defined.
+
+		Default value: `0`
+
+					      *g:db_ui_icons*
+g:db_ui_icons
+		This value holds the icons that are used in drawer. You can
+		override all or only some of them by passing the values you
+		want to override. For example:
+		>
+			let g:db_ui_icons = {'expanded': '+', 'collapsed': '-'}
+		<
+
+		Default value:
+>
+		>{
+			'expanded': '▾',
+			'collapsed': '▸',
+			'saved_query': '*',
+			'new_query': '+',
+			'tables': '~',
+			'buffers': '»',
+		}
+<
+					      *g:db_ui_show_help*
+g:db_ui_show_help
+		When set to `0`, hides `Press ? for help` from the DBUI
+		drawer. Mapping will continue to work no matter of this value.
+
+		Default value: `1`
+
+					      *g:db_ui_default_query*
+g:db_ui_default_query (DEPRECATED)
+		This value was intially used as a default value for the table
+		queries. It is still used as a default value for certain
+		schemes. It is deprecated in favor of |g:db_ui_table_helpers|
+
+		Default value: `SELECT * from "{table}" LIMIT 200;`
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:

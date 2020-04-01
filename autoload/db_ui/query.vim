@@ -97,7 +97,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
     call add(db_buffers.list, a:buffer_name)
   endif
   setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
-  nnoremap <buffer><Plug>(DBUI_EditVariables) :call <sid>method('edit_bind_parameters')<CR>
+  nnoremap <buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
   augroup db_ui_query
     autocmd! * <buffer>
     autocmd BufWritePost <buffer> nested call s:method('execute_query')
@@ -180,7 +180,7 @@ function! s:query.inject_variables_and_execute(db) abort
       continue
     endif
 
-    if val =~? '^[0-9]*$' || val =~? '^\(true\|false\)$' || val =~? "''"
+    if val !=? "^'.*'$" && (val =~? '^[0-9]*$' || val =~? '^\(true\|false\)$' || val =~? "''")
       let content = substitute(content, var, val, 'g')
     else
       let content = substitute(content, var, "'".val."'", 'g')
@@ -240,5 +240,5 @@ function! s:query.save_query() abort
   endif
 
   exe 'write '.full_name
-  call self.drawer.load_saved_sql(db)
+  call self.drawer.load_saved_queries(db)
 endfunction

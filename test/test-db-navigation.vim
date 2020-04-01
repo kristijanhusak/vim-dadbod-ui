@@ -23,7 +23,7 @@ function! s:suite.should_open_db_navigation() abort
   call s:expect(getline(1, '$')).to_equal([
         \ '▾ dadbod_ui_test',
         \ '  + New query',
-        \ '  ▸ Saved sql (0)',
+        \ '  ▸ Saved queries (0)',
         \ '  ▸ Tables (2)',
         \ '▸ dadbod_ui_testing',
         \ ])

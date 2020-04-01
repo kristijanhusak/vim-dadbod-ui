@@ -136,7 +136,7 @@ function! s:drawer.render_help() abort
     call self.add('" A - Add connection', 'noaction', 'help', '', '', 0)
     call self.add('" H - Toggle database details', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>W - Save currently opened query', 'noaction', 'help', '', '', 0)
-    call self.add('" <Leader>E - Edit variables in opened query', 'noaction', 'help', '', '', 0)
+    call self.add('" <Leader>E - Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
     call self.add('', 'noaction', 'help', '', '', 0)
   endif
 endfunction
@@ -171,10 +171,10 @@ function! s:drawer.add_db(db) abort
       endfor
     endif
   endif
-  call self.add('Saved sql ('.len(a:db.saved_sql.list).')', 'toggle', 'saved_sql', self.get_icon(a:db.saved_sql), a:db.key_name, 1)
-  if a:db.saved_sql.expanded
-    for saved_sql in a:db.saved_sql.list
-      call self.add(fnamemodify(saved_sql, ':t'), 'open', 'buffer', g:dbui_icons.saved_sql, a:db.key_name, 2, { 'file_path': saved_sql, 'saved': 1 })
+  call self.add('Saved queries ('.len(a:db.saved_queries.list).')', 'toggle', 'saved_queries', self.get_icon(a:db.saved_queries), a:db.key_name, 1)
+  if a:db.saved_queries.expanded
+    for saved_query in a:db.saved_queries.list
+      call self.add(fnamemodify(saved_query, ':t'), 'open', 'buffer', g:dbui_icons.saved_query, a:db.key_name, 2, { 'file_path': saved_query, 'saved': 1 })
     endfor
   endif
 
@@ -246,12 +246,14 @@ function! s:drawer.delete_line() abort
   let db = self.dbui.dbs[item.db_key_name]
 
   if has_key(item, 'saved')
-    let choice = confirm('Are you sure you want to delete this saved sql?', "&Yes\n&No")
-    if choice ==? 1
-      call delete(item.file_path)
-      call remove(db.saved_sql.list, index(db.saved_sql.list, item.file_path))
-      call db_ui#utils#echo_msg('Deleted.')
+    let choice = confirm('Are you sure you want to delete this saved query?', "&Yes\n&No")
+    if choice !=? 1
+      return
     endif
+
+    call delete(item.file_path)
+    call remove(db.saved_queries.list, index(db.saved_queries.list, item.file_path))
+    call db_ui#utils#echo_msg('Deleted.')
   endif
 
   silent! exe 'bw!'.bufnr(item.file_path)
@@ -263,7 +265,7 @@ function! s:drawer.toggle_db(db) abort
     return a:db
   endif
 
-  call self.load_saved_sql(a:db)
+  call self.load_saved_queries(a:db)
 
   if !empty(a:db.conn)
     return a:db
@@ -280,9 +282,9 @@ function! s:drawer.toggle_db(db) abort
   endtry
 endfunction
 
-function! s:drawer.load_saved_sql(db) abort
+function! s:drawer.load_saved_queries(db) abort
   if !empty(a:db.save_path)
-    let a:db.saved_sql.list = split(glob(printf('%s/*', a:db.save_path)), "\n")
+    let a:db.saved_queries.list = split(glob(printf('%s/*', a:db.save_path)), "\n")
   endif
 endfunction
 

@@ -5,10 +5,14 @@ It allows simple navigation through databases and allows saving queries for late
 
 ![screenshot](https://i.imgur.com/fhGqC9U.png)
 
-This is still work in progress.
-Currently tested only on Linux Vim 8+ and Neovim with PostgreSQL.
+Tested on Linux and Mac, Vim 8+ an Neovim.
 
-If you find any bugs, please report them.
+Features:
+* Navigate through multiple databases and it's tables
+* Several ways to define your connections
+* Save queries on single location for later use
+* Define custom table helpers
+* Inject bind parameters
 
 ## Installation
 
@@ -145,7 +149,7 @@ These are the default icons used:
 let g:db_ui_icons = {
     \ 'expanded': '▾',
     \ 'collapsed': '▸',
-    \ 'saved_sql': '*',
+    \ 'saved_query': '*',
     \ 'new_query': '+',
     \ 'tables': '~',
     \ 'buffers': '»'
@@ -210,9 +214,10 @@ These are the default mappings for `dbui` drawer:
 * A - Add connection (`<Plug>(DBUI_AddConnection)`)
 * H - Toggle database details (`<Plug>(DBUI_ToggleDetails)`)
 
-For queries, filetype is automatically set to `sql`. Also, one mappings is added for the `sql` filetype:
+For queries, filetype is automatically set to `sql`. Also, two mappings is added for the `sql` filetype:
 
 * <Leader>W - Permanently save query for later use (`<Plug>(DBUI_SaveQuery)`)
+* <Leader>E - Edit bind parameters (`<Plug>(DBUI_EditBindParameters)`)
 
 Any of these mappings can be overridden:
 ```vimL

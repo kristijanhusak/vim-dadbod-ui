@@ -78,7 +78,7 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'table_helpers': db_ui#table_helpers#get(scheme),
         \ 'expanded': 0,
         \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
-        \ 'saved_sql': { 'expanded': 0, 'list': [] },
+        \ 'saved_queries': { 'expanded': 0, 'list': [] },
         \ 'buffers': { 'expanded': 0, 'list': [] },
         \ 'save_path': save_path,
         \ 'name': a:db.name,
