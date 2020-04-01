@@ -24,3 +24,7 @@ endfunction
 function! db_ui#utils#input(name, default) abort
   return input(a:name, a:default)
 endfunction
+
+function! db_ui#utils#inputlist(list) abort
+  return inputlist(a:list)
+endfunction

@@ -94,9 +94,10 @@ function! s:drawer.render(...) abort
   let redraw = a:0 > 0
 
   if redraw
+    let query_time = reltime()
     call db_ui#utils#echo_msg('Refreshing all databases...')
     call self.dbui.populate_dbs()
-    call db_ui#utils#echo_msg('Refreshing all databases...Done.')
+    call db_ui#utils#echo_msg('Refreshing all databases...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   endif
 
   let view = winsaveview()
@@ -135,6 +136,7 @@ function! s:drawer.render_help() abort
     call self.add('" A - Add connection', 'noaction', 'help', '', '', 0)
     call self.add('" H - Toggle database details', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>W - Save currently opened query', 'noaction', 'help', '', '', 0)
+    call self.add('" <Leader>E - Edit variables in opened query', 'noaction', 'help', '', '', 0)
     call self.add('', 'noaction', 'help', '', '', 0)
   endif
 endfunction
@@ -268,10 +270,11 @@ function! s:drawer.toggle_db(db) abort
   endif
 
   try
+    let query_time = reltime()
     call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
-    call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected.')
     call self.populate_tables(a:db)
+    call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   catch /.*/
     return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
   endtry

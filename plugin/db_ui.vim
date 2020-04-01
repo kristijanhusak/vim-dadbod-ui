@@ -35,6 +35,7 @@ endfunction
 augroup dbui
   autocmd!
   autocmd FileType sql call s:set_mapping('<Leader>W', '<Plug>(DBUI_SaveQuery)')
+  autocmd FileType sql call s:set_mapping('<Leader>E', '<Plug>(DBUI_EditVariables)')
   autocmd FileType dbui call s:set_mapping('o', '<Plug>(DBUI_SelectLine)')
   autocmd FileType dbui call s:set_mapping('S', '<Plug>(DBUI_SelectLineVsplit)')
   autocmd FileType dbui call s:set_mapping('R', '<Plug>(DBUI_Redraw)')
