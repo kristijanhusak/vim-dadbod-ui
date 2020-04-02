@@ -24,7 +24,12 @@ endfunction
 function! Cleanup() abort
   call db_ui#reset_state()
   unlet! g:dbs
-  windo if &ft ==? 'dbui' || bufname('%') =~? '\(dadbod_ui_test\|\.dbout\)' | bw! | endif
+  let w = 2
+  while w <= winnr('$')
+      silent! execute w . 'close!'
+      let w += 1
+  endwhile
+  silent! execute 'bwipeout!' join(range(1, bufnr('$')), ' ')
 endfunction
 
 function! SetOptionVariable(name, value) abort

@@ -87,6 +87,11 @@ function! s:dbui.generate_new_db_entry(db) abort
 endfunction
 
 function! s:dbui.populate_from_global_variable() abort
+  if exists('g:db') && !empty(g:db)
+    let gdb_name = split(g:db, '/')[-1]
+    call self.add_if_not_exists(gdb_name, g:db, 'g:dbs')
+  endif
+
   if !exists('g:dbs') || empty(g:dbs)
     return self
   endif

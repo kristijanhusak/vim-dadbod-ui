@@ -12,7 +12,7 @@ Features:
 * Several ways to define your connections
 * Save queries on single location for later use
 * Define custom table helpers
-* Inject bind parameters
+* Bind parameters (see `:help vim-dadbod-ui-bind-parameters`)
 
 ## Installation
 

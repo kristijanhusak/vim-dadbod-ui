@@ -1,4 +1,4 @@
-*dadbod-ui.txt* *vim-dadbod-ui*
+*vim-dadbod-ui*
 
         Simple UI for https://github.com/tpope/vim-dadbod
 
@@ -12,7 +12,7 @@ vim-dadbod-ui			    *vim-dadbod-ui*
 3. Commands 		    		    |vim-dadbod-ui-commands|
 4. Connections 			            |vim-dadbod-ui-connections|
   4.1 Through environment variables 	    |vim-dadbod-ui-connections-env|
-  4.2 Via `g:dbs` global variable 	    |vim-dadbod-ui-connections-g:dbs|
+  4.2 Via `g:db` and `g:dbs` global variable|vim-dadbod-ui-connections-g:dbs|
   4.3 Using `DBUIAddConnection` comand 	    |vim-dadbod-ui-connections-add|
 5. Mappings				    |vim-dadbod-ui-mappings|
 6. Table helpers 		   	    |vim-dadbod-ui-table-helpers|
@@ -30,7 +30,7 @@ Main features:
 2. Several ways to define your connections
 3. Save queries on single location for later use
 4. Define custom table helpers
-5. Inject bind parameters
+5. Bind parameters
 
 ==============================================================================
 2. Install					*vim-dadbod-ui-install*
@@ -79,7 +79,7 @@ DBUIAddConnection
 There are multiple ways to set up your database connections:
 
 1. Through environment variables |vim-dadbod-ui-connections-env|
-2. Via `g:dbs` global variable |vim-dadbod-ui-connections-g:dbs|
+2. Via `g:db` and `g:dbs` global variable |vim-dadbod-ui-connections-g:dbs|
 3. Via |DBUIAddConnection| command
 
 It is possible to combine all 3 types, but it's not possible to have same
@@ -113,11 +113,12 @@ change the prefix, change `g:db_ui_dotenv_variable_prefix` value.
 
 
 ==============================================================================
-4.2 Via `g:dbs` global variable		*vim-dadbod-ui-connections-g:dbs*
+4.2 Via `g:db` and `g:dbs` global variable	*vim-dadbod-ui-connections-g:dbs*
 
 This option gives a bit more flexibility, but it's harder to keep it out of
 version control.
-This can be defined as a object, or as an array of objects:
+vim-dadbod `g:db` variable is read first.
+`g:dbs` can be defined as a object, or as an array of objects:
 
 Object example:
 >
@@ -239,13 +240,14 @@ To define your own helper for a specific scheme, add it through
  	let g:db_ui_table_helpers = {
 	\ 	'postgresql': {
 	\ 		'Count': 'select count(*) from {table}'
+	\ 		'Explain': 'EXPLAIN ANALYZE {last_query}'
 	\ 	}
  	\ }
 <
 This will make `Count` table helper available for all postgresql connections
-for each table. Two variables are available as part of the table helper
-content: `{table}` and `{dbname}`. You can also override the defaults by
-passing in the matching helper name. To override `List`, do this:
+for each table. Three variables are available as part of the table helper
+content: `{table}`, `{dbname}` and `{last_query}`. You can also override the
+defaults by passing in the matching helper name. To override `List`, do this:
 
 >
  	let g:db_ui_table_helpers = {
@@ -253,6 +255,11 @@ passing in the matching helper name. To override `List`, do this:
 	\ 		'List': 'select * from {table} order by id asc'
 	\ 	}
  	\ }
+
+Note that `{last_query}` will be empty if no queries were ran before opening
+that helper. Also, in the `EXPLAIN` example above, running the explain helper
+and then running it again for another table will print double `EXPLAIN ANALYZE`
+because first explain query is also considered a valid query for `{last_query}`.
 
 ==============================================================================
 7. Bind parameters				*vim-dadbod-ui-bind-parameters*

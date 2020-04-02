@@ -10,6 +10,7 @@ function! s:query.new(drawer) abort
   let instance = copy(self)
   let instance.drawer = a:drawer
   let instance.buffer_counter = {}
+  let instance.last_query = []
   return instance
 endfunction
 
@@ -110,6 +111,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
 
   let content = substitute(default_content, '{table}', table, 'g')
   let content = substitute(content, '{dbname}', a:db.name, 'g')
+  let content = substitute(content, '{last_query}', join(self.last_query, "\n"), 'g')
   silent 1,$delete _
   call setline(1, split(content, "\n"))
   if g:dbui_auto_execute_table_helpers
@@ -148,6 +150,7 @@ function! s:query.execute_query() abort
   else
     silent! exe '%DB '.db.url
   endif
+  let self.last_query = getline(1, '$')
   call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
 endfunction
 
