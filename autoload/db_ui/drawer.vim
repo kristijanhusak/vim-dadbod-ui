@@ -24,14 +24,16 @@ function! s:drawer.open() abort
     silent! exe dbui_winnr.'wincmd w'
     return
   endif
-  silent! exe 'vertical topleft new dbui'
-  silent! exe 'vertical topleft resize '.g:dbui_winwidth
+  let win_pos = g:dbui_win_position ==? 'left' ? 'topleft' : 'botright'
+  silent! exe 'vertical '.win_pos.' new dbui'
+  silent! exe 'vertical '.win_pos.' resize '.g:dbui_winwidth
   setlocal filetype=dbui buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap cursorline nospell nomodifiable winfixwidth
 
   call self.render()
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>method('toggle_line', 'edit')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_DeleteLine) :call <sid>method('delete_line')<CR>
-  nnoremap <silent><buffer> <Plug>(DBUI_SelectLineVsplit) :call <sid>method('toggle_line', 'vertical botright split')<CR>
+  let query_win_pos = g:dbui_win_position ==? 'left' ? 'botright' : 'topleft'
+  silent! exe "nnoremap <silent><buffer> <Plug>(DBUI_SelectLineVsplit) :call <sid>method('toggle_line', 'vertical ".query_win_pos." split')<CR>"
   nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call <sid>method('render', 1)<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_AddConnection) :call <sid>method('add_connection')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_ToggleDetails) :call <sid>method('toggle_details')<CR>

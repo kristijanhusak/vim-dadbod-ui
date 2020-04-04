@@ -4,6 +4,7 @@ endif
 let g:loaded_dbui = 1
 
 let g:dbui_winwidth = get(g:, 'db_ui_winwidth', 40)
+let g:dbui_win_position = get(g:, 'db_ui_win_position', 'left')
 let g:dbui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')
 let g:dbui_save_location = get(g:, 'db_ui_save_location', '~/.local/share/db_ui')
 let g:dbui_dotenv_variable_prefix = get(g:, 'db_ui_dotenv_variable_prefix', 'DB_UI_')

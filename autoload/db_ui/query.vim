@@ -48,8 +48,10 @@ function! s:query.generate_buffer_basename(db_name, suffix) abort
 endfunction
 
 function! s:query.focus_window() abort
+  let win_pos = g:dbui_win_position ==? 'left' ? 'botright' : 'topleft'
+  let win_cmd = 'vertical '.win_pos.' new'
   if winnr('$') ==? 1
-    vertical new
+    silent! exe win_cmd
     return
   endif
 
@@ -64,7 +66,17 @@ function! s:query.focus_window() abort
   endfor
 
   if !found
-    2wincmd w
+    for win in range(1, winnr('$'))
+      if getwinvar(win, '&filetype') !=? 'dbui' && getwinvar(win, '&buftype') !=? 'nofile'
+        let found = 1
+        exe win.'wincmd w'
+        break
+      endif
+    endfor
+  endif
+
+  if (!found)
+    silent! exe win_cmd
   endif
 endfunction
 

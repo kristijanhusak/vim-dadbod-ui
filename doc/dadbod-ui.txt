@@ -361,6 +361,13 @@ g:db_ui_winwidth
 
 		Default value: `30`
 
+					      *g:db_ui_win_position*
+g:db_ui_win_position
+		On which side of the screen should DBUI drawer open.
+		Possible values: `left` and `right`
+
+		Default value: `left`
+
 					      *g:db_ui_disable_mappings*
 g:db_ui_disable_mappings
 		If this is set to `1`, no default mappings are defined.
