@@ -11,11 +11,15 @@ function! db_ui#utils#echo_warning(text, ...) abort
 endfunction
 
 function! db_ui#utils#echo_msg(text, ...) abort
-  let permanent = a:0 > 0
+  let permanent = a:0 > 0 && a:1
   redraw!
   if permanent
-    let msg = type(a:text) !=? type('') ? string(a:text) : a:text
-    echom '[DBUI] '.msg
+    let message = type(a:text) !=? type('') ? string(a:text) : a:text
+    let message = split(message, "\n")
+    echom '[DBUI] '.message[0]
+    for msg in message[1:]
+      echom msg
+    endfor
   else
     echo '[DBUI] '.a:text
   endif

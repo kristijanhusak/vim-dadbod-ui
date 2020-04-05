@@ -30,11 +30,16 @@ function! s:dbui.new() abort
 
   call instance.populate_dbs()
   if empty(instance.dbs_list)
-    call db_ui#utils#echo_err(printf('No databases found.
-          \ use :DBUIAddConnection command to add a new connection
-          \ or define the g:dbs variable, a $DBUI_URL env variable or
-          \ use the prefix %s in your .env file.', g:dbui_dotenv_variable_prefix
-          \ ))
+    call db_ui#utils#echo_err("No databases found. Use one of these methods to add a connection:\n
+          \1. Call :DBUIAddConnection command to add a new globally available connection\n
+          \2. Define g:dbs variable\n
+          \3. Export $DBUI_URL env variable\n
+          \4. Add an env variable into your .env file that starts with ".g:dbui_dotenv_variable_prefix
+          \, 1)
+    let create_connection = confirm('Create new connection now?', "&Yes\n&No\n&Cancel")
+    if create_connection ==? 1
+      DBUIAddConnection
+    endif
     return {}
   endif
   let instance.drawer = db_ui#drawer#new(instance)
