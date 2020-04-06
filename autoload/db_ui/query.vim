@@ -58,7 +58,7 @@ function! s:query.focus_window() abort
   let found = 0
   for win in range(1, winnr('$'))
     let buf = winbufnr(win)
-    if !empty(getbufvar(buf, 'db_ui_database'))
+    if !empty(getbufvar(buf, 'db_key_name'))
       let found = 1
       exe win.'wincmd w'
       break
@@ -100,7 +100,6 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   silent! exe a:edit_action.' '.a:buffer_name
   call self.resize_if_single(was_single_win)
   let b:db_key_name = a:db.key_name
-  let b:db_ui_database = {'name': a:db.name, 'key_name': a:db.key_name, 'url': a:db.url, 'save_path': a:db.save_path }
   let db_buffers = self.drawer.dbui.dbs[a:db.key_name].buffers
 
   if index(db_buffers.list, a:buffer_name) ==? -1
