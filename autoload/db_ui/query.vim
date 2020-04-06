@@ -157,7 +157,7 @@ function! s:query.execute_query() abort
   let query_time = reltime()
   call db_ui#utils#echo_msg('Executing query...')
   let db = self.drawer.dbui.dbs[b:db_key_name]
-  if search(':\w\+', 'n') > 0
+  if search('[^:]:\w\+', 'n') > 0
     call self.inject_variables_and_execute(db)
   else
     silent! exe '%DB '.db.url
@@ -169,7 +169,7 @@ endfunction
 function! s:query.inject_variables_and_execute(db) abort
   let vars = []
   for line in getline(1, '$')
-    call substitute(line, '\(:\w\+\)', '\=add(vars, submatch(0))', 'g')
+    call substitute(line, '[^:]\(:\w\+\)', '\=add(vars, submatch(1))', 'g')
   endfor
 
   if !exists('b:db_ui_bind_params')
