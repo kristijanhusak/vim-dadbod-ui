@@ -167,7 +167,7 @@ function! s:drawer.add_db(db) abort
         if buf =~? '^'.a:db.save_path
           let buflabel = fnamemodify(buf, ':t')
         else
-          let buflabel = substitute(fnamemodify(buf, ':e'), '^'.a:db.key_name.'-', '', '').' *'
+          let buflabel = substitute(fnamemodify(buf, ':e'), '^'.db_ui#utils#slug(a:db.name).'-', '', '').' *'
         endif
         call self.add(buflabel, 'open', 'buffer', g:dbui_icons.buffers, a:db.key_name, 2, { 'file_path': buf })
       endfor

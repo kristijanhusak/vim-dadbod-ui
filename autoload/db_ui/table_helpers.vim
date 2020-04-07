@@ -9,6 +9,7 @@ let s:basic_constraint_query = "
 
 let s:postgres = {
       \ 'List': g:dbui_default_query,
+      \ 'Columns': "select * from information_schema.columns where table_name='{table}'",
       \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}'",
       \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'",
       \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'",

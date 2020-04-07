@@ -36,7 +36,7 @@ function! s:method(name) abort
 endfunction
 
 function! s:query.generate_buffer_basename(db_name, suffix) abort
-  let buffer_basename = substitute(printf('%s-%s', a:db_name, a:suffix), '[^A-Za-z0-9_\-]', '', 'g')
+  let buffer_basename = db_ui#utils#slug(printf('%s-%s', a:db_name, a:suffix))
   if !has_key(self.buffer_counter, buffer_basename)
     let self.buffer_counter[buffer_basename] = 1
     return buffer_basename

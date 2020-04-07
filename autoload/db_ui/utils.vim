@@ -25,6 +25,10 @@ function! db_ui#utils#echo_msg(text, ...) abort
   endif
 endfunction
 
+function! db_ui#utils#slug(str) abort
+  return substitute(a:str, '[^A-Za-z0-9_\-]', '', 'g')
+endfunction
+
 function! db_ui#utils#input(name, default) abort
   return input(a:name, a:default)
 endfunction
