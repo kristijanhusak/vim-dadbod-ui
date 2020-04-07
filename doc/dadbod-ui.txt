@@ -73,6 +73,13 @@ DBUIAddConnection
 
 		`:DBUIAddConnection`
 
+					      *DBUIFindBuffer*
+DBUIFindBuffer
+		Find currently opened DBUI buffer in DBUI drawer. Buffer must
+		be initially opened from DBUI drawer to make this work.
+
+		`:DBUIFindBuffer`
+
 ==============================================================================
 4. Connections 					*vim-dadbod-ui-connections*
 
