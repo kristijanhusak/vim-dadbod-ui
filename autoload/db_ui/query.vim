@@ -107,6 +107,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
       let db_buffers.expanded = 1
     endif
     call add(db_buffers.list, a:buffer_name)
+    call self.drawer.render()
   endif
   setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
   nnoremap <buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
@@ -149,7 +150,8 @@ endfunction
 function! s:query.remove_buffer(bufnr)
   let db_key_name = getbufvar(a:bufnr, 'db_key_name')
   let list = self.drawer.dbui.dbs[db_key_name].buffers.list
-  return filter(list, 'v:val !=? bufname(a:bufnr)')
+  call filter(list, 'v:val !=? bufname(a:bufnr)')
+  return self.drawer.render()
 endfunction
 
 function! s:query.execute_query() abort
