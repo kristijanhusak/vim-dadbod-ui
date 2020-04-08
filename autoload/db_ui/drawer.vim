@@ -111,6 +111,11 @@ function! s:drawer.render(...) abort
     call self.add_db(self.dbui.dbs[db.key_name])
   endfor
 
+  if empty(self.dbui.dbs_list)
+    call self.add('" No connections', 'noaction', 'help', '', '', 0)
+    call self.add('Add connection', 'call_method', 'add_connection', g:dbui_icons.add_connection, '', 0)
+  endif
+
   let content = map(copy(self.content), 'repeat(" ", shiftwidth() * v:val.level).v:val.icon.(!empty(v:val.icon) ? " " : "").v:val.label')
 
   setlocal modifiable
@@ -197,6 +202,10 @@ function! s:drawer.toggle_line(edit_action) abort
   let item = self.content[line('.') - 1]
   if item.action ==? 'noaction'
     return
+  endif
+
+  if item.action ==? 'call_method'
+    return s:method(item.type)
   endif
 
   if item.action ==? 'open'

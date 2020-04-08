@@ -11,6 +11,7 @@ hi default link dbui_help Comment
 hi default link dbui_help_key String
 hi default link dbui_expanded Directory
 hi default link dbui_collapsed Directory
+hi default link dbui_add_connection Directory
 hi default link dbui_saved_query String
 hi default link dbui_new_query Operator
 hi default link dbui_buffers Constant
