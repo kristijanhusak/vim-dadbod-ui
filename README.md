@@ -13,6 +13,7 @@ Features:
 * Save queries on single location for later use
 * Define custom table helpers
 * Bind parameters (see `:help vim-dadbod-ui-bind-parameters`)
+* Autocompletion with [coc.nvim](https://github.com/neoclide/coc.nvim) and [coc-db](https://github.com/kristijanhusak/coc-db) extension
 
 ## Installation
 
