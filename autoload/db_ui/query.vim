@@ -121,6 +121,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
     return
   endif
 
+  let b:dbui_table_name = table
   let content = substitute(default_content, '{table}', table, 'g')
   let content = substitute(content, '{dbname}', a:db.name, 'g')
   let content = substitute(content, '{last_query}', join(self.last_query, "\n"), 'g')

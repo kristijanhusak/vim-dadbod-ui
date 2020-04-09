@@ -18,6 +18,7 @@ function! s:suite.should_open_table_list_query_changed() abort
   normal o3jojojo
   call s:expect(&filetype).to_equal('sql')
   call s:expect(getline(1)).to_equal('SELECT * FROM contacts')
+  call s:expect(b:dbui_table_name).to_equal('contacts')
 endfunction
 
 function! s:suite.should_open_custom_count_helper() abort

@@ -20,6 +20,7 @@ function! s:suite.should_open_contacts_table_list_query() abort
   :DBUI
   norm 4jojojo
   call s:expect(getline(1)).to_equal('SELECT * from "contacts" LIMIT 200;')
+  call s:expect(b:dbui_table_name).to_equal('contacts')
 endfunction
 
 function! s:suite.should_write_query() abort

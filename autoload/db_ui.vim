@@ -33,6 +33,16 @@ function! db_ui#find_buffer() abort
   call cursor(row, 0)
 endfunction
 
+function! db_ui#get_conn_url(db_key_name) abort
+  if empty(s:dbui_instance)
+    return ''
+  endif
+  if !has_key(s:dbui_instance.dbs, a:db_key_name)
+    return ''
+  endif
+  return s:dbui_instance.dbs[a:db_key_name].url
+endfunction
+
 function! s:dbui.new() abort
   let instance = copy(self)
   let instance.dbs = {}
