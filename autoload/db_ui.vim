@@ -14,18 +14,18 @@ function! db_ui#open() abort
 endfunction
 
 function! db_ui#find_buffer() abort
-  if !exists('b:db_key_name')
+  if !exists('b:dbui_db_key_name')
     return db_ui#utils#echo_err('Unable to find in DBUI. Not a valid dbui query buffer.')
   endif
 
-  let db = b:db_key_name
+  let db = b:dbui_db_key_name
   let bufname = bufname('%')
   let s:dbui_instance.dbs[db].expanded = 1
   let s:dbui_instance.dbs[db].buffers.expanded = 1
   call s:dbui_instance.open()
   let row = 1
   for line in s:dbui_instance.drawer.content
-    if line.db_key_name ==? db && line.type ==? 'buffer' && line.file_path ==? bufname
+    if line.dbui_db_key_name ==? db && line.type ==? 'buffer' && line.file_path ==? bufname
       break
     endif
     let row += 1

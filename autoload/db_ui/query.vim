@@ -15,7 +15,7 @@ function! s:query.new(drawer) abort
 endfunction
 
 function! s:query.open(item, edit_action) abort
-  let db = self.drawer.dbui.dbs[a:item.db_key_name]
+  let db = self.drawer.dbui.dbs[a:item.dbui_db_key_name]
   if a:item.type ==? 'buffer'
     return self.open_buffer(db, a:item.file_path, a:edit_action)
   endif
@@ -58,7 +58,7 @@ function! s:query.focus_window() abort
   let found = 0
   for win in range(1, winnr('$'))
     let buf = winbufnr(win)
-    if !empty(getbufvar(buf, 'db_key_name'))
+    if !empty(getbufvar(buf, 'dbui_db_key_name'))
       let found = 1
       exe win.'wincmd w'
       break
@@ -99,7 +99,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
 
   silent! exe a:edit_action.' '.a:buffer_name
   call self.resize_if_single(was_single_win)
-  let b:db_key_name = a:db.key_name
+  let b:dbui_db_key_name = a:db.key_name
   let db_buffers = self.drawer.dbui.dbs[a:db.key_name].buffers
 
   if index(db_buffers.list, a:buffer_name) ==? -1
@@ -148,8 +148,8 @@ function! s:query.resize_if_single(is_single_win) abort
 endfunction
 
 function! s:query.remove_buffer(bufnr)
-  let db_key_name = getbufvar(a:bufnr, 'db_key_name')
-  let list = self.drawer.dbui.dbs[db_key_name].buffers.list
+  let dbui_db_key_name = getbufvar(a:bufnr, 'dbui_db_key_name')
+  let list = self.drawer.dbui.dbs[dbui_db_key_name].buffers.list
   call filter(list, 'v:val !=? bufname(a:bufnr)')
   return self.drawer.render()
 endfunction
@@ -157,7 +157,7 @@ endfunction
 function! s:query.execute_query() abort
   let query_time = reltime()
   call db_ui#utils#echo_msg('Executing query...')
-  let db = self.drawer.dbui.dbs[b:db_key_name]
+  let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
   if search('[^:]:\w\+', 'n') > 0
     call self.inject_variables_and_execute(db)
   else
@@ -239,7 +239,7 @@ function! s:query.edit_bind_parameters() abort
 endfunction
 
 function! s:query.save_query() abort
-  let db = self.drawer.dbui.dbs[b:db_key_name]
+  let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
   if empty(db.save_path)
     throw 'Save location is empty. Please provide valid directory to g:db_ui_save_location'
   endif

@@ -148,8 +148,8 @@ function! s:drawer.render_help() abort
   endif
 endfunction
 
-function! s:drawer.add(label, action, type, icon, db_key_name, level, ...)
-  let opts = extend({'label': a:label, 'action': a:action, 'type': a:type, 'icon': a:icon, 'db_key_name': a:db_key_name, 'level': a:level }, get(a:, '1', {}))
+function! s:drawer.add(label, action, type, icon, dbui_db_key_name, level, ...)
+  let opts = extend({'label': a:label, 'action': a:action, 'type': a:type, 'icon': a:icon, 'dbui_db_key_name': a:dbui_db_key_name, 'level': a:level }, get(a:, '1', {}))
   call add(self.content, opts)
 endfunction
 
@@ -212,7 +212,7 @@ function! s:drawer.toggle_line(edit_action) abort
     return self.open_query(item, a:edit_action)
   endif
 
-  let db = self.dbui.dbs[item.db_key_name]
+  let db = self.dbui.dbs[item.dbui_db_key_name]
 
   let tree = db
   if item.type !=? 'db'
@@ -243,7 +243,7 @@ function! s:drawer.delete_line() abort
   endif
 
   if item.action ==? 'toggle' && item.type ==? 'db'
-    let db = self.dbui.dbs[item.db_key_name]
+    let db = self.dbui.dbs[item.dbui_db_key_name]
     if db.source !=? 'file'
       return db_ui#utils#echo_err('Cannot delete this connection.')
     endif
@@ -254,7 +254,7 @@ function! s:drawer.delete_line() abort
     return
   endif
 
-  let db = self.dbui.dbs[item.db_key_name]
+  let db = self.dbui.dbs[item.dbui_db_key_name]
 
   if has_key(item, 'saved')
     let choice = confirm('Are you sure you want to delete this saved query?', "&Yes\n&No")
