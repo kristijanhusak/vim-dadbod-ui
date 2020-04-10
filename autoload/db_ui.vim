@@ -33,14 +33,20 @@ function! db_ui#find_buffer() abort
   call cursor(row, 0)
 endfunction
 
-function! db_ui#get_conn_url(db_key_name) abort
+function! db_ui#get_conn_info(db_key_name) abort
   if empty(s:dbui_instance)
-    return ''
+    return {}
   endif
   if !has_key(s:dbui_instance.dbs, a:db_key_name)
-    return ''
+    return {}
   endif
-  return s:dbui_instance.dbs[a:db_key_name].url
+  let db = s:dbui_instance.dbs[a:db_key_name]
+  return {
+        \ 'url': db.url,
+        \ 'tables': db.tables.list,
+        \ 'scheme': db.scheme,
+        \ 'connected': !empty(db.conn),
+        \ }
 endfunction
 
 function! s:dbui.new() abort
