@@ -155,8 +155,13 @@ endfunction
 
 function! s:drawer.add_db(db) abort
   let db_name = a:db.name
+  if !empty(a:db.conn_error)
+    let db_name .= ' '.g:dbui_icons.connection_error
+  elseif !empty(a:db.conn)
+    let db_name .= ' '.g:dbui_icons.connection_ok
+  endif
   if self.show_details
-    let db_name .= ' ('.a:db.source.')'
+    let db_name .= ' ('.a:db.scheme.' - '.a:db.source.')'
   endif
   call self.add(db_name, 'toggle', 'db', self.get_icon(a:db), a:db.key_name, 0)
   if !a:db.expanded
@@ -286,9 +291,11 @@ function! s:drawer.toggle_db(db) abort
     let query_time = reltime()
     call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
+    let a:db.conn_error = ''
     call self.populate_tables(a:db)
     call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   catch /.*/
+    let a:db.conn_error = v:exception
     return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
   endtry
 endfunction

@@ -97,6 +97,7 @@ function! s:dbui.generate_new_db_entry(db) abort
   return {
         \ 'url': a:db.url,
         \ 'conn': '',
+        \ 'conn_error': '',
         \ 'source': a:db.source,
         \ 'scheme': scheme,
         \ 'table_helpers': db_ui#table_helpers#get(scheme),

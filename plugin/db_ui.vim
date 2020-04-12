@@ -22,6 +22,8 @@ let g:dbui_icons = extend({
       \ 'tables': '~',
       \ 'buffers': '»',
       \ 'add_connection': '[+]',
+      \ 'connection_ok': '✓',
+      \ 'connection_error': '✕',
       \ }, get(g:, 'db_ui_icons', {}))
 
 function! s:set_mapping(key, plug) abort

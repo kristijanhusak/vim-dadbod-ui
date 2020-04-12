@@ -154,6 +154,8 @@ let g:db_ui_icons = {
     \ 'new_query': '+',
     \ 'tables': '~',
     \ 'buffers': '»'
+    \ 'connection_ok': '✓',
+    \ 'connection_error': '✕',
     \ }
 ```
 

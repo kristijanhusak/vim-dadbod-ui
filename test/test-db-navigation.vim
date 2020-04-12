@@ -21,7 +21,7 @@ endfunction
 function! s:suite.should_open_db_navigation() abort
   normal o
   call s:expect(getline(1, '$')).to_equal([
-        \ '▾ dadbod_ui_test',
+        \ '▾ dadbod_ui_test '.g:dbui_icons.connection_ok,
         \ '  + New query',
         \ '  ▸ Saved queries (0)',
         \ '  ▸ Tables (2)',

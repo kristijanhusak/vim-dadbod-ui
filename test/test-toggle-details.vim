@@ -18,8 +18,8 @@ function! s:suite.should_show_details() abort
         \ ])
   norm H
   call s:expect(getline(1, '$')).to_equal([
-        \ '▸ dadbod_ui_test (g:dbs)',
-        \ '▸ dadbod_ui_testing (g:dbs)',
+        \ '▸ dadbod_ui_test (sqlite - g:dbs)',
+        \ '▸ dadbod_ui_testing (sqlite - g:dbs)',
         \ ])
   norm H
   call s:expect(getline(1, '$')).to_equal([
