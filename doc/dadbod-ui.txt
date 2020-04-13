@@ -75,8 +75,8 @@ DBUIAddConnection
 
 					      *DBUIFindBuffer*
 DBUIFindBuffer
-		Find currently opened DBUI buffer in DBUI drawer. Buffer must
-		be initially opened from DBUI drawer to make this work.
+		Find currently opened buffer in DBUI drawer, or if it wasn't
+		opened from DBUI, assigns the buffer to specified db.
 
 		`:DBUIFindBuffer`
 

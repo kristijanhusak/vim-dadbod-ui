@@ -174,7 +174,7 @@ function! s:drawer.add_db(db) abort
     if a:db.buffers.expanded
       for buf in a:db.buffers.list
         let buflabel = buf
-        if buf =~? '^'.a:db.save_path
+        if buf =~? '^'.a:db.save_path || empty(getbufvar(buf, 'dbui_is_tmp'))
           let buflabel = fnamemodify(buf, ':t')
         else
           let buflabel = substitute(fnamemodify(buf, ':e'), '^'.db_ui#utils#slug(a:db.name).'-', '', '').' *'
@@ -214,7 +214,7 @@ function! s:drawer.toggle_line(edit_action) abort
   endif
 
   if item.action ==? 'open'
-    return self.open_query(item, a:edit_action)
+    return self.get_query().open(item, a:edit_action)
   endif
 
   let db = self.dbui.dbs[item.dbui_db_key_name]
@@ -233,11 +233,11 @@ function! s:drawer.toggle_line(edit_action) abort
   return self.render()
 endfunction
 
-function! s:drawer.open_query(item, edit_action)
+function! s:drawer.get_query() abort
   if empty(self.query)
     let self.query = db_ui#query#new(self)
   endif
-  return self.query.open(a:item, a:edit_action)
+  return self.query
 endfunction
 
 function! s:drawer.delete_line() abort

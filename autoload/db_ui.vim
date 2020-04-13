@@ -14,10 +14,40 @@ function! db_ui#open() abort
 endfunction
 
 function! db_ui#find_buffer() abort
+  if empty(s:dbui_instance)
+    let s:dbui_instance = s:dbui.new()
+  endif
+
+  if !len(s:dbui_instance.dbs_list)
+    return db_ui#utils#echo_err('No database entries found in DBUI.')
+  endif
+
+  if !exists('b:dbui_db_key_name')
+    if len(s:dbui_instance.dbs_list) ==? 1
+      let db = values(s:dbui_instance.dbs)[0]
+      let b:dbui_db_key_name = db.key_name
+      call db_ui#utils#echo_msg('Assigned buffer to db '.db.name)
+    else
+      let options = map(copy(s:dbui_instance.dbs_list), '(v:key + 1).") ".v:val.name')
+      let selection = db_ui#utils#inputlist(['Select db to assign this buffer to:'] + options)
+      if selection < 1 || selection > len(options)
+        return db_ui#utils#echo_err('Wrong selection.')
+      endif
+      let selected_db = s:dbui_instance.dbs_list[selection - 1]
+      let b:dbui_db_key_name = selected_db.key_name
+      call db_ui#utils#echo_msg('Assigned buffer to db '.selected_db.name)
+    endif
+
+    if index(s:dbui_instance.dbs[b:dbui_db_key_name].buffers.list, bufname('%')) ==? -1
+      call add(s:dbui_instance.dbs[b:dbui_db_key_name].buffers.list, bufname('%'))
+    endif
+  endif
+
   if !exists('b:dbui_db_key_name')
     return db_ui#utils#echo_err('Unable to find in DBUI. Not a valid dbui query buffer.')
   endif
 
+  call s:dbui_instance.drawer.get_query().setup_buffer()
   let db = b:dbui_db_key_name
   let bufname = bufname('%')
   let s:dbui_instance.dbs[db].expanded = 1

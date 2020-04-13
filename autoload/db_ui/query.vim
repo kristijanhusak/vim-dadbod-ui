@@ -27,7 +27,7 @@ function! s:query.open(item, edit_action) abort
   endif
 
   let buffer_name = printf('%s.%s', tempname(), self.generate_buffer_basename(db.name, suffix))
-  call self.open_buffer(db, buffer_name, a:edit_action, table, get(a:item, 'content'))
+  call self.open_buffer(db, buffer_name, a:edit_action, {'table': table, 'content': get(a:item, 'content'), 'is_tmp': 1 })
   nnoremap <buffer><silent><Plug>(DBUI_SaveQuery) :call <sid>method('save_query')<CR>
 endfunction
 
@@ -81,8 +81,9 @@ function! s:query.focus_window() abort
 endfunction
 
 function s:query.open_buffer(db, buffer_name, edit_action, ...)
-  let table = get(a:, 1, '')
-  let default_content = get(a:, 2, g:dbui_default_query)
+  let opts = get(a:, '1', {})
+  let table = get(opts, 'table', '')
+  let default_content = get(opts, 'content', g:dbui_default_query)
   let was_single_win = winnr('$') ==? 1
   if a:edit_action ==? 'edit'
     call self.focus_window()
@@ -90,8 +91,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
     if bufnr > -1
       call self.focus_window()
       silent! exe 'b '.bufnr
-      setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
-      nnoremap <buffer><silent><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
+      call self.setup_buffer()
       call self.resize_if_single(was_single_win)
       return
     endif
@@ -100,6 +100,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   silent! exe a:edit_action.' '.a:buffer_name
   call self.resize_if_single(was_single_win)
   let b:dbui_db_key_name = a:db.key_name
+  let b:dbui_is_tmp = get(opts, 'is_tmp', 0)
   let db_buffers = self.drawer.dbui.dbs[a:db.key_name].buffers
 
   if index(db_buffers.list, a:buffer_name) ==? -1
@@ -109,13 +110,8 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
     call add(db_buffers.list, a:buffer_name)
     call self.drawer.render()
   endif
-  setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
-  nnoremap <buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
-  augroup db_ui_query
-    autocmd! * <buffer>
-    autocmd BufWritePost <buffer> nested call s:method('execute_query')
-    autocmd BufDelete,BufWipeout <buffer> silent! call s:method('remove_buffer', str2nr(expand('<abuf>')))
-  augroup END
+
+  call self.setup_buffer()
 
   if empty(table)
     return
@@ -130,6 +126,16 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   if g:dbui_auto_execute_table_helpers
     write
   endif
+endfunction
+
+function! s:query.setup_buffer() abort
+  setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
+  nnoremap <buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
+  augroup db_ui_query
+    autocmd! * <buffer>
+    autocmd BufWritePost <buffer> nested call s:method('execute_query')
+    autocmd BufDelete,BufWipeout <buffer> silent! call s:method('remove_buffer', str2nr(expand('<abuf>')))
+  augroup END
 endfunction
 
 function! s:method(name, ...) abort
