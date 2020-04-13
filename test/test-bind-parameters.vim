@@ -34,10 +34,10 @@ function! s:suite.should_prompt_to_set_bind_parameters() abort
   endfunction
   write
   call s:expect(g:db_ui_cast_not_considered_bind_param).to_equal(1)
-  call s:expect(get(b:, 'db_ui_bind_params')).to_be_dict()
-  call s:expect(b:db_ui_bind_params[':contactId']).to_equal(1)
-  call s:expect(b:db_ui_bind_params[':firstName']).to_equal('John')
-  call s:expect(b:db_ui_bind_params[':shouldSkip']).to_equal('')
+  call s:expect(get(b:, 'dbui_bind_params')).to_be_dict()
+  call s:expect(b:dbui_bind_params[':contactId']).to_equal(1)
+  call s:expect(b:dbui_bind_params[':firstName']).to_equal('John')
+  call s:expect(b:dbui_bind_params[':shouldSkip']).to_equal('')
 endfunction
 
 function! s:suite.should_prompt_to_edit_bind_parameters() abort
@@ -46,7 +46,7 @@ function! s:suite.should_prompt_to_edit_bind_parameters() abort
     return g:dbui_test_option
   endfunction
 
-  let g:dbui_bind_param_keys = keys(b:db_ui_bind_params)
+  let g:dbui_bind_param_keys = keys(b:dbui_bind_params)
   let g:dbui_new_bind_params = {
         \ ':contactId': '2',
         \ ':shouldSkip': '',
@@ -61,7 +61,7 @@ function! s:suite.should_prompt_to_edit_bind_parameters() abort
   norm ,E
   let g:dbui_test_option = 3
   norm ,E
-  call s:expect(b:db_ui_bind_params[':contactId']).to_equal(2)
-  call s:expect(b:db_ui_bind_params[':firstName']).to_equal('Peter')
-  call s:expect(b:db_ui_bind_params[':shouldSkip']).to_equal('')
+  call s:expect(b:dbui_bind_params[':contactId']).to_equal(2)
+  call s:expect(b:dbui_bind_params[':firstName']).to_equal('Peter')
+  call s:expect(b:dbui_bind_params[':shouldSkip']).to_equal('')
 endfunction

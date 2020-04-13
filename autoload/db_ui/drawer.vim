@@ -37,6 +37,7 @@ function! s:drawer.open() abort
   nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call <sid>method('render', 1)<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_AddConnection) :call <sid>method('add_connection')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_ToggleDetails) :call <sid>method('toggle_details')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_RenameBuffer) :call <sid>method('rename_buffer')<CR>
   nnoremap <silent><buffer> ? :call <sid>method('toggle_help')<CR>
   augroup db_ui
     autocmd! * <buffer>
@@ -51,6 +52,57 @@ function! s:method(method_name, ...) abort
   endif
 
   return s:drawer_instance[a:method_name]()
+endfunction
+
+function s:drawer.get_current_item() abort
+  return self.content[line('.') - 1]
+endfunction
+
+function! s:drawer.rename_buffer() abort
+  let item = self.get_current_item()
+  if item.type !=? 'buffer' || !getbufvar(item.file_path, 'dbui_is_tmp')
+    return
+  endif
+
+  let buffer = item.file_path
+
+  if !filereadable(buffer)
+    return db_ui#utils#echo_err('Only written queries can be renamed.')
+  endif
+
+  let bufnr = bufnr(buffer)
+  let bufwin = bufwinnr(bufnr)
+  let db = self.dbui.dbs[getbufvar(buffer, 'dbui_db_key_name')]
+  let db_slug = db_ui#utils#slug(db.name)
+  let old_name = substitute(fnamemodify(buffer, ':e'), '^'.db_slug.'-', '', '')
+  let new_name = db_ui#utils#input('Enter new name: ', old_name)
+
+  if empty(new_name)
+    return db_ui#utils#echo_err('Valid name must be provided.')
+  endif
+
+  let new = printf('%s.%s', fnamemodify(buffer, ':r'), db_slug.'-'.new_name)
+  call rename(buffer, new)
+
+  let new_bufnr = -1
+  if bufwin > -1
+    call self.get_query().open_buffer(db, new, 'edit', { 'is_tmp': 1 })
+    let new_bufnr = bufnr('%')
+  else
+    let new_bufnr = bufadd(new)
+    call add(db.buffers.list, new)
+  endif
+
+  call setbufvar(new_bufnr, 'dbui_is_tmp', 1)
+  call setbufvar(new_bufnr, 'dbui_db_key_name', db.key_name)
+  call setbufvar(new_bufnr, 'dbui_db_table_name', getbufvar(buffer, 'dbui_db_table_name'))
+  call setbufvar(new_bufnr, 'dbui_bind_params', getbufvar(buffer, 'dbui_bind_params'))
+
+  exe 'bw! '.buffer
+  if bufwin > -1
+    wincmd p
+  endif
+  return self.render()
 endfunction
 
 function! s:drawer.add_connection() abort
@@ -204,7 +256,7 @@ function! s:drawer.add_db(db) abort
 endfunction
 
 function! s:drawer.toggle_line(edit_action) abort
-  let item = self.content[line('.') - 1]
+  let item = self.get_current_item()
   if item.action ==? 'noaction'
     return
   endif
@@ -241,7 +293,7 @@ function! s:drawer.get_query() abort
 endfunction
 
 function! s:drawer.delete_line() abort
-  let item = self.content[line('.') - 1]
+  let item = self.get_current_item()
 
   if item.action ==? 'noaction'
     return

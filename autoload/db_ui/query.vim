@@ -92,6 +92,8 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
       call self.focus_window()
       silent! exe 'b '.bufnr
       call self.setup_buffer()
+      setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
+      nnoremap <buffer><silent><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
       call self.resize_if_single(was_single_win)
       return
     endif
@@ -112,7 +114,6 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   endif
 
   call self.setup_buffer()
-
   if empty(table)
     return
   endif
@@ -180,25 +181,25 @@ function! s:query.inject_variables_and_execute(db) abort
     call substitute(line, '[^:]\(:\w\+\)', '\=add(vars, submatch(1))', 'g')
   endfor
 
-  if !exists('b:db_ui_bind_params')
-    let b:db_ui_bind_params = {}
+  if !exists('b:dbui_bind_params')
+    let b:dbui_bind_params = {}
   endif
 
-  let existing_vars = keys(b:db_ui_bind_params)
+  let existing_vars = keys(b:dbui_bind_params)
   let needs_prompt = !empty(filter(copy(vars), 'index(existing_vars, v:val) <= -1'))
   if needs_prompt
     echo "Please provide bind parameters. Empty values are ignored and considered a raw value.\n\n"
   endif
 
   for var in vars
-    if !has_key(b:db_ui_bind_params, var)
-      let b:db_ui_bind_params[var] = db_ui#utils#input('Enter value for bind parameter '.var.' -> ', '')
+    if !has_key(b:dbui_bind_params, var)
+      let b:dbui_bind_params[var] = db_ui#utils#input('Enter value for bind parameter '.var.' -> ', '')
     endif
   endfor
 
   let content = join(getline(1, '$'))
 
-  for [var, val] in items(b:db_ui_bind_params)
+  for [var, val] in items(b:dbui_bind_params)
     if trim(val) ==? ''
       continue
     endif
@@ -215,12 +216,12 @@ function! s:query.inject_variables_and_execute(db) abort
 endfunction
 
 function! s:query.edit_bind_parameters() abort
-  if !exists('b:db_ui_bind_params') || empty(b:db_ui_bind_params)
+  if !exists('b:dbui_bind_params') || empty(b:dbui_bind_params)
     return db_ui#utils#echo_msg('No bind parameters to edit.')
   endif
 
-  let variable_names = keys(b:db_ui_bind_params)
-  let opts = ['Select bind parameter to edit/delete:'] + map(copy(variable_names), '(v:key + 1).") ".v:val." (".(trim(b:db_ui_bind_params[v:val]) ==? "" ? "Not provided" : b:db_ui_bind_params[v:val]).")"')
+  let variable_names = keys(b:dbui_bind_params)
+  let opts = ['Select bind parameter to edit/delete:'] + map(copy(variable_names), '(v:key + 1).") ".v:val." (".(trim(b:dbui_bind_params[v:val]) ==? "" ? "Not provided" : b:dbui_bind_params[v:val]).")"')
   let selection = db_ui#utils#inputlist(opts)
 
   if selection < 1 || selection > len(variable_names)
@@ -228,17 +229,17 @@ function! s:query.edit_bind_parameters() abort
   endif
 
   let var_name = variable_names[selection - 1]
-  let variable = b:db_ui_bind_params[var_name]
+  let variable = b:dbui_bind_params[var_name]
   redraw!
   let action = confirm('Select action for '.var_name.'? ', "&Edit\n&Delete\n&Cancel")
   if action ==? 1
     redraw!
-    let b:db_ui_bind_params[var_name] = db_ui#utils#input('Enter new value: ', variable)
+    let b:dbui_bind_params[var_name] = db_ui#utils#input('Enter new value: ', variable)
     return db_ui#utils#echo_msg('Changed.')
   endif
 
   if action ==? 2
-    unlet b:db_ui_bind_params[var_name]
+    unlet b:dbui_bind_params[var_name]
     return db_ui#utils#echo_msg('Deleted.')
   endif
 
