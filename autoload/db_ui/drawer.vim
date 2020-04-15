@@ -34,10 +34,10 @@ function! s:drawer.open() abort
   nnoremap <silent><buffer> <Plug>(DBUI_DeleteLine) :call <sid>method('delete_line')<CR>
   let query_win_pos = g:dbui_win_position ==? 'left' ? 'botright' : 'topleft'
   silent! exe "nnoremap <silent><buffer> <Plug>(DBUI_SelectLineVsplit) :call <sid>method('toggle_line', 'vertical ".query_win_pos." split')<CR>"
-  nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call <sid>method('render', 1)<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call <sid>method('render', { 'dbs': 1, 'queries': 1 })<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_AddConnection) :call <sid>method('add_connection')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_ToggleDetails) :call <sid>method('toggle_details')<CR>
-  nnoremap <silent><buffer> <Plug>(DBUI_RenameBuffer) :call <sid>method('rename_buffer')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_RenameLine) :call <sid>method('rename_line')<CR>
   nnoremap <silent><buffer> ? :call <sid>method('toggle_help')<CR>
   augroup db_ui
     autocmd! * <buffer>
@@ -58,51 +58,76 @@ function s:drawer.get_current_item() abort
   return self.content[line('.') - 1]
 endfunction
 
-function! s:drawer.rename_buffer() abort
-  let item = self.get_current_item()
-  if item.type !=? 'buffer' || !getbufvar(item.file_path, 'dbui_is_tmp')
-    return
-  endif
-
-  let buffer = item.file_path
+function! s:drawer.rename_buffer(bufnr, db_key_name, is_saved_query) abort
+  let buffer = bufname(a:bufnr)
+  let current_win = winnr()
+  let current_ft = &filetype
 
   if !filereadable(buffer)
     return db_ui#utils#echo_err('Only written queries can be renamed.')
   endif
 
-  let bufnr = bufnr(buffer)
-  let bufwin = bufwinnr(bufnr)
-  let db = self.dbui.dbs[getbufvar(buffer, 'dbui_db_key_name')]
+  if empty(a:db_key_name)
+    return db_ui#utils#echo_err('Buffer not attached to any database')
+  endif
+
+  let is_saved = a:is_saved_query || (a:bufnr > -1 && getbufvar(a:bufnr, 'dbui_is_tmp') ==? 0)
+  let bufwin = bufwinnr(a:bufnr)
+  let db = self.dbui.dbs[a:db_key_name]
   let db_slug = db_ui#utils#slug(db.name)
-  let old_name = substitute(fnamemodify(buffer, ':e'), '^'.db_slug.'-', '', '')
+
+  if is_saved
+    let old_name = fnamemodify(buffer, ':t')
+  else
+    let old_name = substitute(fnamemodify(buffer, ':e'), '^'.db_slug.'-', '', '')
+  endif
+
   let new_name = db_ui#utils#input('Enter new name: ', old_name)
 
   if empty(new_name)
     return db_ui#utils#echo_err('Valid name must be provided.')
   endif
 
-  let new = printf('%s.%s', fnamemodify(buffer, ':r'), db_slug.'-'.new_name)
-  call rename(buffer, new)
-
-  let new_bufnr = -1
-  if bufwin > -1
-    call self.get_query().open_buffer(db, new, 'edit', { 'is_tmp': 1 })
-    let new_bufnr = bufnr('%')
+  if is_saved
+    let new = printf('%s/%s', fnamemodify(buffer, ':p:h'), new_name)
   else
-    let new_bufnr = bufadd(new)
+    let new = printf('%s.%s', fnamemodify(buffer, ':r'), db_slug.'-'.new_name)
+  endif
+
+  call rename(buffer, new)
+  let new_bufnr = -1
+
+  if bufwin > -1
+    call self.get_query().open_buffer(db, new, 'edit', { 'is_tmp': !is_saved })
+    let new_bufnr = bufnr('%')
+  elseif a:bufnr > -1
+    exe 'badd '.new
+    let new_bufnr = bufnr(new)
     call add(db.buffers.list, new)
   endif
 
-  call setbufvar(new_bufnr, 'dbui_is_tmp', 1)
-  call setbufvar(new_bufnr, 'dbui_db_key_name', db.key_name)
-  call setbufvar(new_bufnr, 'dbui_db_table_name', getbufvar(buffer, 'dbui_db_table_name'))
-  call setbufvar(new_bufnr, 'dbui_bind_params', getbufvar(buffer, 'dbui_bind_params'))
+  if new_bufnr > - 1
+    call setbufvar(new_bufnr, 'dbui_is_tmp', !is_saved)
+    call setbufvar(new_bufnr, 'dbui_db_key_name', db.key_name)
+    call setbufvar(new_bufnr, 'dbui_db_table_name', getbufvar(buffer, 'dbui_db_table_name'))
+    call setbufvar(new_bufnr, 'dbui_bind_params', getbufvar(buffer, 'dbui_bind_params'))
+  endif
 
-  exe 'bw! '.buffer
-  if bufwin > -1
+  silent! exe 'bw! '.buffer
+  if winnr() !=? current_win
     wincmd p
   endif
-  return self.render()
+
+  return self.render({ 'queries': 1 })
+endfunction
+
+function! s:drawer.rename_line() abort
+  let item = self.get_current_item()
+  if item.type !=? 'buffer'
+    return
+  endif
+
+  return self.rename_buffer(bufnr(item.file_path), item.dbui_db_key_name, get(item, 'saved', 0))
 endfunction
 
 function! s:drawer.add_connection() abort
@@ -132,6 +157,7 @@ function! s:drawer.toggle_details() abort
 endfunction
 
 function! s:drawer.render(...) abort
+  let opts = get(a:, 1, {})
   let restore_win = 0
   if &filetype !=? 'dbui'
     let winnr = bufwinnr('dbui')
@@ -145,9 +171,7 @@ function! s:drawer.render(...) abort
     return
   endif
 
-  let redraw = a:0 > 0
-
-  if redraw
+  if get(opts, 'dbs', 0)
     let query_time = reltime()
     call db_ui#utils#echo_msg('Refreshing all databases...')
     call self.dbui.populate_dbs()
@@ -160,6 +184,9 @@ function! s:drawer.render(...) abort
   call self.render_help()
 
   for db in self.dbui.dbs_list
+    if get(opts, 'queries', 0)
+      call self.load_saved_queries(self.dbui.dbs[db.key_name])
+    endif
     call self.add_db(self.dbui.dbs[db.key_name])
   endfor
 
@@ -194,6 +221,7 @@ function! s:drawer.render_help() abort
     call self.add('" R - Redraw', 'noaction', 'help', '', '', 0)
     call self.add('" A - Add connection', 'noaction', 'help', '', '', 0)
     call self.add('" H - Toggle database details', 'noaction', 'help', '', '', 0)
+    call self.add('" r - Rename buffer/saved query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>W - Save currently opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>E - Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
     call self.add('', 'noaction', 'help', '', '', 0)

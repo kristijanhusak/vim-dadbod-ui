@@ -63,6 +63,14 @@ function! db_ui#find_buffer() abort
   call cursor(row, 0)
 endfunction
 
+function! db_ui#rename_buffer() abort
+  if empty(s:dbui_instance)
+    let s:dbui_instance = s:dbui.new()
+  endif
+
+  return s:dbui_instance.drawer.rename_buffer(bufnr('%'), get(b:, 'dbui_db_key_name'), 0)
+endfunction
+
 function! db_ui#get_conn_info(db_key_name) abort
   if empty(s:dbui_instance)
     return {}

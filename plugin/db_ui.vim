@@ -46,9 +46,10 @@ augroup dbui
   autocmd FileType dbui call s:set_mapping('d', '<Plug>(DBUI_DeleteLine)')
   autocmd FileType dbui call s:set_mapping('A', '<Plug>(DBUI_AddConnection)')
   autocmd FileType dbui call s:set_mapping('H', '<Plug>(DBUI_ToggleDetails)')
-  autocmd FileType dbui call s:set_mapping('r', '<Plug>(DBUI_RenameBuffer)')
+  autocmd FileType dbui call s:set_mapping('r', '<Plug>(DBUI_RenameLine)')
 augroup END
 
 command! DBUI call db_ui#open()
 command! DBUIAddConnection call db_ui#connections#add()
 command! DBUIFindBuffer call db_ui#find_buffer()
+command! DBUIRenameBuffer call db_ui#rename_buffer()

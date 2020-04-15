@@ -101,7 +101,7 @@ endfunction
 function! s:connections.write(file) abort
   call writefile([json_encode(a:file)], self.get_file())
   if !empty(self.drawer)
-    call self.drawer.render(1)
+    call self.drawer.render({ 'dbs': 1 })
   endif
   return 1
 endfunction
