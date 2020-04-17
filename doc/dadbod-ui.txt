@@ -1,4 +1,4 @@
-*vim-dadbod-ui*
+*dadbod-ui.txt*
 
         Simple UI for https://github.com/tpope/vim-dadbod
 
