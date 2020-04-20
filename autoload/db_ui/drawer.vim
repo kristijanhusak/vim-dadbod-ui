@@ -373,7 +373,9 @@ function! s:drawer.toggle_db(db) abort
     let a:db.conn = db#connect(a:db.url)
     let a:db.conn_error = ''
     call self.populate_tables(a:db)
-    call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected after '.split(reltimestr(reltime(query_time)))[0].' sec.')
+    if v:shell_error ==? 0
+      call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected after '.split(reltimestr(reltime(query_time)))[0].' sec.')
+    endif
   catch /.*/
     let a:db.conn_error = v:exception
     return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
@@ -392,7 +394,12 @@ function! s:drawer.populate_tables(db) abort
     return a:db
   endif
 
-  let a:db.tables.list = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
+  let tables = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
+  if v:shell_error !=? 0
+    return db_ui#utils#echo_err(printf('Error loading tables. Reason: %s', get(tables, 0, 'Unknown')), 1)
+  endif
+
+  let a:db.tables.list = tables
   " Fix issue with sqlite tables listing as single string with spaces
   if a:db.scheme =~? '^sqlite' && len(a:db.tables.list) ==? 1
     let a:db.tables.list = map(split(copy(a:db.tables.list[0])), 'trim(v:val)')
