@@ -89,29 +89,15 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
     call self.focus_window()
     let bufnr = bufnr(a:buffer_name)
     if bufnr > -1
-      call self.focus_window()
       silent! exe 'b '.bufnr
-      call self.setup_buffer()
-      call self.resize_if_single(was_single_win)
+      call self.setup_buffer(a:db, opts, a:buffer_name, was_single_win)
       return
     endif
   endif
 
   silent! exe a:edit_action.' '.a:buffer_name
-  call self.resize_if_single(was_single_win)
-  let b:dbui_db_key_name = a:db.key_name
-  let b:dbui_is_tmp = get(opts, 'is_tmp', 0)
-  let db_buffers = self.drawer.dbui.dbs[a:db.key_name].buffers
+  call self.setup_buffer(a:db, opts, a:buffer_name, was_single_win)
 
-  if index(db_buffers.list, a:buffer_name) ==? -1
-    if empty(db_buffers.list)
-      let db_buffers.expanded = 1
-    endif
-    call add(db_buffers.list, a:buffer_name)
-    call self.drawer.render()
-  endif
-
-  call self.setup_buffer()
   if empty(table)
     return
   endif
@@ -127,10 +113,23 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   endif
 endfunction
 
-function! s:query.setup_buffer() abort
+function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
+  call self.resize_if_single(a:was_single_win)
+  let b:dbui_db_key_name = a:db.key_name
+  let b:dbui_is_tmp = get(a:opts, 'is_tmp', 0)
+  let db_buffers = self.drawer.dbui.dbs[a:db.key_name].buffers
+
+  if index(db_buffers.list, a:buffer_name) ==? -1
+    if empty(db_buffers.list)
+      let db_buffers.expanded = 1
+    endif
+    call add(db_buffers.list, a:buffer_name)
+    call self.drawer.render()
+  endif
+
   setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
   nnoremap <buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
-  if get(b:, 'dbui_is_tmp', 0)
+  if b:dbui_is_tmp
     nnoremap <buffer><silent><Plug>(DBUI_SaveQuery) :call <sid>method('save_query')<CR>
   endif
   augroup db_ui_query

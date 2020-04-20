@@ -37,19 +37,17 @@ function! db_ui#find_buffer() abort
       let b:dbui_db_key_name = selected_db.key_name
       call db_ui#utils#echo_msg('Assigned buffer to db '.selected_db.name)
     endif
-
-    if index(s:dbui_instance.dbs[b:dbui_db_key_name].buffers.list, bufname('%')) ==? -1
-      call add(s:dbui_instance.dbs[b:dbui_db_key_name].buffers.list, bufname('%'))
-    endif
   endif
 
   if !exists('b:dbui_db_key_name')
     return db_ui#utils#echo_err('Unable to find in DBUI. Not a valid dbui query buffer.')
   endif
 
-  call s:dbui_instance.drawer.get_query().setup_buffer()
   let db = b:dbui_db_key_name
   let bufname = bufname('%')
+
+  let is_tmp = get(b: ,'dbui_is_tmp', 0)
+  call s:dbui_instance.drawer.get_query().setup_buffer(s:dbui_instance.dbs[db], { 'is_tmp': is_tmp }, bufname, 0)
   let s:dbui_instance.dbs[db].expanded = 1
   let s:dbui_instance.dbs[db].buffers.expanded = 1
   call s:dbui_instance.open()
