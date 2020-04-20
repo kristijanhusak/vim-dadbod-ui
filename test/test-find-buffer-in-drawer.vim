@@ -43,6 +43,7 @@ function! s:suite.should_find_non_dbui_buffer_in_dbui_drawer() abort
   wincmd p
   call s:expect(&filetype).to_equal('sql')
   call s:expect(b:dbui_db_key_name).to_equal('dadbod_ui_test_g:dbs')
+  call s:expect(b:db).to_equal(g:dbs[0].url)
   write
   call s:expect(bufname('.dbout')).not.to_be_empty()
   call s:expect(getwinvar(bufwinnr('.dbout'), '&previewwindow')).to_equal(1)

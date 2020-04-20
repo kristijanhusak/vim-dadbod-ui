@@ -26,6 +26,7 @@ function! db_ui#find_buffer() abort
     if len(s:dbui_instance.dbs_list) ==? 1
       let db = values(s:dbui_instance.dbs)[0]
       let b:dbui_db_key_name = db.key_name
+      let b:db = db.url
       call db_ui#utils#echo_msg('Assigned buffer to db '.db.name)
     else
       let options = map(copy(s:dbui_instance.dbs_list), '(v:key + 1).") ".v:val.name')
@@ -35,6 +36,7 @@ function! db_ui#find_buffer() abort
       endif
       let selected_db = s:dbui_instance.dbs_list[selection - 1]
       let b:dbui_db_key_name = selected_db.key_name
+      let b:db = selected_db.url
       call db_ui#utils#echo_msg('Assigned buffer to db '.selected_db.name)
     endif
   endif
