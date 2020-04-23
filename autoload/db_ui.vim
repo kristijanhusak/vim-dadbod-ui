@@ -226,7 +226,7 @@ function! s:dbui.populate_from_connections_file() abort
     return self
   endif
 
-  let file = json_decode(join(readfile(config_path), "\n"))
+  let file = db_ui#utils#readfile(config_path)
 
   for conn in file
     call self.add_if_not_exists(conn.name, conn.url, 'file')

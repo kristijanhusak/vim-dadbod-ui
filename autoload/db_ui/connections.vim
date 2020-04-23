@@ -95,7 +95,7 @@ function s:connections.save(name, url) abort
 endfunction
 
 function! s:connections.read() abort
-  return json_decode(join(readfile(self.get_file()), "\n"))
+  return db_ui#utils#readfile(self.get_file())
 endfunction
 
 function! s:connections.write(file) abort

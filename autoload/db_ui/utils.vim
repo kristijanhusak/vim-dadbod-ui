@@ -36,3 +36,17 @@ endfunction
 function! db_ui#utils#inputlist(list) abort
   return inputlist(a:list)
 endfunction
+
+function! db_ui#utils#readfile(file) abort
+  try
+    let content = readfile(a:file)
+    let content = json_decode(join(content, "\n"))
+    if type(content) !=? type([])
+      throw 'Connections file not a valid array'
+    endif
+    return content
+  catch /.*/
+    call db_ui#utils#echo_warning(printf("Error reading connections file.\nValidate that content of file %s is valid json array.\nIf it's empty, feel free to delete it.", a:file))
+    return []
+  endtry
+endfunction
