@@ -153,7 +153,7 @@ let g:db_ui_icons = {
     \ 'saved_query': '*',
     \ 'new_query': '+',
     \ 'tables': '~',
-    \ 'buffers': '»'
+    \ 'buffers': '»',
     \ 'connection_ok': '✓',
     \ 'connection_error': '✕',
     \ }
