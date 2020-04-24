@@ -38,6 +38,7 @@ function! s:drawer.open() abort
   nnoremap <silent><buffer> <Plug>(DBUI_AddConnection) :call <sid>method('add_connection')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_ToggleDetails) :call <sid>method('toggle_details')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_RenameLine) :call <sid>method('rename_line')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_Closebuffer) :call <sid>method('close_buffer')<CR>
   nnoremap <silent><buffer> ? :call <sid>method('toggle_help')<CR>
   augroup db_ui
     autocmd! * <buffer>
@@ -129,6 +130,10 @@ function! s:drawer.rename_line() abort
   endif
 
   return self.rename_buffer(bufnr(item.file_path), item.dbui_db_key_name, get(item, 'saved', 0))
+endfunction
+
+function! s:drawer.close_buffer() abort
+  exec ":bd"
 endfunction
 
 function! s:drawer.add_connection() abort
@@ -226,6 +231,7 @@ function! s:drawer.render_help() abort
     call self.add('" <Leader>W - Save currently opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>E - Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
     call self.add('', 'noaction', 'help', '', '', 0)
+    call self.add('" q - Quiet', 'noaction', 'help', '', '', 0)
   endif
 endfunction
 
