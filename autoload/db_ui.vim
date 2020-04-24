@@ -13,6 +13,16 @@ function! db_ui#open() abort
   endif
 endfunction
 
+function! db_ui#toggle() abort
+  let dbui_winnr = bufwinnr('dbui')
+  let dbui_bufnr = bufnr('dbui')
+  if dbui_winnr > 0
+    silent exec "bd" . dbui_bufnr
+  else
+    call db_ui#open()
+  endif
+endfunction
+
 function! db_ui#find_buffer() abort
   if empty(s:dbui_instance)
     let s:dbui_instance = s:dbui.new()

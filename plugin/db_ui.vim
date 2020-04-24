@@ -51,6 +51,7 @@ augroup dbui
 augroup END
 
 command! DBUI call db_ui#open()
+command! DBUIToggle call db_ui#toggle()
 command! DBUIAddConnection call db_ui#connections#add()
 command! DBUIFindBuffer call db_ui#find_buffer()
 command! DBUIRenameBuffer call db_ui#rename_buffer()

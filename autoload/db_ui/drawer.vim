@@ -133,7 +133,7 @@ function! s:drawer.rename_line() abort
 endfunction
 
 function! s:drawer.close_buffer() abort
-  exec ":bd"
+  silent exec ":bd"
 endfunction
 
 function! s:drawer.add_connection() abort
@@ -228,10 +228,10 @@ function! s:drawer.render_help() abort
     call self.add('" A - Add connection', 'noaction', 'help', '', '', 0)
     call self.add('" H - Toggle database details', 'noaction', 'help', '', '', 0)
     call self.add('" r - Rename buffer/saved query', 'noaction', 'help', '', '', 0)
+    call self.add('" q - Quiet', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>W - Save currently opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>E - Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
     call self.add('', 'noaction', 'help', '', '', 0)
-    call self.add('" q - Quiet', 'noaction', 'help', '', '', 0)
   endif
 endfunction
 
