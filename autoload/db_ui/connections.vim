@@ -80,6 +80,12 @@ endfunction
 
 function s:connections.save(name, url) abort
   let file = self.get_file()
+  let dir = fnamemodify(file, ':p:h')
+  
+  if !isdirectory(dir)
+    call mkdir(dir, 'p')
+  endif
+  
   if !filereadable(file)
     call writefile(['[]'], file)
   endif
