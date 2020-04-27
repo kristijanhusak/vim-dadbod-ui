@@ -12,7 +12,7 @@ function! s:suite.after() abort
 endfunction
 
 function! s:suite.should_show_help_text() abort
-  DBUI
+  :DBUI
   call s:expect(getline(1)).to_equal('" Press ? for help')
   call s:expect(getline(2)).to_be_empty()
   call s:expect(getline(3)).to_equal('▸ dadbod_ui_test')
@@ -26,7 +26,8 @@ function! s:suite.should_show_help_text() abort
   call s:expect(getline(7)).to_equal('" A - Add connection')
   call s:expect(getline(8)).to_equal('" H - Toggle database details')
   call s:expect(getline(9)).to_equal('" r - Rename buffer/saved query')
-  call s:expect(getline(10)).to_equal('" <Leader>W - Save currently opened query')
+  call s:expect(getline(10)).to_equal('" q - Close drawer')
+  call s:expect(getline(11)).to_equal('" <Leader>W - Save currently opened query')
   normal ?
   call s:expect(getline(1)).to_equal('" Press ? for help')
   call s:expect(getline(2)).to_be_empty()

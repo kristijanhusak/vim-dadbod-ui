@@ -63,6 +63,13 @@ DBUI
 
 		`:DBUI`
 
+					      *DBUIToggle*
+DBUIToggle
+		Toggle the drawer. When closed, same as calling `DBUI`. When
+		opened, same as doing `q` in drawer.
+
+		`:DBUIToggle`
+
 					      *DBUIAddConnection*
 DBUIAddConnection
 		Open a prompt to enter new connection, by providing database
@@ -244,6 +251,12 @@ the connection you want to delete.
 		This mapping is used to show help in the DBUI drawer, that
 		contains mappings that are available. To hide
 		`Press ? for help`, see |g:db_ui_show_help|
+
+					      *<Plug>(DBUI_Quit)*
+
+<Plug>(DBUI_Quit)
+		Mapping for closing the drawer.
+		By default, mapped to `q`.
 
 ==============================================================================
 6. Table helpers				*vim-dadbod-ui-table-helpers*

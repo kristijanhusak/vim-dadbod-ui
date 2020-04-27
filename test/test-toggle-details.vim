@@ -10,7 +10,7 @@ function! s:suite.after() abort
 endfunction
 
 function! s:suite.should_show_details() abort
-  DBUI
+  :DBUI
   call s:expect(&filetype).to_equal('dbui')
   call s:expect(getline(1, '$')).to_equal([
         \ '▸ dadbod_ui_test',

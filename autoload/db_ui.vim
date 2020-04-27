@@ -2,15 +2,19 @@ let s:dbui_instance = {}
 let s:dbui = {}
 
 function! db_ui#open() abort
-  if !empty(s:dbui_instance)
-    return s:dbui_instance.open()
+  if empty(s:dbui_instance)
+    let s:dbui_instance = s:dbui.new()
   endif
 
-  let s:dbui_instance = s:dbui.new()
+  return s:dbui_instance.drawer.open()
+endfunction
 
-  if !empty(s:dbui_instance)
-    return s:dbui_instance.open()
+function! db_ui#toggle() abort
+  if empty(s:dbui_instance)
+    let s:dbui_instance = s:dbui.new()
   endif
+
+  return s:dbui_instance.drawer.toggle()
 endfunction
 
 function! db_ui#find_buffer() abort
@@ -52,7 +56,7 @@ function! db_ui#find_buffer() abort
   call s:dbui_instance.drawer.get_query().setup_buffer(s:dbui_instance.dbs[db], { 'is_tmp': is_tmp }, bufname, 0)
   let s:dbui_instance.dbs[db].expanded = 1
   let s:dbui_instance.dbs[db].buffers.expanded = 1
-  call s:dbui_instance.open()
+  call s:dbui_instance.drawer.open()
   let row = 1
   for line in s:dbui_instance.drawer.content
     if line.dbui_db_key_name ==? db && line.type ==? 'buffer' && line.file_path ==? bufname
@@ -101,12 +105,6 @@ function! s:dbui.new() abort
   call instance.populate_dbs()
   let instance.drawer = db_ui#drawer#new(instance)
   return instance
-endfunction
-
-function! s:dbui.open() abort
-  if !empty(self.drawer)
-    return self.drawer.open()
-  endif
 endfunction
 
 function! s:dbui.populate_dbs() abort

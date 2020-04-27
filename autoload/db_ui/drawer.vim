@@ -19,9 +19,8 @@ function! s:drawer.new(dbui) abort
 endfunction
 
 function! s:drawer.open() abort
-  let dbui_winnr = bufwinnr('dbui')
-  if dbui_winnr > -1
-    silent! exe dbui_winnr.'wincmd w'
+  if self.is_opened()
+    silent! exe bufwinnr('dbui').'wincmd w'
     return
   endif
   let win_pos = g:dbui_win_position ==? 'left' ? 'topleft' : 'botright'
@@ -38,12 +37,30 @@ function! s:drawer.open() abort
   nnoremap <silent><buffer> <Plug>(DBUI_AddConnection) :call <sid>method('add_connection')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_ToggleDetails) :call <sid>method('toggle_details')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_RenameLine) :call <sid>method('rename_line')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_Quit) :call <sid>method('quit')<CR>
   nnoremap <silent><buffer> ? :call <sid>method('toggle_help')<CR>
   augroup db_ui
     autocmd! * <buffer>
     autocmd BufEnter <buffer> call s:method('render')
   augroup END
   silent! doautocmd User DBUIOpened
+endfunction
+
+function! s:drawer.is_opened() abort
+  return bufwinnr('dbui') > -1
+endfunction
+
+function! s:drawer.toggle() abort
+  if self.is_opened()
+    return self.quit()
+  endif
+  return self.open()
+endfunction
+
+function! s:drawer.quit() abort
+  if self.is_opened()
+    silent! exe 'bd'.bufnr('dbui')
+  endif
 endfunction
 
 function! s:method(method_name, ...) abort
@@ -223,6 +240,7 @@ function! s:drawer.render_help() abort
     call self.add('" A - Add connection', 'noaction', 'help', '', '', 0)
     call self.add('" H - Toggle database details', 'noaction', 'help', '', '', 0)
     call self.add('" r - Rename buffer/saved query', 'noaction', 'help', '', '', 0)
+    call self.add('" q - Close drawer', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>W - Save currently opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>E - Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
     call self.add('', 'noaction', 'help', '', '', 0)

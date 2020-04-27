@@ -37,7 +37,7 @@ function! s:suite.should_find_non_dbui_buffer_in_dbui_drawer() abort
   function! db_ui#utils#inputlist(list)
     return 1
   endfunction
-  DBUIFindBuffer
+  :DBUIFindBuffer
   call s:expect(&filetype).to_equal('dbui')
   call s:expect(getline(5)).to_equal('    '.g:dbui_icons.buffers.' '.self.filename)
   wincmd p

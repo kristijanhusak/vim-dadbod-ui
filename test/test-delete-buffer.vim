@@ -10,9 +10,9 @@ function! s:suite.after() abort
 endfunction
 
 function! s:suite.should_delete_buffer()
-  DBUI
+  :DBUI
   norm ojo
-  DBUI
+  :DBUI
   call s:expect(search('Buffers', 'w')).to_be_greater_than(0)
   call s:expect(search(g:dbui_icons.buffers.' query', 'w')).to_be_greater_than(0)
   norm d
