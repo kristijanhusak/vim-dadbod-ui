@@ -262,7 +262,7 @@ function! s:drawer.add_db(db) abort
   if self.show_details
     let db_name .= ' ('.a:db.scheme.' - '.a:db.source.')'
   endif
-  call self.add(db_name, 'toggle', 'db', self.get_icon(a:db), a:db.key_name, 0)
+  call self.add(db_name, 'toggle', 'db', self.get_database_icon(a:db), a:db.key_name, 0)
   if !a:db.expanded
     return a:db
   endif
@@ -430,6 +430,22 @@ function! s:drawer.populate_tables(db) abort
     endif
   endfor
   return a:db
+endfunction
+
+function! s:drawer.get_database_icon(item) abort
+  if g:dbui_show_database_icon
+    if a:item.expanded
+      return g:dbui_icons.expanded. ' '.g:dbui_icons.database
+    else
+      return g:dbui_icons.collapsed. ' '.g:dbui_icons.database
+    endif
+  else
+    if a:item.expanded
+      return g:dbui_icons.expanded
+    else
+      return g:dbui_icons.collapsed
+    endif
+  endif
 endfunction
 
 function! s:drawer.get_icon(item) abort
