@@ -267,7 +267,8 @@ function! s:drawer.add_db(db) abort
   if self.show_details
     let db_name .= ' ('.a:db.scheme.' - '.a:db.source.')'
   endif
-  call self.db_add(db_name, 'toggle', 'db', self.get_icon(a:db), self.get_database_icon(), a:db.key_name, 0)
+  let database_icon = ''.g:dbui_icons.database
+  call self.db_add(db_name, 'toggle', 'db', self.get_icon(a:db), database_icon, a:db.key_name, 0)
   if !a:db.expanded
     return a:db
   endif
