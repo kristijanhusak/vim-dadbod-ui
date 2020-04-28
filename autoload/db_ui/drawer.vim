@@ -262,12 +262,13 @@ function! s:drawer.add_db(db) abort
   if !empty(a:db.conn_error)
     let db_name .= ' '.g:dbui_icons.connection_error
   elseif !empty(a:db.conn)
-    let db_name .= ' '.g:dbui_icons.connection_ok
+    let db_name .= g:dbui_icons.database.' '.g:dbui_icons.connection_ok
   endif
   if self.show_details
     let db_name .= ' ('.a:db.scheme.' - '.a:db.source.')'
   endif
   let database_icon = ''.g:dbui_icons.database
+  echo database_icon
   call self.db_add(db_name, 'toggle', 'db', self.get_icon(a:db), database_icon, a:db.key_name, 0)
   if !a:db.expanded
     return a:db
