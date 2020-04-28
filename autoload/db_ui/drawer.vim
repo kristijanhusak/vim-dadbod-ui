@@ -369,8 +369,7 @@ function! s:drawer.delete_line() abort
     call delete(item.file_path)
     call remove(db.saved_queries.list, index(db.saved_queries.list, item.file_path))
     call db_ui#utils#echo_msg('Deleted.')
-  endif
-
+  en
   silent! exe 'bw!'.bufnr(item.file_path)
   call self.render()
 endfunction
@@ -440,7 +439,7 @@ function! s:drawer.get_database_icon(item) abort
       return g:dbui_icons.collapsed. ' '.g:dbui_icons.database
     endif
   else
-    call <sid>drawer.get_icon(a:item)
+    call s:drawer.get_icon(item)
   endif
 endfunction
 
