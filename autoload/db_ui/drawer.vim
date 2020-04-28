@@ -440,11 +440,7 @@ function! s:drawer.get_database_icon(item) abort
       return g:dbui_icons.collapsed. ' '.g:dbui_icons.database
     endif
   else
-    if a:item.expanded
-      return g:dbui_icons.expanded
-    else
-      return g:dbui_icons.collapsed
-    endif
+    call s:drawer.get_icon(a:item)
   endif
 endfunction
 
