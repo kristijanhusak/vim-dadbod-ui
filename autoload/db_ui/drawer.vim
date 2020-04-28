@@ -252,11 +252,6 @@ function! s:drawer.add(label, action, type, icon, dbui_db_key_name, level, ...)
   call add(self.content, opts)
 endfunction
 
-function! s:drawer.db_add(label, action, type, icon, db_icon,dbui_db_key_name, level, ...)
-  let opts = extend({'label': a:label, 'action': a:action, 'type': a:type, 'icon': a:icon, 'db_icon': a:db_icon, 'dbui_db_key_name': a:dbui_db_key_name, 'level': a:level }, get(a:, '1', {}))
-  call add(self.content, opts)
-endfunction
-
 function! s:drawer.add_db(db) abort
   let db_name = a:db.name
   if !empty(a:db.conn_error)
@@ -267,8 +262,7 @@ function! s:drawer.add_db(db) abort
   if self.show_details
     let db_name .= ' ('.a:db.scheme.' - '.a:db.source.')'
   endif
-  let database_icon = g:dbui_icons.database
-  call self.db_add(db_name, 'toggle', 'db', self.get_icon(a:db), database_icon, a:db.key_name, 0)
+  call self.add(db_name, 'toggle', 'db', self.get_database_icon(a:db), a:db.key_name, 0)
   if !a:db.expanded
     return a:db
   endif
@@ -438,11 +432,20 @@ function! s:drawer.populate_tables(db) abort
   return a:db
 endfunction
 
-function! s:drawer.get_database_icon() abort
+function! s:drawer.get_database_icon(item) abort
   if g:dbui_show_database_icon
-    return g:dbui_icons.database
+    if a:item.expanded
+      return g:dbui_icons.expanded. ' '.g:dbui_icons.database
+    else
+      return g:dbui_icons.collapsed. ' '.g:dbui_icons.database
+    endif
+  else
+    if a:item.expanded
+      return g:dbui_icons.expanded
+    else
+      return g:dbui_icons.collapsed
+    endif
   endif
-  return ''
 endfunction
 
 function! s:drawer.get_icon(item) abort
