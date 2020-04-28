@@ -408,6 +408,14 @@ g:db_ui_disable_mappings
 
 		Default value: `0`
 
+  					      *g:db_ui_show_database_icon*
+g:db_ui_show_database_icon
+		If this is set to 1, will add an icon on database name. Notice
+		this option depends on nerdfonts. So if you want enable it,you
+		need install nerdfonts.
+
+		Default value: `0`
+
 					      *g:db_ui_icons*
 g:db_ui_icons
 		This value holds the icons that are used in drawer. You can
