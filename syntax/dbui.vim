@@ -18,7 +18,6 @@ hi default link dbui_saved_query String
 hi default link dbui_new_query Operator
 hi default link dbui_buffers Constant
 hi default link dbui_tables Constant
-hi default link dbui_database  Directory
 if &background ==? 'light'
   hi dbui_connection_ok guifg=#00AA00
   hi dbui_connection_error guifg=#AA0000
