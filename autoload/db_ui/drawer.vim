@@ -297,7 +297,7 @@ function! s:drawer.add_db(db) abort
   call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_icon(a:db.tables), a:db.key_name, 1)
   if a:db.tables.expanded
     for table in a:db.tables.list
-      call self.add(table, 'toggle', 'tables.items.'.table, self.get_icon(a:db.tables.items[table]), a:db.key_name, 2)
+      call self.add(table, 'toggle', 'tables_||_items_||_'.table, self.get_icon(a:db.tables.items[table]), a:db.key_name, 2)
       if a:db.tables.items[table].expanded
         for [helper_name, helper] in items(a:db.table_helpers)
           call self.add(helper_name, 'open', 'table', g:dbui_icons.tables, a:db.key_name, 3, {'table': table, 'content': helper })
@@ -463,7 +463,7 @@ endfunction
 
 function! s:drawer.get_nested(obj, val, ...) abort
   let default = get(a:, '1', 0)
-  let items = split(a:val, '\.')
+  let items = split(a:val, '_||_')
   let result = copy(a:obj)
 
   for item in items
