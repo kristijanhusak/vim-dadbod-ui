@@ -36,7 +36,7 @@ let s:helpers = {
       \ 'oracle': { 'List': g:dbui_default_query },
       \ 'sqlite': s:sqlite,
       \ 'sqlserver': { 'List': 'SELECT TOP 200 * from {table}' },
-      \ 'mongodb': { 'List': 'db.{table}.find()'},
+      \ 'mongodb': { 'List': '{table}.find()'},
       \  }
 
 let s:all = {}
