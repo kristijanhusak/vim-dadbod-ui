@@ -30,12 +30,36 @@ let s:mysql = {
       \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{dbname}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
       \ }
 
+let s:column_summary_query = "
+      \ select c.column_name + ' (' + \n
+      \     isnull(( select 'PK, ' from information_schema.table_constraints as k join information_schema.key_column_usage as kcu on k.constraint_name = kcu.constraint_name where constraint_type='PRIMARY KEY' and k.table_name = c.table_name and kcu.column_name = c.column_name), '') + \n
+      \     isnull(( select 'FK, ' from information_schema.table_constraints as k join information_schema.key_column_usage as kcu on k.constraint_name = kcu.constraint_name where constraint_type='FOREIGN KEY' and k.table_name = c.table_name and kcu.column_name = c.column_name), '') + \n
+      \     data_type + coalesce('(' + rtrim(cast(character_maximum_length as varchar)) + ')','(' + rtrim(cast(numeric_precision as varchar)) + ',' + rtrim(cast(numeric_scale as varchar)) + ')','(' + rtrim(cast(datetime_precision as varchar)) + ')','') + ', ' + \n
+      \     case when is_nullable = 'YES' then 'null' else 'not null' end + ')' as Columns \n
+      \ from information_schema.columns c where c.table_name='{table}'"
+
+let s:constraints_query = "
+      \ SELECT u.CONSTRAINT_NAME, c.CHECK_CLAUSE FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE u \n
+      \     inner join INFORMATION_SCHEMA.CHECK_CONSTRAINTS c on u.CONSTRAINT_NAME = c.CONSTRAINT_NAME \n
+      \ where TABLE_NAME = '{table}'"
+
+let s:sqlserver = {
+      \ 'List': 'select top 200 * from {table}',
+      \ 'Columns': s:column_summary_query,
+      \ 'Indexes': 'exec sp_helpindex {table}',
+      \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'",
+      \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'",
+      \ 'Primary Keys': s:basic_constraint_query."WHERE constraint_type = 'PRIMARY KEY'\nand tc.table_name = '{table}'",
+      \ 'Contraints': s:constraints_query,
+      \ 'Describe': 'exec sp_help {table}',
+\   }
+
 let s:helpers = {
       \ 'postgresql': s:postgres,
       \ 'mysql': s:mysql,
       \ 'oracle': { 'List': g:dbui_default_query },
       \ 'sqlite': s:sqlite,
-      \ 'sqlserver': { 'List': 'SELECT TOP 200 * from {table}' },
+      \ 'sqlserver': s:sqlserver,
       \ 'mongodb': { 'List': '{table}.find()'},
       \  }
 
