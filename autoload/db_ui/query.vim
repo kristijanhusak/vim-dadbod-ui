@@ -117,7 +117,9 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   call self.resize_if_single(a:was_single_win)
   let b:dbui_db_key_name = a:db.key_name
   let b:db = a:db.url
-  let b:dbui_is_tmp = get(a:opts, 'is_tmp', 0)
+  if !exists('b:dbui_is_tmp') || has_key(a:opts, 'is_tmp')
+    let b:dbui_is_tmp = get(a:opts, 'is_tmp', 0)
+  endif
   let db_buffers = self.drawer.dbui.dbs[a:db.key_name].buffers
 
   if index(db_buffers.list, a:buffer_name) ==? -1
