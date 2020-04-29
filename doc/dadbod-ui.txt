@@ -58,8 +58,10 @@ Execute `:DBUI` command
 
 					      *DBUI*
 DBUI
-		Open drawer with available connections. If it doesn't find any
-		connections, it will return an error.
+		Open drawer with available connections, or an option to add
+		connection if there isn't any. Supports `<mods>`, which means
+		that you can open the drawer for example in new tab like this:
+		`:tab DBUI`
 
 		`:DBUI`
 

@@ -1,12 +1,12 @@
 let s:dbui_instance = {}
 let s:dbui = {}
 
-function! db_ui#open() abort
+function! db_ui#open(mods) abort
   if empty(s:dbui_instance)
     let s:dbui_instance = s:dbui.new()
   endif
 
-  return s:dbui_instance.drawer.open()
+  return s:dbui_instance.drawer.open(a:mods)
 endfunction
 
 function! db_ui#toggle() abort

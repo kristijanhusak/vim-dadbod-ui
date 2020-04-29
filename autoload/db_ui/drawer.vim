@@ -18,14 +18,19 @@ function! s:drawer.new(dbui) abort
   return instance
 endfunction
 
-function! s:drawer.open() abort
+function! s:drawer.open(...) abort
   if self.is_opened()
     silent! exe bufwinnr('dbui').'wincmd w'
     return
   endif
-  let win_pos = g:dbui_win_position ==? 'left' ? 'topleft' : 'botright'
-  silent! exe 'vertical '.win_pos.' new dbui'
-  silent! exe 'vertical '.win_pos.' resize '.g:dbui_winwidth
+  let mods = get(a:, 1, '')
+  if !empty(mods)
+    silent! exe mods.' new dbui'
+  else
+    let win_pos = g:dbui_win_position ==? 'left' ? 'topleft' : 'botright'
+    silent! exe 'vertical '.win_pos.' new dbui'
+    silent! exe 'vertical '.win_pos.' resize '.g:dbui_winwidth
+  endif
   setlocal filetype=dbui buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap cursorline nospell nomodifiable winfixwidth
 
   call self.render()

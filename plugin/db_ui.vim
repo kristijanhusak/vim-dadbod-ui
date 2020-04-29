@@ -52,7 +52,7 @@ augroup dbui
   autocmd FileType dbui call s:set_mapping('q', '<Plug>(DBUI_Quit)')
 augroup END
 
-command! DBUI call db_ui#open()
+command! DBUI call db_ui#open('<mods>')
 command! DBUIToggle call db_ui#toggle()
 command! DBUIAddConnection call db_ui#connections#add()
 command! DBUIFindBuffer call db_ui#find_buffer()
