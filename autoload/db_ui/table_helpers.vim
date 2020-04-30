@@ -30,7 +30,7 @@ let s:mysql = {
       \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{dbname}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
       \ }
 
-let s:column_summary_query = "
+let s:sqlserver_column_summary_query = "
       \ select c.column_name + ' (' + \n
       \     isnull(( select 'PK, ' from information_schema.table_constraints as k join information_schema.key_column_usage as kcu on k.constraint_name = kcu.constraint_name where constraint_type='PRIMARY KEY' and k.table_name = c.table_name and kcu.column_name = c.column_name), '') + \n
       \     isnull(( select 'FK, ' from information_schema.table_constraints as k join information_schema.key_column_usage as kcu on k.constraint_name = kcu.constraint_name where constraint_type='FOREIGN KEY' and k.table_name = c.table_name and kcu.column_name = c.column_name), '') + \n
@@ -38,19 +38,69 @@ let s:column_summary_query = "
       \     case when is_nullable = 'YES' then 'null' else 'not null' end + ')' as Columns \n
       \ from information_schema.columns c where c.table_name='{table}'"
 
-let s:constraints_query = "
+let s:sqlserver_foreign_keys_query = "
+      \ SELECT c.constraint_name  \n
+      \    ,kcu.column_name as column_name  \n
+      \    ,c2.table_name as foreign_table_name  \n
+      \    ,kcu2.column_name as foreign_column_name \n
+      \ from   information_schema.table_constraints c  \n
+      \        inner join information_schema.key_column_usage kcu  \n
+      \          on c.constraint_schema = kcu.constraint_schema  \n
+      \             and c.constraint_name = kcu.constraint_name  \n
+      \        inner join information_schema.referential_constraints rc  \n
+      \          on c.constraint_schema = rc.constraint_schema  \n
+      \             and c.constraint_name = rc.constraint_name  \n
+      \        inner join information_schema.table_constraints c2  \n
+      \          on rc.unique_constraint_schema = c2.constraint_schema  \n
+      \             and rc.unique_constraint_name = c2.constraint_name  \n
+      \        inner join information_schema.key_column_usage kcu2  \n
+      \          on c2.constraint_schema = kcu2.constraint_schema  \n
+      \             and c2.constraint_name = kcu2.constraint_name  \n
+      \             and kcu.ordinal_position = kcu2.ordinal_position  \n
+      \ where  c.constraint_type = 'FOREIGN KEY'  \n
+      \ and c.TABLE_NAME = '{table}'"
+
+let s:sqlserver_references_query = "
+      \ select kcu1.constraint_name as constraint_name  \n
+      \     ,kcu1.table_name as foreign_table_name   \n
+      \     ,kcu1.column_name as foreign_column_name  \n
+      \     ,kcu2.column_name as column_name  \n
+      \ from information_schema.referential_constraints as rc  \n
+      \ inner join information_schema.key_column_usage as kcu1  \n
+      \     on kcu1.constraint_catalog = rc.constraint_catalog   \n
+      \     and kcu1.constraint_schema = rc.constraint_schema  \n
+      \     and kcu1.constraint_name = rc.constraint_name  \n
+      \ inner join information_schema.key_column_usage as kcu2  \n
+      \     on kcu2.constraint_catalog = rc.unique_constraint_catalog   \n
+      \     and kcu2.constraint_schema = rc.unique_constraint_schema  \n
+      \     and kcu2.constraint_name = rc.unique_constraint_name  \n
+      \     and kcu2.ordinal_position = kcu1.ordinal_position  \n
+      \ where kcu2.table_name='{table}'"
+
+let s:sqlserver_primary_keys = "
+      \  select tc.constraint_name, kcu.column_name \n
+      \  from \n
+      \      information_schema.table_constraints AS tc \n
+      \      JOIN information_schema.key_column_usage AS kcu \n
+      \        ON tc.constraint_name = kcu.constraint_name \n
+      \      JOIN information_schema.constraint_column_usage AS ccu \n
+      \        ON ccu.constraint_name = tc.constraint_name \n
+      \ where constraint_type = 'PRIMARY KEY' \n
+      \ and tc.table_name = '{table}'"
+
+let s:sqlserver_constraints_query = "
       \ SELECT u.CONSTRAINT_NAME, c.CHECK_CLAUSE FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE u \n
       \     inner join INFORMATION_SCHEMA.CHECK_CONSTRAINTS c on u.CONSTRAINT_NAME = c.CONSTRAINT_NAME \n
       \ where TABLE_NAME = '{table}'"
 
 let s:sqlserver = {
       \ 'List': 'select top 200 * from {table}',
-      \ 'Columns': s:column_summary_query,
+      \ 'Columns': s:sqlserver_column_summary_query,
       \ 'Indexes': 'exec sp_helpindex {table}',
-      \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'",
-      \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'",
-      \ 'Primary Keys': s:basic_constraint_query."WHERE constraint_type = 'PRIMARY KEY'\nand tc.table_name = '{table}'",
-      \ 'Contraints': s:constraints_query,
+      \ 'Foreign Keys': s:sqlserver_foreign_keys_query,
+      \ 'References': s:sqlserver_references_query,
+      \ 'Primary Keys': s:sqlserver_primary_keys,
+      \ 'Contraints': s:sqlserver_constraints_query,
       \ 'Describe': 'exec sp_help {table}',
 \   }
 
