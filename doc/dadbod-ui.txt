@@ -202,6 +202,12 @@ the connection you want to delete.
 		Confirm prompt is opened before deleting to avoid accidents.
 		By default, mapped to `d`.
 
+					      *<Plug>(DBUI_JumpToForeignKey)*
+<Plug>(DBUI_JumpToForeignKey)
+		This mapping is used to jump to foreign key in a table from
+		dbout buffer. Currently supported for MySQL and Postgres.
+		By default, mapped to `<C-]>`.
+
 					      *<Plug>(DBUI_AddConnection)*
 <Plug>(DBUI_AddConnection)
 		This mapping is used adding a new connection. It is same as

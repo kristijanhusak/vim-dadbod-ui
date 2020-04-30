@@ -12,7 +12,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
   let result = db_ui#schemas#query({ 'url': b:db }, foreign_key_query)
   let result = scheme.parse_results(result)
   if empty(result)
-    return
+    return db_ui#utils#echo_err('No valid foreign key found.')
   endif
 
   let result = result[0]

@@ -246,8 +246,9 @@ function! s:drawer.render_help() abort
     call self.add('" H - Toggle database details', 'noaction', 'help', '', '', 0)
     call self.add('" r - Rename buffer/saved query', 'noaction', 'help', '', '', 0)
     call self.add('" q - Close drawer', 'noaction', 'help', '', '', 0)
-    call self.add('" <Leader>W - Save currently opened query', 'noaction', 'help', '', '', 0)
-    call self.add('" <Leader>E - Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
+    call self.add('" <Leader>W - (sql) Save currently opened query', 'noaction', 'help', '', '', 0)
+    call self.add('" <Leader>E - (sql) Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
+    call self.add('" <C-]> - (.dbout) Go to entry from foreign key cell', 'noaction', 'help', '', '', 0)
     call self.add('', 'noaction', 'help', '', '', 0)
   endif
 endfunction

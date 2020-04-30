@@ -27,7 +27,9 @@ function! s:suite.should_show_help_text() abort
   call s:expect(getline(8)).to_equal('" H - Toggle database details')
   call s:expect(getline(9)).to_equal('" r - Rename buffer/saved query')
   call s:expect(getline(10)).to_equal('" q - Close drawer')
-  call s:expect(getline(11)).to_equal('" <Leader>W - Save currently opened query')
+  call s:expect(getline(11)).to_equal('" <Leader>W - (sql) Save currently opened query')
+  call s:expect(getline(12)).to_equal('" <Leader>E - (sql) Edit bind parameters in opened query')
+  call s:expect(getline(13)).to_equal('" <C-]> - (.dbout) Go to entry from foreign key cell')
   normal ?
   call s:expect(getline(1)).to_equal('" Press ? for help')
   call s:expect(getline(2)).to_be_empty()

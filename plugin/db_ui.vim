@@ -50,7 +50,9 @@ augroup dbui
   autocmd FileType dbui call s:set_mapping('H', '<Plug>(DBUI_ToggleDetails)')
   autocmd FileType dbui call s:set_mapping('r', '<Plug>(DBUI_RenameLine)')
   autocmd FileType dbui call s:set_mapping('q', '<Plug>(DBUI_Quit)')
-  autocmd BufReadPost *.dbout call s:set_mapping('<C-]>', ':call db_ui#dbout#jump_to_foreign_table()<CR>')
+  autocmd BufReadPost *.dbout
+        \ nnoremap <silent><buffer> <Plug>(DBUI_JumpToForeignKey) :call db_ui#dbout#jump_to_foreign_table()<CR>
+        \ | call s:set_mapping('<C-]>', '<Plug>(DBUI_JumpToForeignKey)')
 augroup END
 
 command! DBUI call db_ui#open('<mods>')
