@@ -233,7 +233,7 @@ function! s:dbui.populate_from_connections_file() abort
   return self
 endfunction
 
-function s:dbui.add_if_not_exists(name, url, source) abort
+function! s:dbui.add_if_not_exists(name, url, source) abort
   let existing = get(filter(copy(self.dbs_list), 'v:val.name ==? a:name && v:val.source ==? a:source'), 0, {})
   if !empty(existing)
     return db_ui#utils#echo_warning(printf('Warning: Duplicate connection name "%s" in "%s" source. First one added has precedence.', a:name, a:source))

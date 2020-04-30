@@ -207,11 +207,7 @@ function! s:query.inject_variables_and_execute(db) abort
       continue
     endif
 
-    if val !=? "^'.*'$" && (val =~? '^[0-9]*$' || val =~? '^\(true\|false\)$' || val =~? "''")
-      let content = substitute(content, var, val, 'g')
-    else
-      let content = substitute(content, var, "'".val."'", 'g')
-    endif
+    let content = substitute(content, var, db_ui#utils#quote_query_value(val), 'g')
   endfor
 
   exe 'DB '.a:db.url.' '.content

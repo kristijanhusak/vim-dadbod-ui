@@ -50,3 +50,11 @@ function! db_ui#utils#readfile(file) abort
     return []
   endtry
 endfunction
+
+function! db_ui#utils#quote_query_value(val) abort
+  if a:val !=? "^'.*'$" && (a:val =~? '^[0-9]*$' || a:val =~? '^\(true\|false\)$' || a:val =~? "''")
+    return a:val
+  endif
+
+  return "'".a:val."'"
+endfunction
