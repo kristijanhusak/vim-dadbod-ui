@@ -294,17 +294,34 @@ function! s:drawer.add_db(db) abort
     endfor
   endif
 
-  call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_icon(a:db.tables), a:db.key_name, 1)
-  if a:db.tables.expanded
-    for table in a:db.tables.list
-      call self.add(table, 'toggle', 'tables_||_items_||_'.table, self.get_icon(a:db.tables.items[table]), a:db.key_name, 2)
-      if a:db.tables.items[table].expanded
-        for [helper_name, helper] in items(a:db.table_helpers)
-          call self.add(helper_name, 'open', 'table', g:dbui_icons.tables, a:db.key_name, 3, {'table': table, 'content': helper })
-        endfor
-      endif
-    endfor
+  if a:db.schema_support
+    call self.add('Schemas ('.len(a:db.schemas.items).')', 'toggle', 'schemas', self.get_icon(a:db.schemas), a:db.key_name, 1)
+    if a:db.schemas.expanded
+      for schema in a:db.schemas.list
+        call self.add(schema, 'toggle', 'schemas_||_items_||_'.schema, self.get_icon(a:db.schemas.items[schema]), a:db.key_name, 2)
+        if a:db.schemas.items[schema].expanded
+          call self.render_tables(a:db.schemas.items[schema].tables, a:db,'schemas_||_items_||_'.schema.'_||_tables_||_items_||_', 3)
+        endif
+      endfor
+    endif
+  else
+    call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_icon(a:db.tables), a:db.key_name, 1)
+    call self.render_tables(a:db.tables, a:db, 'tables_||_items_||_', 2)
   endif
+endfunction
+
+function! s:drawer.render_tables(tables, db, path, level) abort
+  if !a:tables.expanded
+    return
+  endif
+  for table in a:tables.list
+    call self.add(table, 'toggle', a:path.table, self.get_icon(a:tables.items[table]), a:db.key_name, a:level)
+    if a:tables.items[table].expanded
+      for [helper_name, helper] in items(a:db.table_helpers)
+        call self.add(helper_name, 'open', 'table', g:dbui_icons.tables, a:db.key_name, a:level + 1, {'table': table, 'content': helper })
+      endfor
+    endif
+  endfor
 endfunction
 
 function! s:drawer.toggle_line(edit_action) abort
@@ -396,7 +413,11 @@ function! s:drawer.toggle_db(db) abort
     call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
     let a:db.conn_error = ''
-    call self.populate_tables(a:db)
+    if a:db.schema_support
+      call self.populate_schemas(a:db)
+    else
+      call self.populate_tables(a:db)
+    endif
     if v:shell_error ==? 0
       call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected after '.split(reltimestr(reltime(query_time)))[0].' sec.')
     endif
@@ -429,12 +450,45 @@ function! s:drawer.populate_tables(db) abort
     let a:db.tables.list = map(split(copy(a:db.tables.list[0])), 'trim(v:val)')
   endif
 
-  for table in a:db.tables.list
-    if !has_key(a:db.tables.items, table)
-      let a:db.tables.items[table] = {'expanded': 0 }
+  call self.populate_table_items(a:db.tables)
+  return a:db
+endfunction
+
+function! s:drawer.populate_table_items(tables) abort
+  for table in a:tables.list
+    if !has_key(a:tables.items, table)
+      let a:tables.items[table] = {'expanded': 0 }
     endif
   endfor
-  return a:db
+endfunction
+
+function! s:drawer.populate_schemas(db) abort
+  let scheme = db_ui#schemas#get(a:db.scheme)
+  let schemas = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_query))
+  let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_tables_query))
+  let tables_by_schema = {}
+  for table in tables
+    let [scheme_name, table] = map(split(table, scheme.cell_delimiter), 'trim(v:val)')
+    if !has_key(tables_by_schema, scheme_name)
+      let tables_by_schema[scheme_name] = []
+    endif
+    call add(tables_by_schema[scheme_name], table)
+  endfor
+  let a:db.schemas.list = schemas
+  for schema in schemas
+    if !has_key(a:db.schemas.items, schema)
+      let a:db.schemas.items[schema] = {
+            \ 'expanded': 0,
+            \ 'tables': {
+            \   'expanded': 1,
+            \   'list': sort(get(tables_by_schema, schema, [])),
+            \   'items': {},
+            \ },
+            \ }
+
+      call self.populate_table_items(a:db.schemas.items[schema].tables)
+    endif
+  endfor
 endfunction
 
 function! s:drawer.get_database_icon(item) abort

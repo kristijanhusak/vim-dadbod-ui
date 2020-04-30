@@ -139,11 +139,13 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'table_helpers': db_ui#table_helpers#get(scheme),
         \ 'expanded': 0,
         \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
+        \ 'schemas': {'expanded': 0, 'items': {}, 'list': [] },
         \ 'saved_queries': { 'expanded': 0, 'list': [] },
         \ 'buffers': { 'expanded': 0, 'list': [] },
         \ 'save_path': save_path,
         \ 'name': a:db.name,
         \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
+        \ 'schema_support': !empty(get(db_ui#schemas#get(scheme), 'schemes_query')),
         \ }
 endfunction
 
