@@ -8,12 +8,13 @@ It allows simple navigation through databases and allows saving queries for late
 Tested on Linux and Mac, Vim 8+ an Neovim.
 
 Features:
-* Navigate through multiple databases and it's tables
+* Navigate through multiple databases and it's tables and schemas
 * Several ways to define your connections
 * Save queries on single location for later use
 * Define custom table helpers
 * Bind parameters (see `:help vim-dadbod-ui-bind-parameters`)
 * Autocompletion with [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
+* Jump to foreign keys from the dadbod output (see `:help <Plug>(DBUI_JumpToForeignKey)`)
 
 ## Installation
 
