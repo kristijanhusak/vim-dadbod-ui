@@ -281,14 +281,14 @@ To define your own helper for a specific scheme, add it through
 >
  	let g:db_ui_table_helpers = {
 	\ 	'postgresql': {
-	\ 		'Count': 'select count(*) from {table}'
+	\ 		'Count': 'select count(*) from {optional_schema}{table}'
 	\ 		'Explain': 'EXPLAIN ANALYZE {last_query}'
 	\ 	}
  	\ }
 <
 This will make `Count` table helper available for all postgresql connections
-for each table. Three variables are available as part of the table helper
-content: `{table}`, `{dbname}` and `{last_query}`. You can also override the
+for each table. Five variables are available as part of the table helper
+content: `{table}`, `{schema}`, `{optional_schema}`, `{dbname}` and `{last_query}`. You can also override the
 defaults by passing in the matching helper name. To override `List`, do this:
 
 >
@@ -302,6 +302,13 @@ Note that `{last_query}` will be empty if no queries were ran before opening
 that helper. Also, in the `EXPLAIN` example above, running the explain helper
 and then running it again for another table will print double `EXPLAIN ANALYZE`
 because first explain query is also considered a valid query for `{last_query}`.
+
+`{optional_schema}`is provided only when the current table schema is not the
+default one. If provided, it goes in format `schemaname.`, so if you need to
+write select queries, add it like this:
+`select * from {optional_schema}{table}`, which will expand into for example:
+`select * from information_schema.columns`, or for public schema in postgres,
+`select * from mytable`
 
 ==============================================================================
 7. Bind parameters				*vim-dadbod-ui-bind-parameters*

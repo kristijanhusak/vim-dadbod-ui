@@ -8,12 +8,12 @@ let s:basic_constraint_query = "
       \       ON ccu.constraint_name = tc.constraint_name\n"
 
 let s:postgres = {
-      \ 'List': g:dbui_default_query,
-      \ 'Columns': "select * from information_schema.columns where table_name='{table}'",
-      \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}'",
-      \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'",
-      \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'",
-      \ 'Primary Keys': s:basic_constraint_query."WHERE constraint_type = 'PRIMARY KEY'\nand tc.table_name = '{table}'",
+      \ 'List': 'select * from {optional_schema}"{table}" LIMIT 200',
+      \ 'Columns': "select * from information_schema.columns where table_name='{table}' and table_schema='{schema}'",
+      \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}' and schemaname='{schema}'",
+      \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
+      \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'\nand tc.table_schema = '{schema}'",
+      \ 'Primary Keys': s:basic_constraint_query."WHERE constraint_type = 'PRIMARY KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
       \ }
 
 let s:sqlite = {
@@ -24,10 +24,10 @@ let s:sqlite = {
       \ }
 
 let s:mysql = {
-      \ 'List': 'SELECT * from {table} LIMIT 200',
-      \ 'Indexes': 'SHOW INDEXES FROM {table}',
-      \ 'Foreign Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{dbname}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'FOREIGN KEY'",
-      \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{dbname}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
+      \ 'List': 'SELECT * from {optional_schema}{table} LIMIT 200',
+      \ 'Indexes': 'SHOW INDEXES FROM {optional_schema}{table}',
+      \ 'Foreign Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'FOREIGN KEY'",
+      \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
       \ }
 
 let s:sqlserver_column_summary_query = "
@@ -36,7 +36,7 @@ let s:sqlserver_column_summary_query = "
       \     isnull(( select 'FK, ' from information_schema.table_constraints as k join information_schema.key_column_usage as kcu on k.constraint_name = kcu.constraint_name where constraint_type='FOREIGN KEY' and k.table_name = c.table_name and kcu.column_name = c.column_name), '') + \n
       \     data_type + coalesce('(' + rtrim(cast(character_maximum_length as varchar)) + ')','(' + rtrim(cast(numeric_precision as varchar)) + ',' + rtrim(cast(numeric_scale as varchar)) + ')','(' + rtrim(cast(datetime_precision as varchar)) + ')','') + ', ' + \n
       \     case when is_nullable = 'YES' then 'null' else 'not null' end + ')' as Columns \n
-      \ from information_schema.columns c where c.table_name='{table}'"
+      \ from information_schema.columns c where c.table_name='{table}' and c.TABLE_SCHEMA = '{schema}'"
 
 let s:sqlserver_foreign_keys_query = "
       \ SELECT c.constraint_name  \n
@@ -58,7 +58,7 @@ let s:sqlserver_foreign_keys_query = "
       \             and c2.constraint_name = kcu2.constraint_name  \n
       \             and kcu.ordinal_position = kcu2.ordinal_position  \n
       \ where  c.constraint_type = 'FOREIGN KEY'  \n
-      \ and c.TABLE_NAME = '{table}'"
+      \ and c.TABLE_NAME = '{table}' and c.TABLE_SCHEMA = '{schema}'"
 
 let s:sqlserver_references_query = "
       \ select kcu1.constraint_name as constraint_name  \n
@@ -75,7 +75,7 @@ let s:sqlserver_references_query = "
       \     and kcu2.constraint_schema = rc.unique_constraint_schema  \n
       \     and kcu2.constraint_name = rc.unique_constraint_name  \n
       \     and kcu2.ordinal_position = kcu1.ordinal_position  \n
-      \ where kcu2.table_name='{table}'"
+      \ where kcu2.table_name='{table}' and kcu2.table_schema = '{shema}'"
 
 let s:sqlserver_primary_keys = "
       \  select tc.constraint_name, kcu.column_name \n
@@ -86,21 +86,21 @@ let s:sqlserver_primary_keys = "
       \      JOIN information_schema.constraint_column_usage AS ccu \n
       \        ON ccu.constraint_name = tc.constraint_name \n
       \ where constraint_type = 'PRIMARY KEY' \n
-      \ and tc.table_name = '{table}'"
+      \ and tc.table_name = '{table}' and tc.table_schema = '{schema}'"
 
 let s:sqlserver_constraints_query = "
       \ SELECT u.CONSTRAINT_NAME, c.CHECK_CLAUSE FROM INFORMATION_SCHEMA.CONSTRAINT_TABLE_USAGE u \n
       \     inner join INFORMATION_SCHEMA.CHECK_CONSTRAINTS c on u.CONSTRAINT_NAME = c.CONSTRAINT_NAME \n
-      \ where TABLE_NAME = '{table}'"
+      \ where TABLE_NAME = '{table}' and u.TABLE_SCHEMA = '{schema}'"
 
 let s:sqlserver = {
-      \ 'List': 'select top 200 * from {table}',
+      \ 'List': 'select top 200 * from {optional_schema}{table}',
       \ 'Columns': s:sqlserver_column_summary_query,
       \ 'Indexes': 'exec sp_helpindex {table}',
       \ 'Foreign Keys': s:sqlserver_foreign_keys_query,
       \ 'References': s:sqlserver_references_query,
       \ 'Primary Keys': s:sqlserver_primary_keys,
-      \ 'Contraints': s:sqlserver_constraints_query,
+      \ 'Constraints': s:sqlserver_constraints_query,
       \ 'Describe': 'exec sp_help {table}',
 \   }
 

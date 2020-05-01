@@ -303,17 +303,17 @@ function! s:drawer.add_db(db) abort
         let tables = schema_item.tables
         call self.add(schema.' ('.len(tables.items).')', 'toggle', 'schemas->items->'.schema, self.get_icon(schema_item), a:db.key_name, 2)
         if schema_item.expanded
-          call self.render_tables(tables, a:db,'schemas->items->'.schema.'->tables->items', 3)
+          call self.render_tables(tables, a:db,'schemas->items->'.schema.'->tables->items', 3, schema)
         endif
       endfor
     endif
   else
     call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_icon(a:db.tables), a:db.key_name, 1)
-    call self.render_tables(a:db.tables, a:db, 'tables->items', 2)
+    call self.render_tables(a:db.tables, a:db, 'tables->items', 2, '')
   endif
 endfunction
 
-function! s:drawer.render_tables(tables, db, path, level) abort
+function! s:drawer.render_tables(tables, db, path, level, schema) abort
   if !a:tables.expanded
     return
   endif
@@ -321,7 +321,7 @@ function! s:drawer.render_tables(tables, db, path, level) abort
     call self.add(table, 'toggle', a:path.'->'.table, self.get_icon(a:tables.items[table]), a:db.key_name, a:level)
     if a:tables.items[table].expanded
       for [helper_name, helper] in items(a:db.table_helpers)
-        call self.add(helper_name, 'open', 'table', g:dbui_icons.tables, a:db.key_name, a:level + 1, {'table': table, 'content': helper })
+        call self.add(helper_name, 'open', 'table', g:dbui_icons.tables, a:db.key_name, a:level + 1, {'table': table, 'content': helper, 'schema': a:schema })
       endfor
     endif
   endfor

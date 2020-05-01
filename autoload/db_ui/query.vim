@@ -21,13 +21,15 @@ function! s:query.open(item, edit_action) abort
   endif
   let suffix = 'query'
   let table = ''
+  let schema = ''
   if a:item.type !=? 'query'
     let suffix = a:item.table.'-'.a:item.label
     let table = a:item.table
+    let schema = a:item.schema
   endif
 
   let buffer_name = printf('%s.%s', tempname(), self.generate_buffer_basename(db.name, suffix))
-  call self.open_buffer(db, buffer_name, a:edit_action, {'table': table, 'content': get(a:item, 'content'), 'is_tmp': 1 })
+  call self.open_buffer(db, buffer_name, a:edit_action, {'table': table, 'content': get(a:item, 'content'), 'is_tmp': 1, 'schema': schema })
 endfunction
 
 function! s:method(name) abort
@@ -82,6 +84,7 @@ endfunction
 function s:query.open_buffer(db, buffer_name, edit_action, ...)
   let opts = get(a:, '1', {})
   let table = get(opts, 'table', '')
+  let schema = get(opts, 'schema', '')
   let default_content = get(opts, 'content', g:dbui_default_query)
   let was_single_win = winnr('$') ==? 1
 
@@ -102,9 +105,21 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
     return
   endif
 
+  let optional_schema = schema ==? a:db.default_scheme ? '' : schema
+
+  if !empty(optional_schema)
+    if a:db.quote
+      let optional_schema = '"'.optional_schema.'"'
+    endif
+    let optional_schema = optional_schema.'.'
+  endif
+
   let b:dbui_table_name = table
   let content = substitute(default_content, '{table}', table, 'g')
-  let content = substitute(content, '{dbname}', a:db.name, 'g')
+  let content = substitute(content, '{optional_schema}', optional_schema, 'g')
+  let content = substitute(content, '{schema}', schema, 'g')
+  let db_name = !empty(schema) ? schema : a:db.name
+  let content = substitute(content, '{dbname}', db_name, 'g')
   let content = substitute(content, '{last_query}', join(self.last_query, "\n"), 'g')
   silent 1,$delete _
   call setline(1, split(content, "\n"))

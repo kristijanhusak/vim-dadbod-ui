@@ -132,6 +132,7 @@ function! s:dbui.generate_new_db_entry(db) abort
   if !empty(self.save_path)
     let save_path = printf('%s/%s', self.save_path, a:db.name)
   endif
+  let scheme_info = db_ui#schemas#get(scheme)
   return {
         \ 'url': a:db.url,
         \ 'conn': '',
@@ -147,7 +148,9 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'save_path': save_path,
         \ 'name': a:db.name,
         \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
-        \ 'schema_support': !empty(get(db_ui#schemas#get(scheme), 'schemes_query')),
+        \ 'schema_support': !empty(get(scheme_info, 'schemes_query', 0)),
+        \ 'quote': get(scheme_info, 'quote', 0),
+        \ 'default_scheme': get(scheme_info, 'default_scheme', '')
         \ }
 endfunction
 

@@ -17,7 +17,8 @@ let s:postgresql = {
       \ 'cell_line_delimiter': '+',
       \ 'cell_line_number': 2,
       \ 'cell_delimiter': '|',
-      \ 'parse_results': {results -> results[1:(len(results) - 2)]},
+      \ 'parse_results': {results -> results[1:-2]},
+      \ 'default_scheme': 'public',
       \ 'quote': 1,
       \ }
 
@@ -51,8 +52,9 @@ let s:sqlserver = {
       \   'cell_line_delimiter': ' ',
       \   'cell_line_number': 2,
       \   'cell_delimiter': ' ',
-      \   'parse_results': {results -> results[0:(len(results) - 3)]},
+      \   'parse_results': {results -> results[0:-3]},
       \   'quote': 0,
+      \   'default_scheme': 'dbo',
       \ }
 
 let s:mysql_foreign_key_query =  "
@@ -69,7 +71,8 @@ let s:mysql = {
       \ 'cell_line_number': 3,
       \ 'cell_delimiter': '\t',
       \ 'parse_results': {results -> results[1:]},
-      \ 'quote': 1,
+      \ 'default_scheme': '',
+      \ 'quote': 0,
       \ }
 let s:schemas = {
       \ 'postgres': s:postgresql,
