@@ -92,5 +92,5 @@ endfunction
 
 function! db_ui#schemas#query(db, query) abort
   let base_query = db#adapter#dispatch(a:db.conn, 'interactive')
-  return systemlist(printf('%s %s', base_query, a:query))
+  return map(systemlist(printf('%s %s', base_query, a:query)), 'substitute(v:val, "\r$", "", "")')
 endfunction
