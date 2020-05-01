@@ -119,7 +119,7 @@ function! s:dbui.populate_dbs() abort
     if !has_key(self.dbs, key_name)
       let self.dbs[key_name] = self.generate_new_db_entry(db)
     else
-      let self.dbs[key_name] = self.drawer.populate_tables(self.dbs[key_name])
+      let self.dbs[key_name] = self.drawer.populate(self.dbs[key_name])
     endif
   endfor
 endfunction

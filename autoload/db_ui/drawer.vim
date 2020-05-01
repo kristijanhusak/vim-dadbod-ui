@@ -299,15 +299,17 @@ function! s:drawer.add_db(db) abort
     call self.add('Schemas ('.len(a:db.schemas.items).')', 'toggle', 'schemas', self.get_icon(a:db.schemas), a:db.key_name, 1)
     if a:db.schemas.expanded
       for schema in a:db.schemas.list
-        call self.add(schema, 'toggle', 'schemas_||_items_||_'.schema, self.get_icon(a:db.schemas.items[schema]), a:db.key_name, 2)
-        if a:db.schemas.items[schema].expanded
-          call self.render_tables(a:db.schemas.items[schema].tables, a:db,'schemas_||_items_||_'.schema.'_||_tables_||_items_||_', 3)
+        let schema_item = a:db.schemas.items[schema]
+        let tables = schema_item.tables
+        call self.add(schema.' ('.len(tables.items).')', 'toggle', 'schemas->items->'.schema, self.get_icon(schema_item), a:db.key_name, 2)
+        if schema_item.expanded
+          call self.render_tables(tables, a:db,'schemas->items->'.schema.'->tables->items', 3)
         endif
       endfor
     endif
   else
     call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_icon(a:db.tables), a:db.key_name, 1)
-    call self.render_tables(a:db.tables, a:db, 'tables_||_items_||_', 2)
+    call self.render_tables(a:db.tables, a:db, 'tables->items', 2)
   endif
 endfunction
 
@@ -316,7 +318,7 @@ function! s:drawer.render_tables(tables, db, path, level) abort
     return
   endif
   for table in a:tables.list
-    call self.add(table, 'toggle', a:path.table, self.get_icon(a:tables.items[table]), a:db.key_name, a:level)
+    call self.add(table, 'toggle', a:path.'->'.table, self.get_icon(a:tables.items[table]), a:db.key_name, a:level)
     if a:tables.items[table].expanded
       for [helper_name, helper] in items(a:db.table_helpers)
         call self.add(helper_name, 'open', 'table', g:dbui_icons.tables, a:db.key_name, a:level + 1, {'table': table, 'content': helper })
@@ -414,11 +416,7 @@ function! s:drawer.toggle_db(db) abort
     call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
     let a:db.conn_error = ''
-    if a:db.schema_support
-      call self.populate_schemas(a:db)
-    else
-      call self.populate_tables(a:db)
-    endif
+    call self.populate(a:db)
     if v:shell_error ==? 0
       call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected after '.split(reltimestr(reltime(query_time)))[0].' sec.')
     endif
@@ -426,6 +424,13 @@ function! s:drawer.toggle_db(db) abort
     let a:db.conn_error = v:exception
     return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
   endtry
+endfunction
+
+function! s:drawer.populate(db) abort
+  if a:db.schema_support
+    return self.populate_schemas(a:db)
+  endif
+  return self.populate_tables(a:db)
 endfunction
 
 function! s:drawer.load_saved_queries(db) abort
@@ -464,6 +469,10 @@ function! s:drawer.populate_table_items(tables) abort
 endfunction
 
 function! s:drawer.populate_schemas(db) abort
+  let a:db.schemas.list = []
+  if empty(a:db.conn)
+    return a:db
+  endif
   let scheme = db_ui#schemas#get(a:db.scheme)
   let schemas = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_query))
   let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_tables_query))
@@ -490,22 +499,16 @@ function! s:drawer.populate_schemas(db) abort
       call self.populate_table_items(a:db.schemas.items[schema].tables)
     endif
   endfor
+  return a:db
 endfunction
 
 function! s:drawer.get_database_icon(item) abort
-  if g:dbui_show_database_icon
-    if a:item.expanded
-      return g:dbui_icons.expanded. ' '.g:dbui_icons.database
-    else
-      return g:dbui_icons.collapsed. ' '.g:dbui_icons.database
-    endif
-  else
-    if a:item.expanded
-      return g:dbui_icons.expanded
-    else
-      return g:dbui_icons.collapsed
-    endif
+  let suffix = g:dbui_show_database_icon ? g:dbui_icons.database : ''
+  if a:item.expanded
+    return g:dbui_icons.expanded.suffix
   endif
+
+  return g:dbui_icons.collapsed.suffix
 endfunction
 
 function! s:drawer.get_icon(item) abort
@@ -518,7 +521,7 @@ endfunction
 
 function! s:drawer.get_nested(obj, val, ...) abort
   let default = get(a:, '1', 0)
-  let items = split(a:val, '_||_')
+  let items = split(a:val, '->')
   let result = copy(a:obj)
 
   for item in items
