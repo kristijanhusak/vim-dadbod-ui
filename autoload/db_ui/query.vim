@@ -116,7 +116,7 @@ endfunction
 function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   call self.resize_if_single(a:was_single_win)
   let b:dbui_db_key_name = a:db.key_name
-  let b:db = a:db.url
+  let b:db = a:db.conn
   if !exists('b:dbui_is_tmp') || has_key(a:opts, 'is_tmp')
     let b:dbui_is_tmp = get(a:opts, 'is_tmp', 0)
   endif
@@ -172,7 +172,7 @@ function! s:query.execute_query() abort
   if search('[^:]:\w\+', 'n') > 0
     call self.inject_variables_and_execute(db)
   else
-    silent! exe '%DB '.db.url
+    silent! exe '%DB '.db.conn
   endif
   let self.last_query = getline(1, '$')
   call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
@@ -210,7 +210,7 @@ function! s:query.inject_variables_and_execute(db) abort
     let content = substitute(content, var, db_ui#utils#quote_query_value(val), 'g')
   endfor
 
-  exe 'DB '.a:db.url.' '.content
+  exe 'DB '.a:db.conn.' '.content
   call db_ui#utils#echo_msg('Executing query...Done.')
 endfunction
 

@@ -16,8 +16,8 @@ let g:db_ui_show_help = 0
 
 function! SetupTestDbs() abort
 let g:dbs = [
-  \ {'name': 'dadbod_ui_test', 'url': 'sqlite:test/dadbod_ui_test.db' },
-  \ {'name': 'dadbod_ui_testing', 'url': 'sqlite:test/dadbod_ui_test.db' },
+  \ {'name': 'dadbod_ui_test', 'url': 'sqlite:'.fnamemodify('test/dadbod_ui_test.db', ':p') },
+  \ {'name': 'dadbod_ui_testing', 'url': 'sqlite:'.fnamemodify('test/dadbod_ui_test.db', ':p') },
   \ ]
 endfunction
 

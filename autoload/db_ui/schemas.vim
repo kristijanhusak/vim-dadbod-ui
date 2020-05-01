@@ -91,6 +91,6 @@ function! db_ui#schemas#get(scheme) abort
 endfunction
 
 function! db_ui#schemas#query(db, query) abort
-  let base_query = db#adapter#dispatch(a:db.url, 'interactive')
+  let base_query = db#adapter#dispatch(a:db.conn, 'interactive')
   return systemlist(printf('%s %s', base_query, a:query))
 endfunction

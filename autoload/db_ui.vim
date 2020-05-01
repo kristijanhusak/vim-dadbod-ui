@@ -30,7 +30,7 @@ function! db_ui#find_buffer() abort
     if len(s:dbui_instance.dbs_list) ==? 1
       let db = values(s:dbui_instance.dbs)[0]
       let b:dbui_db_key_name = db.key_name
-      let b:db = db.url
+      let b:db = db.conn
       call db_ui#utils#echo_msg('Assigned buffer to db '.db.name)
     else
       let options = map(copy(s:dbui_instance.dbs_list), '(v:key + 1).") ".v:val.name')
@@ -39,8 +39,9 @@ function! db_ui#find_buffer() abort
         return db_ui#utils#echo_err('Wrong selection.')
       endif
       let selected_db = s:dbui_instance.dbs_list[selection - 1]
+      let selected_db = s:dbui_instance.dbs[selected_db.key_name]
       let b:dbui_db_key_name = selected_db.key_name
-      let b:db = selected_db.url
+      let b:db = selected_db.conn
       call db_ui#utils#echo_msg('Assigned buffer to db '.selected_db.name)
     endif
   endif
@@ -85,6 +86,7 @@ function! db_ui#get_conn_info(db_key_name) abort
   let db = s:dbui_instance.dbs[a:db_key_name]
   return {
         \ 'url': db.url,
+        \ 'conn': db.conn,
         \ 'tables': db.tables.list,
         \ 'scheme': db.scheme,
         \ 'connected': !empty(db.conn),

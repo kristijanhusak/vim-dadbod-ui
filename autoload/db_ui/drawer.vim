@@ -131,7 +131,7 @@ function! s:drawer.rename_buffer(bufnr, db_key_name, is_saved_query) abort
   if new_bufnr > - 1
     call setbufvar(new_bufnr, 'dbui_is_tmp', !is_saved)
     call setbufvar(new_bufnr, 'dbui_db_key_name', db.key_name)
-    call setbufvar(new_bufnr, 'db', db.url)
+    call setbufvar(new_bufnr, 'db', db.conn)
     call setbufvar(new_bufnr, 'dbui_db_table_name', getbufvar(buffer, 'dbui_db_table_name'))
     call setbufvar(new_bufnr, 'dbui_bind_params', getbufvar(buffer, 'dbui_bind_params'))
   endif
