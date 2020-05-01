@@ -483,6 +483,7 @@ function! s:drawer.populate_schemas(db) abort
       let tables_by_schema[scheme_name] = []
     endif
     call add(tables_by_schema[scheme_name], table)
+    call add(a:db.tables.list, table)
   endfor
   let a:db.schemas.list = schemas
   for schema in schemas

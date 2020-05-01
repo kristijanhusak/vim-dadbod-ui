@@ -88,6 +88,7 @@ function! db_ui#get_conn_info(db_key_name) abort
         \ 'url': db.url,
         \ 'conn': db.conn,
         \ 'tables': db.tables.list,
+        \ 'schemas': db.schemas.list,
         \ 'scheme': db.scheme,
         \ 'connected': !empty(db.conn),
         \ }
