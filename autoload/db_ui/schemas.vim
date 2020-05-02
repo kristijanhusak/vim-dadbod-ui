@@ -1,3 +1,13 @@
+function! s:results_parser(results, delimiter, min_len) abort
+  if a:min_len ==? 1
+    return filter(a:results, '!empty(trim(v:val))')
+  endif
+  return filter(
+        \ map(a:results, {_,row -> filter(split(row, a:delimiter), '!empty(trim(v:val))')}),
+        \ 'len(v:val) ==? '.a:min_len
+        \ )
+endfunction
+
 let s:postgres_foreign_key_query = "
       \ SELECT ccu.table_name AS foreign_table_name, ccu.column_name AS foreign_column_name
       \ FROM
@@ -16,8 +26,7 @@ let s:postgresql = {
       \ 'select_foreign_key_query': 'select * from "%s" where "%s" = %s',
       \ 'cell_line_delimiter': '+',
       \ 'cell_line_number': 2,
-      \ 'cell_delimiter': '|',
-      \ 'parse_results': {results -> results[1:-2]},
+      \ 'parse_results': {results,min_len -> s:results_parser(results[1:-2], '|', min_len)},
       \ 'default_scheme': 'public',
       \ 'quote': 1,
       \ }
@@ -43,7 +52,7 @@ let s:sqlserver_foreign_keys_query = "
       \ where  c.constraint_type = 'FOREIGN KEY'
       \ and kcu.column_name = '{col_name}'"
 
-let s:sqlserver_args = '-h-1 -W -Q "%s"'
+let s:sqlserver_args = '-h-1 -W -s "|" -Q "%s"'
 let s:sqlserver = {
       \   'foreign_key_query': printf(s:sqlserver_args, s:sqlserver_foreign_keys_query),
       \   'schemes_query': printf(s:sqlserver_args, 'SELECT schema_name FROM information_schema.schemata'),
@@ -51,8 +60,7 @@ let s:sqlserver = {
       \   'select_foreign_key_query': 'select * from %s where %s = %s',
       \   'cell_line_delimiter': ' ',
       \   'cell_line_number': 2,
-      \   'cell_delimiter': ' ',
-      \   'parse_results': {results -> results[0:-3]},
+      \   'parse_results': {results, min_len -> s:results_parser(results[0:-3], '|', min_len)},
       \   'quote': 0,
       \   'default_scheme': 'dbo',
       \ }
@@ -69,8 +77,7 @@ let s:mysql = {
       \ 'select_foreign_key_query': 'select * from %s where %s = %s',
       \ 'cell_line_delimiter': '+',
       \ 'cell_line_number': 3,
-      \ 'cell_delimiter': '\t',
-      \ 'parse_results': {results -> results[1:]},
+      \ 'parse_results': {results, min_len -> s:results_parser(results[1:], '\t', min_len)},
       \ 'default_scheme': '',
       \ 'quote': 0,
       \ }

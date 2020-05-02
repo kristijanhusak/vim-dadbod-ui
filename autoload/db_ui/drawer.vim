@@ -474,15 +474,10 @@ function! s:drawer.populate_schemas(db) abort
     return a:db
   endif
   let scheme = db_ui#schemas#get(a:db.scheme)
-  let schemas = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_query))
-  let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_tables_query))
+  let schemas = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_query), 1)
+  let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_tables_query), 2)
   let tables_by_schema = {}
-  for table in tables
-    let scheme_table = map(split(table, scheme.cell_delimiter), 'trim(v:val)')
-    if len(scheme_table) < 2
-      continue
-    endif
-    let [scheme_name, table] = scheme_table
+  for [scheme_name, table] in tables
     if !has_key(tables_by_schema, scheme_name)
       let tables_by_schema[scheme_name] = []
     endif
