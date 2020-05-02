@@ -5,7 +5,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
     return db_ui#utils#echo_err(parsed.scheme.' scheme not supported for foreign key jump.')
   endif
 
-  let cell_range = s:get_cell_range(getline(scheme.cell_line_number), col('.'), scheme.cell_line_delimiter)
+  let cell_range = s:get_cell_range(getline(scheme.cell_line_number), col('.'))
   let field_name = trim(getline(scheme.cell_line_number - 1)[(cell_range.from):(cell_range.to)])
   let field_value = trim(getline('.')[(cell_range.from):(cell_range.to)])
   let foreign_key_query = substitute(scheme.foreign_key_query, '{col_name}', field_name, '')
@@ -19,16 +19,17 @@ function! db_ui#dbout#jump_to_foreign_table() abort
   exe 'DB '.query
 endfunction
 
-function! s:get_cell_range(line, col, delimiter) abort
+function! s:get_cell_range(line, col) abort
+  let table_line = '-'
   let col = a:col - 1
   let from = 0
   let to = 0
-  while col >= 0 && a:line[col] !=? a:delimiter
+  while col >= 0 && a:line[col] ==? table_line
     let from = col
     let col -= 1
   endwhile
   let col = a:col - 1
-  while col <= len(a:line) && a:line[col] !=? a:delimiter
+  while col <= len(a:line) && a:line[col] ==? table_line
     let to = col
     let col += 1
   endwhile
