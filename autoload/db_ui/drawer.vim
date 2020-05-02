@@ -492,13 +492,14 @@ function! s:drawer.populate_schemas(db) abort
             \ 'expanded': 0,
             \ 'tables': {
             \   'expanded': 1,
-            \   'list': sort(get(tables_by_schema, schema, [])),
+            \   'list': [],
             \   'items': {},
             \ },
             \ }
 
-      call self.populate_table_items(a:db.schemas.items[schema].tables)
     endif
+    let a:db.schemas.items[schema].tables.list = sort(get(tables_by_schema, schema, []))
+    call self.populate_table_items(a:db.schemas.items[schema].tables)
   endfor
   return a:db
 endfunction
