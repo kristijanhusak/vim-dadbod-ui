@@ -205,8 +205,53 @@ the connection you want to delete.
 					      *<Plug>(DBUI_JumpToForeignKey)*
 <Plug>(DBUI_JumpToForeignKey)
 		This mapping is used to jump to foreign key in a table from
-		dbout buffer. Currently supported for MySQL and Postgres.
-		By default, mapped to `<C-]>`.
+		dbout buffer. Currently supported for MySQL, Sqlserver and
+		Postgres. Here's an example:
+
+		Having table called "Users":
+>
+		_____________________________
+		| id   | username | password |
+		-------+----------+----------
+		| 1    | test     | test1    |
+		| 2    | john     | johntest |
+		------------------------------
+<
+		And table "Posts" with a defined foreign key to table "Users":
+>
+		_____________________________
+		| id   | userId   | subject  |
+		-------+----------+----------
+		| 1    | 1        | hello    |
+		| 2    | 2        | world    |
+		------------------------------
+<
+		After doing a query to fetch "Posts", and in `.dbout` preview
+		window going to the cell with user id of 1 (Note the cursor
+		in middle of cell where userId is 1)
+>
+		___________________________________
+		| id   | userId         | subject  |
+		-------+----------------+----------
+		| 1    | 1  |<- cursor  | hello    |
+		| 2    | 2              | world    |
+		------------------------------------
+<
+		And then executing this mapping (by default `<C-]>`), it will
+		do a query behind the scenes to fetch the user from table
+		"Users" with that id. After executing the mapping, you should
+		get this result
+>
+		_____________________________
+		| id   | username | password |
+		-------+----------+----------
+		| 1    | test     | test1    |
+		------------------------------
+<
+		pressing `r` (dadbods mapping for populating cmd line with
+		last query), will give you this:
+
+		`:DB select * from Users where id = 1`
 
 					      *<Plug>(DBUI_AddConnection)*
 <Plug>(DBUI_AddConnection)
