@@ -268,14 +268,14 @@ function! s:drawer.add_db(db) abort
   if self.show_details
     let db_name .= ' ('.a:db.scheme.' - '.a:db.source.')'
   endif
-  call self.add(db_name, 'toggle', 'db', self.get_database_icon(a:db), a:db.key_name, 0)
+  call self.add(db_name, 'toggle', 'db', self.get_toggle_icon('db', a:db), a:db.key_name, 0)
   if !a:db.expanded
     return a:db
   endif
 
   call self.add('New query', 'open', 'query', g:dbui_icons.new_query, a:db.key_name, 1)
   if !empty(a:db.buffers.list)
-    call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', self.get_icon(a:db.buffers), a:db.key_name, 1)
+    call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', self.get_toggle_icon('buffers', a:db.buffers), a:db.key_name, 1)
     if a:db.buffers.expanded
       for buf in a:db.buffers.list
         let buflabel = buf
@@ -288,7 +288,7 @@ function! s:drawer.add_db(db) abort
       endfor
     endif
   endif
-  call self.add('Saved queries ('.len(a:db.saved_queries.list).')', 'toggle', 'saved_queries', self.get_icon(a:db.saved_queries), a:db.key_name, 1)
+  call self.add('Saved queries ('.len(a:db.saved_queries.list).')', 'toggle', 'saved_queries', self.get_toggle_icon('saved_queries', a:db.saved_queries), a:db.key_name, 1)
   if a:db.saved_queries.expanded
     for saved_query in a:db.saved_queries.list
       call self.add(fnamemodify(saved_query, ':t'), 'open', 'buffer', g:dbui_icons.saved_query, a:db.key_name, 2, { 'file_path': saved_query, 'saved': 1 })
@@ -296,19 +296,19 @@ function! s:drawer.add_db(db) abort
   endif
 
   if a:db.schema_support
-    call self.add('Schemas ('.len(a:db.schemas.items).')', 'toggle', 'schemas', self.get_icon(a:db.schemas), a:db.key_name, 1)
+    call self.add('Schemas ('.len(a:db.schemas.items).')', 'toggle', 'schemas', self.get_toggle_icon('schemas', a:db.schemas), a:db.key_name, 1)
     if a:db.schemas.expanded
       for schema in a:db.schemas.list
         let schema_item = a:db.schemas.items[schema]
         let tables = schema_item.tables
-        call self.add(schema.' ('.len(tables.items).')', 'toggle', 'schemas->items->'.schema, self.get_icon(schema_item), a:db.key_name, 2)
+        call self.add(schema.' ('.len(tables.items).')', 'toggle', 'schemas->items->'.schema, self.get_toggle_icon('schema', schema_item), a:db.key_name, 2)
         if schema_item.expanded
           call self.render_tables(tables, a:db,'schemas->items->'.schema.'->tables->items', 3, schema)
         endif
       endfor
     endif
   else
-    call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_icon(a:db.tables), a:db.key_name, 1)
+    call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_toggle_icon('tables', a:db.tables), a:db.key_name, 1)
     call self.render_tables(a:db.tables, a:db, 'tables->items', 2, '')
   endif
 endfunction
@@ -318,7 +318,7 @@ function! s:drawer.render_tables(tables, db, path, level, schema) abort
     return
   endif
   for table in a:tables.list
-    call self.add(table, 'toggle', a:path.'->'.table, self.get_icon(a:tables.items[table]), a:db.key_name, a:level)
+    call self.add(table, 'toggle', a:path.'->'.table, self.get_toggle_icon('table', a:tables.items[table]), a:db.key_name, a:level)
     if a:tables.items[table].expanded
       for [helper_name, helper] in items(a:db.table_helpers)
         call self.add(helper_name, 'open', 'table', g:dbui_icons.tables, a:db.key_name, a:level + 1, {'table': table, 'content': helper, 'schema': a:schema })
@@ -503,21 +503,12 @@ function! s:drawer.populate_schemas(db) abort
   return a:db
 endfunction
 
-function! s:drawer.get_database_icon(item) abort
-  let suffix = g:dbui_show_database_icon ? g:dbui_icons.database : ''
+function! s:drawer.get_toggle_icon(type, item) abort
   if a:item.expanded
-    return g:dbui_icons.expanded.suffix
+    return g:dbui_icons.expanded[a:type]
   endif
 
-  return g:dbui_icons.collapsed.suffix
-endfunction
-
-function! s:drawer.get_icon(item) abort
-  if a:item.expanded
-    return g:dbui_icons.expanded
-  endif
-
-  return g:dbui_icons.collapsed
+  return g:dbui_icons.collapsed[a:type]
 endfunction
 
 function! s:drawer.get_nested(obj, val, ...) abort

@@ -18,6 +18,6 @@ function! s:suite.should_read_dotenv_variables()
   edit LICENSE
   :DBUI
   call s:expect(&filetype).to_equal('dbui')
-  call s:expect(getline(1)).to_equal(printf('%s %s', g:dbui_icons.collapsed, 'prod_db'))
-  call s:expect(getline(2)).to_equal(printf('%s %s', g:dbui_icons.collapsed, 'dev_db'))
+  call s:expect(getline(1)).to_equal(printf('%s %s', g:dbui_icons.collapsed.db, 'prod_db'))
+  call s:expect(getline(2)).to_equal(printf('%s %s', g:dbui_icons.collapsed.db, 'dev_db'))
 endfunction

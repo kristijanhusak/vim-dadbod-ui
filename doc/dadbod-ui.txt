@@ -481,23 +481,95 @@ g:db_ui_icons
 		This value holds the icons that are used in drawer. You can
 		override all or only some of them by passing the values you
 		want to override. For example:
-		>
-			let g:db_ui_icons = {'expanded': '+', 'collapsed': '-'}
-		<
-
+>
+			let g:db_ui_icons = {
+			  \ 'expanded': {
+		          \   'db': '-',
+		          \   'buffers': '-',
+		          \   'saved_queries': '-',
+		          \   'schemas': '-',
+		          \   'schema': '-',
+		          \   'tables': '-',
+		          \   'table': '-',
+			  \ },
+			  \ 'collapsed': {
+		          \   'db': '+',
+		          \   'buffers': '+',
+		          \   'saved_queries': '+',
+		          \   'schemas': '+',
+		          \   'schema': '+',
+		          \   'tables': '+',
+		          \   'table': '+',
+			  \ },
+			}
+<
 		Default value:
 >
 		>{
-			'expanded': '▾',
-			'collapsed': '▸',
-			'saved_query': '*',
-			'new_query': '+',
-			'tables': '~',
-			'buffers': '»',
-			'connection_ok': '✓',
-			'connection_error': '✕',
+		  'expanded': {
+		    'db': '▾',
+		    'buffers': '▾',
+		    'saved_queries': '▾',
+		    'schemas': '▾',
+		    'schema': '▾',
+		    'tables': '▾',
+		    'table': '▾',
+		  },
+		  'collapsed': {
+		    'db': '▸',
+		    'buffers': '▸',
+		    'saved_queries': '▸',
+		    'schemas': '▸',
+		    'schema': '▸',
+		    'tables': '▸',
+		    'table': '▸',
+		  },
+		  'saved_query': '*',
+		  'new_query': '+',
+		  'tables': '~',
+		  'buffers': '»',
+		  'add_connection': '[+]',
+		  'connection_ok': '✓',
+		  'connection_error': '✕',
 		}
 <
+					      *g:db_ui_use_nerd_fonts*
+g:db_ui_use_nerd_fonts
+		When set to `1`, Uses nerd fonts. They can be overriden in the
+		same way as regular icons. These are the default nerd icons:
+
+>
+		 {
+		  'expanded': {
+		    'db': '▾ ',
+		    'buffers': '▾ ',
+		    'saved_queries': '▾ ',
+		    'schemas': '▾ ',
+		    'schema': '▾ פּ',
+		    'tables': '▾ 藺',
+		    'table': '▾ ',
+		  },
+		  'collapsed': {
+		    'db': '▸ ',
+		    'buffers': '▸ ',
+		    'saved_queries': '▸ ',
+		    'schemas': '▸ ',
+		    'schema': '▸ פּ',
+		    'tables': '▸ 藺',
+		    'table': '▸ ',
+		  },
+		  'saved_query': '',
+		  'new_query': '璘',
+		  'tables': '離',
+		  'buffers': '﬘',
+		  'add_connection': '',
+		  'connection_ok': '✓',
+		  'connection_error': '✕',
+		}
+<
+
+		Default value: `0`
+
 					      *g:db_ui_show_help*
 g:db_ui_show_help
 		When set to `0`, hides `Press ? for help` from the DBUI

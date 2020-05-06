@@ -15,5 +15,5 @@ endfunction
 function! s:suite.should_read_env_variable() abort
   :DBUI
   cal s:expect(&filetype).to_equal('dbui')
-  call s:expect(getline(1)).to_equal(printf('%s %s', g:dbui_icons.collapsed, 'dadbod_ui_test.db'))
+  call s:expect(getline(1)).to_equal(printf('%s %s', g:dbui_icons.collapsed.db, 'dadbod_ui_test.db'))
 endfunction

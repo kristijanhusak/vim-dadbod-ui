@@ -21,7 +21,7 @@ function! s:suite.should_find_buffer_in_dbui_drawer() abort
   norm jo
   exe 'b'.bufnr
   :DBUI
-  call s:expect(getline('.')).to_equal(g:dbui_icons.expanded.' dadbod_ui_test '.g:dbui_icons.connection_ok)
+  call s:expect(getline('.')).to_equal(g:dbui_icons.expanded.db.' dadbod_ui_test '.g:dbui_icons.connection_ok)
   wincmd p
   :DBUIFindBuffer
   call s:expect(&filetype).to_equal('dbui')

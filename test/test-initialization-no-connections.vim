@@ -26,5 +26,5 @@ function! s:suite.should_add_connection_from_empty_dbui_drawer() abort
   endfunction
 
   norm jo
-  call s:expect(getline(1)).to_equal(g:dbui_icons.collapsed.' test-add-from-empty')
+  call s:expect(getline(1)).to_equal(g:dbui_icons.collapsed.db.' test-add-from-empty')
 endfunction

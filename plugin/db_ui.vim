@@ -14,11 +14,31 @@ let g:dbui_disable_mappings = get(g:, 'db_ui_disable_mappings', 0)
 let g:dbui_table_helpers = get(g:, 'db_ui_table_helpers', {})
 let g:dbui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpers', 0)
 let g:dbui_show_help = get(g:, 'db_ui_show_help', 1)
-let g:dbui_show_database_icon = get(g:, 'db_ui_show_database_icon',0)
-let g:dbui_icons = extend({
-      \ 'database': '',
-      \ 'expanded': '▾',
-      \ 'collapsed': '▸',
+let g:dbui_use_nerd_fonts = get(g:, 'db_ui_use_nerd_fonts', 0)
+let s:dbui_icons = get(g:, 'db_ui_icons', {})
+let s:expanded_icon = get(s:dbui_icons, 'expanded', '▾')
+let s:collapsed_icon = get(s:dbui_icons, 'collapsed', '▸')
+silent! call remove(s:dbui_icons, 'expanded')
+silent! call remove(s:dbui_icons, 'collapsed')
+let g:dbui_icons = {
+      \ 'expanded': {
+      \   'db': s:expanded_icon,
+      \   'buffers': s:expanded_icon,
+      \   'saved_queries': s:expanded_icon,
+      \   'schemas': s:expanded_icon,
+      \   'schema': s:expanded_icon,
+      \   'tables': s:expanded_icon,
+      \   'table': s:expanded_icon,
+      \ },
+      \ 'collapsed': {
+      \   'db': s:collapsed_icon,
+      \   'buffers': s:collapsed_icon,
+      \   'saved_queries': s:collapsed_icon,
+      \   'schemas': s:collapsed_icon,
+      \   'schema': s:collapsed_icon,
+      \   'tables': s:collapsed_icon,
+      \   'table': s:collapsed_icon,
+      \ },
       \ 'saved_query': '*',
       \ 'new_query': '+',
       \ 'tables': '~',
@@ -26,7 +46,39 @@ let g:dbui_icons = extend({
       \ 'add_connection': '[+]',
       \ 'connection_ok': '✓',
       \ 'connection_error': '✕',
-      \ }, get(g:, 'db_ui_icons', {}))
+      \ }
+
+if g:dbui_use_nerd_fonts
+  let g:dbui_icons = {
+        \ 'expanded': {
+        \   'db': s:expanded_icon.' ',
+        \   'buffers': s:expanded_icon.' ',
+        \   'saved_queries': s:expanded_icon.' ',
+        \   'schemas': s:expanded_icon.' ',
+        \   'schema': s:expanded_icon.' פּ',
+        \   'tables': s:expanded_icon.' 藺',
+        \   'table': s:expanded_icon.' ',
+        \ },
+        \ 'collapsed': {
+        \   'db': s:collapsed_icon.' ',
+        \   'buffers': s:collapsed_icon.' ',
+        \   'saved_queries': s:collapsed_icon.' ',
+        \   'schemas': s:collapsed_icon.' ',
+        \   'schema': s:collapsed_icon.' פּ',
+        \   'tables': s:collapsed_icon.' 藺',
+        \   'table': s:collapsed_icon.' ',
+        \ },
+        \ 'saved_query': '',
+        \ 'new_query': '璘',
+        \ 'tables': '離',
+        \ 'buffers': '﬘',
+        \ 'add_connection': '',
+        \ 'connection_ok': '✓',
+        \ 'connection_error': '✕',
+        \ }
+endif
+
+let g:dbui_icons = extend(g:dbui_icons, s:dbui_icons)
 
 function! s:set_mapping(key, plug) abort
   if g:dbui_disable_mappings

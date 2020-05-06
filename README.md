@@ -3,7 +3,7 @@
 Simple UI for [vim-dadbod](https://github.com/tpope/vim-dadbod).
 It allows simple navigation through databases and allows saving queries for later use.
 
-![screenshot](https://i.imgur.com/fhGqC9U.png)
+![screenshot](https://i.imgur.com/aXI5BTG.png)
 
 Tested on Linux and Mac, Vim 8+ an Neovim.
 
@@ -15,6 +15,7 @@ Features:
 * Bind parameters (see `:help vim-dadbod-ui-bind-parameters`)
 * Autocompletion with [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
 * Jump to foreign keys from the dadbod output (see `:help <Plug>(DBUI_JumpToForeignKey)`)
+* Support for nerd fonts (see `:help g:db_ui_use_nerd_fonts`)
 
 ## Installation
 

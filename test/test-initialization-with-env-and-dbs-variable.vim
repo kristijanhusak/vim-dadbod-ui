@@ -16,6 +16,6 @@ endfunction
 function! s:suite.should_read_both_env_and_global_dbs_variable()
   :DBUI
   call s:expect(&filetype).to_equal('dbui')
-  call s:expect(getline(1)).to_equal(printf('%s %s', g:dbui_icons.collapsed, 'dbui_test'))
-  call s:expect(getline(2)).to_equal(printf('%s %s', g:dbui_icons.collapsed, 'dbui_testing'))
+  call s:expect(getline(1)).to_equal(printf('%s %s', g:dbui_icons.collapsed.db, 'dbui_test'))
+  call s:expect(getline(2)).to_equal(printf('%s %s', g:dbui_icons.collapsed.db, 'dbui_testing'))
 endfunction
