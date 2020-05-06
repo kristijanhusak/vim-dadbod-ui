@@ -3,7 +3,10 @@
 Simple UI for [vim-dadbod](https://github.com/tpope/vim-dadbod).
 It allows simple navigation through databases and allows saving queries for later use.
 
-![screenshot](https://i.imgur.com/aXI5BTG.png)
+![screenshot](https://i.imgur.com/fhGqC9U.png)
+
+With nerd fonts:
+![with-nerd-fonts](https://i.imgur.com/aXI5BTG.png)
 
 Tested on Linux and Mac, Vim 8+ an Neovim.
 
