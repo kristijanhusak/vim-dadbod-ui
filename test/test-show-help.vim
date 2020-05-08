@@ -30,6 +30,7 @@ function! s:suite.should_show_help_text() abort
   call s:expect(getline(11)).to_equal('" <Leader>W - (sql) Save currently opened query')
   call s:expect(getline(12)).to_equal('" <Leader>E - (sql) Edit bind parameters in opened query')
   call s:expect(getline(13)).to_equal('" <C-]> - (.dbout) Go to entry from foreign key cell')
+  call s:expect(getline(14)).to_equal('" yic - (.dbout) Yank cell value')
   normal ?
   call s:expect(getline(1)).to_equal('" Press ? for help')
   call s:expect(getline(2)).to_be_empty()

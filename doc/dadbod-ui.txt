@@ -253,6 +253,15 @@ the connection you want to delete.
 
 		`:DB select * from Users where id = 1`
 
+					      *<Plug>(DBUI_YankCellValue)*
+<Plug>(DBUI_YankCellValue)
+		Yank value of the cell under the cursor. Supports yanking to
+		custom register (for example, doing `"zyic`) will yank the
+		value to the register `z`. Currently supported for MySQL,
+		Sqlserver and Postgres.
+
+		Mapped to `yic`
+
 					      *<Plug>(DBUI_AddConnection)*
 <Plug>(DBUI_AddConnection)
 		This mapping is used adding a new connection. It is same as

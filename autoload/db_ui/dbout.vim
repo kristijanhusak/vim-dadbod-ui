@@ -34,6 +34,18 @@ function! db_ui#dbout#foldexpr(lnum) abort
   return -1
 endfunction
 
+function! db_ui#dbout#yank_cell_value() abort
+  let parsed = db#url#parse(b:db)
+  let scheme = db_ui#schemas#get(parsed.scheme)
+  if empty(scheme)
+    return db_ui#utils#echo_err('Yanking cell value not supported for '.parsed.scheme.' scheme.')
+  endif
+
+  let cell_range = s:get_cell_range(getline(scheme.cell_line_number), col('.'))
+  let field_value = trim(getline('.')[(cell_range.from):(cell_range.to)])
+  call setreg(v:register, field_value)
+endfunction
+
 function! s:get_cell_range(line, col) abort
   let table_line = '-'
   let col = a:col - 1

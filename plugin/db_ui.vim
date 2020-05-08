@@ -106,7 +106,9 @@ augroup dbui
   autocmd FileType dbout setlocal foldmethod=expr foldexpr=db_ui#dbout#foldexpr(v:lnum) | normal!zo
   autocmd FileType dbout
         \ nnoremap <silent><buffer> <Plug>(DBUI_JumpToForeignKey) :call db_ui#dbout#jump_to_foreign_table()<CR>
+        \ | nnoremap <silent><buffer> <Plug>(DBUI_YankCellValue) :call db_ui#dbout#yank_cell_value()<CR>
         \ | call s:set_mapping('<C-]>', '<Plug>(DBUI_JumpToForeignKey)')
+        \ | call s:set_mapping('yic', '<Plug>(DBUI_YankCellValue)')
 augroup END
 
 command! DBUI call db_ui#open('<mods>')
