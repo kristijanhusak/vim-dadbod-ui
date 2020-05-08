@@ -19,6 +19,21 @@ function! db_ui#dbout#jump_to_foreign_table() abort
   exe 'DB '.query
 endfunction
 
+function! db_ui#dbout#foldexpr(lnum) abort
+  if getline(a:lnum) !~? '^[[:blank:]]*$'
+    if getline(a:lnum - 1) =~? '^[[:blank:]]*$'
+      return '>1'
+    endif
+    return 1
+  endif
+
+  if getline(a:lnum) =~? '^[[:blank:]]*$'
+    return 0
+  endif
+
+  return -1
+endfunction
+
 function! s:get_cell_range(line, col) abort
   let table_line = '-'
   let col = a:col - 1
