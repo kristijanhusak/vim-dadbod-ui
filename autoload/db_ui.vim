@@ -2,26 +2,17 @@ let s:dbui_instance = {}
 let s:dbui = {}
 
 function! db_ui#open(mods) abort
-  if empty(s:dbui_instance)
-    let s:dbui_instance = s:dbui.new()
-  endif
-
+  call s:init()
   return s:dbui_instance.drawer.open(a:mods)
 endfunction
 
 function! db_ui#toggle() abort
-  if empty(s:dbui_instance)
-    let s:dbui_instance = s:dbui.new()
-  endif
-
+  call s:init()
   return s:dbui_instance.drawer.toggle()
 endfunction
 
 function! db_ui#find_buffer() abort
-  if empty(s:dbui_instance)
-    let s:dbui_instance = s:dbui.new()
-  endif
-
+  call s:init()
   if !len(s:dbui_instance.dbs_list)
     return db_ui#utils#echo_err('No database entries found in DBUI.')
   endif
@@ -69,10 +60,7 @@ function! db_ui#find_buffer() abort
 endfunction
 
 function! db_ui#rename_buffer() abort
-  if empty(s:dbui_instance)
-    let s:dbui_instance = s:dbui.new()
-  endif
-
+  call s:init()
   return s:dbui_instance.drawer.rename_buffer(bufnr('%'), get(b:, 'dbui_db_key_name'), 0)
 endfunction
 
@@ -253,4 +241,12 @@ endfunction
 
 function! db_ui#reset_state() abort
   let s:dbui_instance = {}
+endfunction
+
+function! s:init() abort
+  if empty(s:dbui_instance)
+    let s:dbui_instance = s:dbui.new()
+  endif
+
+  return s:dbui_instance
 endfunction

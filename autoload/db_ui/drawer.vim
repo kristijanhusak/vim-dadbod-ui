@@ -248,6 +248,7 @@ function! s:drawer.render_help() abort
     call self.add('" q - Close drawer', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>W - (sql) Save currently opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>E - (sql) Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
+    call self.add('" <Leader>S - (sql) Execute query in visual or normal mode', 'noaction', 'help', '', '', 0)
     call self.add('" <C-]> - (.dbout) Go to entry from foreign key cell', 'noaction', 'help', '', '', 0)
     call self.add('" yic - (.dbout) Yank cell value', 'noaction', 'help', '', '', 0)
     call self.add('', 'noaction', 'help', '', '', 0)

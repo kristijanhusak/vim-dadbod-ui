@@ -302,6 +302,13 @@ the connection you want to delete.
 		written to temp folder by default. Once saved, it will be
 		available in the connection tree under `Saved queries` .
 
+					      *<Plug>(DBUI_ExecuteQuery)*
+<Plug>(DBUI_ExecuteQuery)
+		Execute query in sql buffer. Supports normal and visual mode.
+		Normal mode executes all content in a file, where visual mode
+		executes only the selected content.
+
+		By default, mapped to `<Leader>S`
 					      *<Plug>(DBUI_EditBindParameters)*
 <Plug>(DBUI_EditBindParameters)
 		This mapping is used in `sql` files to edit bind parameters if

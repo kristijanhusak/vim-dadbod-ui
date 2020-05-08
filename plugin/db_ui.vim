@@ -80,13 +80,14 @@ endif
 
 let g:dbui_icons = extend(g:dbui_icons, s:dbui_icons)
 
-function! s:set_mapping(key, plug) abort
+function! s:set_mapping(key, plug, ...) abort
   if g:dbui_disable_mappings
     return
   endif
 
-  if !hasmapto(a:plug)
-    silent! exe 'nmap <buffer><nowait> '.a:key.' '.a:plug
+  let mode = a:0 > 0 ? a:1 : 'n'
+  if !hasmapto(a:plug, mode)
+    silent! exe mode.'map <buffer><nowait> '.a:key.' '.a:plug
   endif
 endfunction
 
@@ -94,6 +95,8 @@ augroup dbui
   autocmd!
   autocmd FileType sql call s:set_mapping('<Leader>W', '<Plug>(DBUI_SaveQuery)')
   autocmd FileType sql call s:set_mapping('<Leader>E', '<Plug>(DBUI_EditBindParameters)')
+  autocmd FileType sql call s:set_mapping('<Leader>S', '<Plug>(DBUI_ExecuteQuery)')
+  autocmd FileType sql call s:set_mapping('<Leader>S', '<Plug>(DBUI_ExecuteQuery)', 'v')
   autocmd FileType dbui call s:set_mapping('o', '<Plug>(DBUI_SelectLine)')
   autocmd FileType dbui call s:set_mapping('S', '<Plug>(DBUI_SelectLineVsplit)')
   autocmd FileType dbui call s:set_mapping('R', '<Plug>(DBUI_Redraw)')

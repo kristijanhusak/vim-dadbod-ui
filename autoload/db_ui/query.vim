@@ -32,10 +32,6 @@ function! s:query.open(item, edit_action) abort
   call self.open_buffer(db, buffer_name, a:edit_action, {'table': table, 'content': get(a:item, 'content'), 'is_tmp': 1, 'schema': schema })
 endfunction
 
-function! s:method(name) abort
-  return s:query[a:name]()
-endfunction
-
 function! s:query.generate_buffer_basename(db_name, suffix) abort
   let buffer_basename = db_ui#utils#slug(printf('%s-%s', a:db_name, a:suffix))
   if !has_key(self.buffer_counter, buffer_basename)
@@ -147,6 +143,8 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
 
   setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
   nnoremap <buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
+  nnoremap <buffer><Plug>(DBUI_ExecuteQuery) :call <sid>method('execute_query')<CR>
+  vnoremap <buffer><Plug>(DBUI_ExecuteQuery) :<C-u>call <sid>method('execute_query', 1)<CR>
   if b:dbui_is_tmp
     nnoremap <buffer><silent><Plug>(DBUI_SaveQuery) :call <sid>method('save_query')<CR>
   endif
@@ -180,22 +178,39 @@ function! s:query.remove_buffer(bufnr)
   return self.drawer.render()
 endfunction
 
-function! s:query.execute_query() abort
+function! s:query.execute_query(...) abort
+  let lines = self.get_lines(get(a:, 1, 0))
   let query_time = reltime()
   call db_ui#utils#echo_msg('Executing query...')
   let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
-  if search('[^:]:\w\+', 'n') > 0
-    call self.inject_variables_and_execute(db)
+  if match(join(lines), '[^:]:\w\+') > -1
+    call self.inject_variables_and_execute(db, copy(lines))
   else
-    silent! exe '%DB '.db.conn
+    silent! exe 'DB '.join(lines)
   endif
-  let self.last_query = getline(1, '$')
+  let self.last_query = lines
   call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
 endfunction
 
-function! s:query.inject_variables_and_execute(db) abort
+
+function! s:query.get_lines(is_visual_mode) abort
+  if !a:is_visual_mode
+    return getline(1, '$')
+  endif
+
+  let sel_save = &selection
+  let &selection = 'inclusive'
+  let reg_save = @@
+  silent exe 'normal! gvy'
+  let lines = split(@@, "\n")
+  let &selection = sel_save
+  let @@ = reg_save
+  return lines
+endfunction
+
+function! s:query.inject_variables_and_execute(db, lines) abort
   let vars = []
-  for line in getline(1, '$')
+  for line in a:lines
     call substitute(line, '[^:]\(:\w\+\)', '\=add(vars, submatch(1))', 'g')
   endfor
 
@@ -215,7 +230,7 @@ function! s:query.inject_variables_and_execute(db) abort
     endif
   endfor
 
-  let content = join(getline(1, '$'))
+  let content = join(a:lines)
 
   for [var, val] in items(b:dbui_bind_params)
     if trim(val) ==? ''
