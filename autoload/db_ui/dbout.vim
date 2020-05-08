@@ -21,13 +21,16 @@ endfunction
 
 function! db_ui#dbout#foldexpr(lnum) abort
   if getline(a:lnum) !~? '^[[:blank:]]*$'
-    if getline(a:lnum - 1) =~? '^[[:blank:]]*$'
+    if getline(a:lnum + 1) =~? '^----'
       return '>1'
     endif
     return 1
   endif
 
   if getline(a:lnum) =~? '^[[:blank:]]*$'
+    if getline(a:lnum + 2) !~? '^----'
+      return 1
+    endif
     return 0
   endif
 
