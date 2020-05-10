@@ -21,12 +21,18 @@ endfunction
 
 function! db_ui#dbout#foldexpr(lnum) abort
   if getline(a:lnum) !~? '^[[:blank:]]*$'
+    " Mysql
+    if getline(a:lnum) =~? '^+---' && getline(a:lnum + 2) =~? '^+---'
+      return '>1'
+    endif
+    " Postgres & Sqlserver
     if getline(a:lnum + 1) =~? '^----'
       return '>1'
     endif
     return 1
   endif
 
+  "Postgres & Sqlserver
   if getline(a:lnum) =~? '^[[:blank:]]*$'
     if getline(a:lnum + 2) !~? '^----'
       return 1
