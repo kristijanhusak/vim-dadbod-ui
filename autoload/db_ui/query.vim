@@ -1,5 +1,6 @@
 let s:query_instance = {}
 let s:query = {}
+let s:bind_param_rgx = '[^:]:\w\+'
 
 function! db_ui#query#new(drawer) abort
   let s:query_instance = s:query.new(a:drawer)
@@ -179,19 +180,32 @@ function! s:query.remove_buffer(bufnr)
 endfunction
 
 function! s:query.execute_query(...) abort
-  let lines = self.get_lines(get(a:, 1, 0))
+  let is_visual_mode = get(a:, 1, 0)
+  let lines = self.get_lines(is_visual_mode)
   let query_time = reltime()
   call db_ui#utils#echo_msg('Executing query...')
-  let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
-  if match(join(lines), '[^:]:\w\+') > -1
-    call self.inject_variables_and_execute(db, copy(lines))
+  if !is_visual_mode && search(s:bind_param_rgx, 'n') <= 0
+    silent! exe '%DB'
   else
-    silent! exe 'DB '.join(lines)
+    let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
+    call self.execute_lines(db, lines, is_visual_mode)
   endif
   let self.last_query = lines
   call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
 endfunction
 
+function! s:query.execute_lines(db, lines, is_visual_mode) abort
+  let filename = tempname()
+  let lines = copy(a:lines)
+
+  if match(join(a:lines), '[^:]:\w\+') > -1
+    let lines = self.inject_variables(lines)
+  endif
+
+  call writefile(lines, filename)
+  silent! exe 'DB < '.filename
+  return filename
+endfunction
 
 function! s:query.get_lines(is_visual_mode) abort
   if !a:is_visual_mode
@@ -208,7 +222,7 @@ function! s:query.get_lines(is_visual_mode) abort
   return lines
 endfunction
 
-function! s:query.inject_variables_and_execute(db, lines) abort
+function! s:query.inject_variables(lines) abort
   let vars = []
   for line in a:lines
     call substitute(line, '[^:]\(:\w\+\)', '\=add(vars, submatch(1))', 'g')
@@ -230,18 +244,19 @@ function! s:query.inject_variables_and_execute(db, lines) abort
     endif
   endfor
 
-  let content = join(a:lines)
+  let content = []
 
-  for [var, val] in items(b:dbui_bind_params)
-    if trim(val) ==? ''
-      continue
-    endif
-
-    let content = substitute(content, var, db_ui#utils#quote_query_value(val), 'g')
+  for line in a:lines
+    for [var, val] in items(b:dbui_bind_params)
+      if trim(val) ==? ''
+        continue
+      endif
+      let line = substitute(line, var, db_ui#utils#quote_query_value(val), 'g')
+    endfor
+    call add(content, line)
   endfor
 
-  exe 'DB '.a:db.conn.' '.content
-  call db_ui#utils#echo_msg('Executing query...Done.')
+  return content
 endfunction
 
 function! s:query.edit_bind_parameters() abort
