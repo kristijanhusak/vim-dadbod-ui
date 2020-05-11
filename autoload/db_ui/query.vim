@@ -202,9 +202,14 @@ function! s:query.execute_lines(db, lines, is_visual_mode) abort
     let lines = self.inject_variables(lines)
   endif
 
+  if len(lines) ==? 1
+    silent! exe 'DB '.lines[0]
+    return lines
+  endif
+
   call writefile(lines, filename)
   silent! exe 'DB < '.filename
-  return filename
+  return lines
 endfunction
 
 function! s:query.get_lines(is_visual_mode) abort
