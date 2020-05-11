@@ -52,7 +52,7 @@ function! db_ui#utils#readfile(file) abort
 endfunction
 
 function! db_ui#utils#quote_query_value(val) abort
-  if a:val !=? "^'.*'$" && (a:val =~? '^[0-9]*$' || a:val =~? '^\(true\|false\)$' || a:val =~? "''")
+  if a:val =~? "^'.*'$" || a:val =~? '^[0-9]*$' || a:val =~? '^\(true\|false\)$'
     return a:val
   endif
 
