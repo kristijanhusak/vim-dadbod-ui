@@ -75,7 +75,7 @@ let s:sqlserver_references_query = "
       \     and kcu2.constraint_schema = rc.unique_constraint_schema  \n
       \     and kcu2.constraint_name = rc.unique_constraint_name  \n
       \     and kcu2.ordinal_position = kcu1.ordinal_position  \n
-      \ where kcu2.table_name='{table}' and kcu2.table_schema = '{shema}'"
+      \ where kcu2.table_name='{table}' and kcu2.table_schema = '{schema}'"
 
 let s:sqlserver_primary_keys = "
       \  select tc.constraint_name, kcu.column_name \n
@@ -96,12 +96,12 @@ let s:sqlserver_constraints_query = "
 let s:sqlserver = {
       \ 'List': 'select top 200 * from {optional_schema}{table}',
       \ 'Columns': s:sqlserver_column_summary_query,
-      \ 'Indexes': 'exec sp_helpindex {table}',
+      \ 'Indexes': 'exec sp_helpindex ''{schema}.{table}''',
       \ 'Foreign Keys': s:sqlserver_foreign_keys_query,
       \ 'References': s:sqlserver_references_query,
       \ 'Primary Keys': s:sqlserver_primary_keys,
       \ 'Constraints': s:sqlserver_constraints_query,
-      \ 'Describe': 'exec sp_help {table}',
+      \ 'Describe': 'exec sp_help ''{schema}.{table}''',
 \   }
 
 let s:helpers = {
