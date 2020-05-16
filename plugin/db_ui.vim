@@ -18,8 +18,19 @@ let g:dbui_use_nerd_fonts = get(g:, 'db_ui_use_nerd_fonts', 0)
 let s:dbui_icons = get(g:, 'db_ui_icons', {})
 let s:expanded_icon = get(s:dbui_icons, 'expanded', '▾')
 let s:collapsed_icon = get(s:dbui_icons, 'collapsed', '▸')
-silent! call remove(s:dbui_icons, 'expanded')
-silent! call remove(s:dbui_icons, 'collapsed')
+
+if type(s:expanded_icon) !=? type('')
+  let s:expanded_icon = '▾'
+else
+  silent! call remove(s:dbui_icons, 'expanded')
+endif
+
+if type(s:collapsed_icon) !=? type('')
+  let s:collapsed_icon = '▸'
+else
+  silent! call remove(s:dbui_icons, 'collapsed')
+endif
+
 let g:dbui_icons = {
       \ 'expanded': {
       \   'db': s:expanded_icon,
