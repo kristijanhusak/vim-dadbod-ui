@@ -234,7 +234,7 @@ autocmd FileType dbui nmap <buffer> v <Plug>(DBUI_SelectLineVsplit)
 
 If you don't want any mappings to be added, add this to vimrc:
 ```vimL
-let g:db_ui_disable-mappings = 1
+let g:db_ui_disable_mappings = 1
 ```
 
 ## TODO
