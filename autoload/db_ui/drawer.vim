@@ -458,7 +458,6 @@ function! s:drawer.populate_tables(db) abort
     let temp_table_list = []
 
     for table_index in a:db.tables.list
-      echom table_index
       let temp_table_list += map(split(copy(table_index)), 'trim(v:val)')
     endfor
 
