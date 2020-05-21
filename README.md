@@ -122,7 +122,7 @@ For example, to add a "count rows" helper for postgres, you would add this as a 
 
 ```vimL
 let g:db_ui_table_helpers = {
-\   'postgresql': {
+\   'postgres': {
 \     'Count': 'select count(*) from "{table}"'
 \   }
 \ }
@@ -131,7 +131,7 @@ let g:db_ui_table_helpers = {
 Or if you want to override any of the defaults, provide the same name as part of config:
 ```vimL
 let g:db_ui_table_helpers = {
-\   'postgresql': {
+\   'postgres': {
 \     'List': 'select * from "{table}" order by id asc'
 \   }
 \ }
