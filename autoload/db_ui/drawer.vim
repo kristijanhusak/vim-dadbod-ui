@@ -461,7 +461,7 @@ function! s:drawer.populate_tables(db) abort
       let temp_table_list += map(split(copy(table_index)), 'trim(v:val)')
     endfor
 
-    let a:db.tables.list = temp_table_list
+    let a:db.tables.list = sort(temp_table_list)
   endif
 
   call self.populate_table_items(a:db.tables)
