@@ -453,9 +453,15 @@ function! s:drawer.populate_tables(db) abort
   endif
 
   let a:db.tables.list = tables
-  " Fix issue with sqlite tables listing as single string with spaces
-  if a:db.scheme =~? '^sqlite' && len(a:db.tables.list) ==? 1
-    let a:db.tables.list = map(split(copy(a:db.tables.list[0])), 'trim(v:val)')
+  " Fix issue with sqlite tables listing as strings with spaces
+  if a:db.scheme =~? '^sqlite' && len(a:db.tables.list) >=? 0
+    let temp_table_list = []
+
+    for table_index in a:db.tables.list
+      let temp_table_list += map(split(copy(table_index)), 'trim(v:val)')
+    endfor
+
+    let a:db.tables.list = temp_table_list
   endif
 
   call self.populate_table_items(a:db.tables)
