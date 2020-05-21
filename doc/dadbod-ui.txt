@@ -517,7 +517,7 @@ g:db_ui_icons
 		          \   'tables': '+',
 		          \   'table': '+',
 			  \ },
-			}
+			\ }
 <
 		Default value:
 >
