@@ -21,7 +21,7 @@ Features:
 * Support for nerd fonts (see `:help g:db_ui_use_nerd_fonts`)
 
 ## Installation
-
+### With a package manager
 Use your favorite package manager. If you don't have one, I suggest [vim-packager](https://github.com/kristijanhusak/vim-packager)
 ```vimL
 function! PackagerInit() abort
@@ -38,6 +38,23 @@ let g:dbs = {
 \ }
 ```
 
+### Without a package manager
+First, ensure vim-dadbod is installed, by following Tim Pope his [instructions](https://github.com/tpope/vim-dadbod#installation)
+Then run the following commands to install this plugin:
+```
+mkdir -p $HOME/.vim/pack/plugins/start
+cd $HOME/.vim/pack/plugins/start
+git clone https://github.com/kristijanhusak/vim-dadbod-ui.git
+```
+
+Optionally, install [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion) as well:
+```
+mkdir -p $HOME/.vim/pack/plugins/start
+cd $HOME/.vim/pack/plugins/start
+git clone https://github.com/kristijanhusak/vim-dadbod-completion.git
+```
+
+## What to do after installing
 After installation, run `:DBUI`, which should open up a drawer with all databases provided.
 When you finish writing your query, just write the file (`:w`) and it will automatically execute the query for that database and it will automatically execute the query for selected database.
 
