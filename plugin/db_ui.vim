@@ -19,14 +19,18 @@ let g:dbui_execute_on_save = get(g:, 'db_ui_execute_on_save', 1)
 let s:dbui_icons = get(g:, 'db_ui_icons', {})
 let s:expanded_icon = get(s:dbui_icons, 'expanded', '▾')
 let s:collapsed_icon = get(s:dbui_icons, 'collapsed', '▸')
+let s:expanded_icons = {}
+let s:collapsed_icons = {}
 
 if type(s:expanded_icon) !=? type('')
+  let s:expanded_icons = s:expanded_icon
   let s:expanded_icon = '▾'
 else
   silent! call remove(s:dbui_icons, 'expanded')
 endif
 
 if type(s:collapsed_icon) !=? type('')
+  let s:collapsed_icons = s:collapsed_icon
   let s:collapsed_icon = '▸'
 else
   silent! call remove(s:dbui_icons, 'collapsed')
@@ -90,6 +94,10 @@ if g:dbui_use_nerd_fonts
         \ }
 endif
 
+let g:dbui_icons.expanded = extend(g:dbui_icons.expanded, s:expanded_icons)
+let g:dbui_icons.collapsed = extend(g:dbui_icons.collapsed, s:collapsed_icons)
+silent! call remove(s:dbui_icons, 'expanded')
+silent! call remove(s:dbui_icons, 'collapsed')
 let g:dbui_icons = extend(g:dbui_icons, s:dbui_icons)
 
 function! s:set_mapping(key, plug, ...) abort
