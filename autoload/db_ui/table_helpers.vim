@@ -122,6 +122,18 @@ endfor
 let s:all.postgres = s:all.postgresql
 let s:all.sqlite3 = s:all.sqlite
 
+let s:scheme_map = {
+      \ 'postgres': 'postgresql',
+      \ 'postgresql': 'postgres',
+      \ 'sqlite3': 'sqlite',
+      \ 'sqlite': 'sqlite3',
+      \ }
+
 function db_ui#table_helpers#get(scheme) abort
-  return extend(get(s:all, a:scheme, { 'List': '' }), get(g:dbui_table_helpers, a:scheme, {}))
+  let result = extend(get(s:all, a:scheme, { 'List': '' }), get(g:dbui_table_helpers, a:scheme, {}))
+  if has_key(s:scheme_map, a:scheme)
+    let result = extend(result, get(g:dbui_table_helpers, s:scheme_map[a:scheme], {}))
+  endif
+
+  return result
 endfunction
