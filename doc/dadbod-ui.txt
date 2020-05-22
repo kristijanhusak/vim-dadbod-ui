@@ -437,6 +437,13 @@ g:db_ui_table_helpers
 
 		Default value: `{}`
 
+					   *g:db_ui_execute_on_save*
+g:db_ui_execute_on_save
+		If this is set to `1`, queries are automatically executed on
+		sql buffer save.
+
+		Default value: `1`
+
 					   *g:db_ui_auto_execute_table_helpers*
 g:db_ui_auto_execute_table_helpers
 		If this is set to `1`, opening any table helper will

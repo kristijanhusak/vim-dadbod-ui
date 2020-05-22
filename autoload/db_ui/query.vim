@@ -152,7 +152,9 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   endif
   augroup db_ui_query
     autocmd! * <buffer>
-    autocmd BufWritePost <buffer> nested call s:method('execute_query')
+    if g:dbui_execute_on_save
+      autocmd BufWritePost <buffer> nested call s:method('execute_query')
+    endif
     autocmd BufDelete,BufWipeout <buffer> silent! call s:method('remove_buffer', str2nr(expand('<abuf>')))
   augroup END
 endfunction
