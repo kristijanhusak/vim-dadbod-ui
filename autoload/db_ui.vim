@@ -82,6 +82,21 @@ function! db_ui#get_conn_info(db_key_name) abort
         \ }
 endfunction
 
+function! db_ui#query(query) abort
+  if empty(b:db)
+    throw 'Cannot find valid connection for a buffer.'
+  endif
+
+  let parsed = db#url#parse(b:db)
+  let scheme = db_ui#schemas#get(parsed.scheme)
+  if empty(scheme)
+    throw 'Unsupported scheme '.parsed.scheme
+  endif
+
+  let result = db_ui#schemas#query({ 'conn': b:db }, printf(scheme.args, a:query))
+  return scheme.parse_results(result, 0)
+endfunction
+
 function! s:dbui.new() abort
   let instance = copy(self)
   let instance.dbs = {}

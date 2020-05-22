@@ -112,6 +112,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   endif
 
   let b:dbui_table_name = table
+  let b:dbui_schema_name = schema
   let content = substitute(default_content, '{table}', table, 'g')
   let content = substitute(content, '{optional_schema}', optional_schema, 'g')
   let content = substitute(content, '{schema}', schema, 'g')

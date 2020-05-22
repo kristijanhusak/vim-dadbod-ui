@@ -2,10 +2,15 @@ function! s:results_parser(results, delimiter, min_len) abort
   if a:min_len ==? 1
     return filter(a:results, '!empty(trim(v:val))')
   endif
-  return filter(
-        \ map(a:results, {_,row -> filter(split(row, a:delimiter), '!empty(trim(v:val))')}),
-        \ 'len(v:val) ==? '.a:min_len
-        \ )
+  let mapped = map(a:results, {_,row -> filter(split(row, a:delimiter), '!empty(trim(v:val))')})
+  if a:min_len > 1
+    return filter(mapped, 'len(v:val) ==? '.a:min_len)
+  endif
+
+  let counts = map(copy(mapped), 'len(v:val)')
+  let min_len = max(counts)
+
+  return filter(mapped,'len(v:val) ==? '.min_len)
 endfunction
 
 let s:postgres_foreign_key_query = "
@@ -20,6 +25,7 @@ let s:postgres_foreign_key_query = "
 
 let s:postgresql_args = '-A -c "%s"'
 let s:postgresql = {
+      \ 'args': s:postgresql_args,
       \ 'foreign_key_query': printf(s:postgresql_args, s:postgres_foreign_key_query),
       \ 'schemes_query': printf(s:postgresql_args, 'SELECT schema_name FROM information_schema.schemata'),
       \ 'schemes_tables_query': printf(s:postgresql_args, 'SELECT table_schema, table_name FROM information_schema.tables'),
@@ -47,6 +53,7 @@ let s:sqlserver_foreign_keys_query = "
 
 let s:sqlserver_args = '-h-1 -W -s "|" -Q "%s"'
 let s:sqlserver = {
+      \   'args': s:sqlserver_args,
       \   'foreign_key_query': printf(s:sqlserver_args, trim(s:sqlserver_foreign_keys_query)),
       \   'schemes_query': printf(s:sqlserver_args, 'SELECT schema_name FROM information_schema.schemata'),
       \   'schemes_tables_query': printf(s:sqlserver_args, 'SELECT table_schema, table_name FROM information_schema.tables'),
@@ -63,6 +70,7 @@ let s:mysql_foreign_key_query =  "
       \ where referenced_table_name is not null and column_name = '{col_name}' LIMIT 1"
 let s:mysql_args = '-e "%s"'
 let s:mysql = {
+      \ 'args': s:mysql_args,
       \ 'foreign_key_query': printf(s:mysql_args, s:mysql_foreign_key_query),
       \ 'schemes_query': printf(s:mysql_args, 'SELECT schema_name FROM information_schema.schemata'),
       \ 'schemes_tables_query': printf(s:mysql_args, 'SELECT table_schema, table_name FROM information_schema.tables'),
