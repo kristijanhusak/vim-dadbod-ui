@@ -130,8 +130,10 @@ augroup dbui
   autocmd FileType dbout
         \ nnoremap <silent><buffer> <Plug>(DBUI_JumpToForeignKey) :call db_ui#dbout#jump_to_foreign_table()<CR>
         \ | nnoremap <silent><buffer> <Plug>(DBUI_YankCellValue) :call db_ui#dbout#yank_cell_value()<CR>
+        \ | nnoremap <silent><buffer> <Plug>(DBUI_YankHeader) :call db_ui#dbout#yank_header()<CR>
         \ | call s:set_mapping('<C-]>', '<Plug>(DBUI_JumpToForeignKey)')
         \ | call s:set_mapping('yic', '<Plug>(DBUI_YankCellValue)')
+        \ | call s:set_mapping('yh', '<Plug>(DBUI_YankHeader)')
 augroup END
 
 command! DBUI call db_ui#open('<mods>')
