@@ -55,6 +55,33 @@ function! db_ui#dbout#yank_cell_value() abort
   call setreg(v:register, field_value)
 endfunction
 
+function! db_ui#dbout#yank_header() abort
+  let parsed = db#url#parse(b:db)
+  let scheme = db_ui#schemas#get(parsed.scheme)
+  if empty(scheme)
+    return db_ui#utils#echo_err('Yanking headers not supported for '.parsed.scheme.' scheme.')
+  endif
+
+  let table_line = '-'
+  let column_line = getline(scheme.cell_line_number-1)
+  let underline = getline(scheme.cell_line_number)
+  let from = 0
+  let to = 0
+  let i = 0
+  let columns=[]
+  let lastcol = strlen(underline)
+  while i <= lastcol
+    if underline[i] !=? table_line || i == lastcol
+      let to = i-1
+      call add(columns, trim(column_line[from:to]))
+      let from = i+1
+    endif
+    let i += 1
+  endwhile
+  let csv_columns = join(columns, ', ')
+  call setreg(v:register, csv_columns)
+endfunction
+
 function! s:get_cell_range(line, col) abort
   let table_line = '-'
   let col = a:col - 1
