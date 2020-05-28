@@ -43,7 +43,7 @@ function! db_ui#dbout#foldexpr(lnum) abort
   return -1
 endfunction
 
-function! db_ui#dbout#yank_cell_value() abort
+function! db_ui#dbout#get_cell_value() abort
   let parsed = db#url#parse(b:db)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
@@ -51,8 +51,18 @@ function! db_ui#dbout#yank_cell_value() abort
   endif
 
   let cell_range = s:get_cell_range(getline(scheme.cell_line_number), col('.'))
-  let field_value = trim(getline('.')[(cell_range.from):(cell_range.to)])
-  call setreg(v:register, field_value)
+  let field_value = getline('.')[(cell_range.from):(cell_range.to)]
+  let start_spaces = len(matchstr(field_value, '^[[:blank:]]*'))
+  let end_spaces = len(matchstr(field_value, '[[:blank:]]*$'))
+  let from = cell_range.from + start_spaces + 1
+  let to = cell_range.to - end_spaces
+  call cursor(line('.'), from)
+  let motion = max([(to - from), 0])
+  let cmd = 'normal!v'
+  if motion > 0
+    let cmd .= motion.'l'
+  endif
+  exe cmd
 endfunction
 
 function! db_ui#dbout#yank_header() abort
