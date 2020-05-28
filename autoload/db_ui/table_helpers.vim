@@ -1,9 +1,11 @@
 let s:basic_constraint_query = "
-      \ SELECT tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name AS foreign_table_name, ccu.column_name AS foreign_column_name\n
-      \ FROM\n
+      \SELECT tc.constraint_name, tc.table_name, kcu.column_name, ccu.table_name AS foreign_table_name, ccu.column_name AS foreign_column_name, rc.update_rule, rc.delete_rule\n
+      \FROM\n
       \     information_schema.table_constraints AS tc\n
       \     JOIN information_schema.key_column_usage AS kcu\n
       \       ON tc.constraint_name = kcu.constraint_name\n
+      \     JOIN information_schema.referential_constraints as rc\n
+      \       ON tc.constraint_name = rc.constraint_name\n
       \     JOIN information_schema.constraint_column_usage AS ccu\n
       \       ON ccu.constraint_name = tc.constraint_name\n"
 
