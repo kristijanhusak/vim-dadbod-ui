@@ -254,14 +254,14 @@ the connection you want to delete.
 
 		`:DB select * from Users where id = 1`
 
-					      *<Plug>(DBUI_YankCellValue)*
-<Plug>(DBUI_YankCellValue)
-		Yank value of the cell under the cursor. Supports yanking to
-		custom register (for example, doing `"zyic`) will yank the
-		value to the register `z`. Currently supported for MySQL,
-		Sqlserver and Postgres.
+					      *ic*
+ic
+		Operator pending mapping that works on cell value in results
+		buffer.  For example, to yank cell value under cursor, do `yic`.
+		To visually select it, do `vic`. Also supports custom
+		registers.
 
-		Mapped to `yic`
+		Mapped to `ic`
 
 					      *<Plug>(DBUI_AddConnection)*
 <Plug>(DBUI_AddConnection)
@@ -310,6 +310,14 @@ the connection you want to delete.
 		executes only the selected content.
 
 		By default, mapped to `<Leader>S`
+
+					      *<Plug>(DBUI_ToggleResultLayout)*
+<Plug>(DBUI_ToggleResultLayout)
+		Toggle expanded view in the results buffer (column and value
+		per line). Currently supported only for MySQL and PostgreSQL.
+
+		By default, mapped to `<Leader>R`
+
 					      *<Plug>(DBUI_EditBindParameters)*
 <Plug>(DBUI_EditBindParameters)
 		This mapping is used in `sql` files to edit bind parameters if

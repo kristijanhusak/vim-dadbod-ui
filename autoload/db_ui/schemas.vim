@@ -33,6 +33,7 @@ let s:postgresql = {
       \ 'cell_line_number': 2,
       \ 'parse_results': {results,min_len -> s:results_parser(results[1:-2], '|', min_len)},
       \ 'default_scheme': 'public',
+      \ 'layout_flag': '\\x',
       \ 'quote': 1,
       \ }
 
@@ -78,6 +79,7 @@ let s:mysql = {
       \ 'cell_line_number': 3,
       \ 'parse_results': {results, min_len -> s:results_parser(results[1:], '\t', min_len)},
       \ 'default_scheme': '',
+      \ 'layout_flag': '\\G',
       \ 'quote': 0,
       \ }
 let s:schemas = {

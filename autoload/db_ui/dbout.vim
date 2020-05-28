@@ -65,6 +65,31 @@ function! db_ui#dbout#get_cell_value() abort
   exe cmd
 endfunction
 
+function! db_ui#dbout#toggle_layout() abort
+  let parsed = db#url#parse(b:db)
+  let scheme = db_ui#schemas#get(parsed.scheme)
+  if !has_key(scheme, 'layout_flag')
+    return db_ui#utils#echo_err('Toggling layout not supported for '.parsed.scheme.' scheme.')
+  endif
+  let content = join(readfile(b:db_input), "\n")
+  let expanded_layout = get(b:, 'db_ui_expanded_layout', 0)
+
+  if expanded_layout
+    let b:db_ui_expanded_layout = !expanded_layout
+    norm R
+    return
+  endif
+
+  let content = substitute(content, ';\?$', ' '.scheme.layout_flag, '')
+  let tmp = tempname()
+  call writefile(split(content, "\n"), tmp)
+  let old_db_input = b:db_input
+  let b:db_input = tmp
+  norm R
+  let b:db_input = old_db_input
+  let b:db_ui_expanded_layout = !expanded_layout
+endfunction
+
 function! db_ui#dbout#yank_header() abort
   let parsed = db#url#parse(b:db)
   let scheme = db_ui#schemas#get(parsed.scheme)

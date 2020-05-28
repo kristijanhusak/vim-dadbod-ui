@@ -131,9 +131,11 @@ augroup dbui
         \ nnoremap <silent><buffer> <Plug>(DBUI_JumpToForeignKey) :call db_ui#dbout#jump_to_foreign_table()<CR>
         \ | nnoremap <silent><buffer> <Plug>(DBUI_YankCellValue) :call db_ui#dbout#get_cell_value()<CR>
         \ | nnoremap <silent><buffer> <Plug>(DBUI_YankHeader) :call db_ui#dbout#yank_header()<CR>
+        \ | nnoremap <silent><buffer> <Plug>(DBUI_ToggleResultLayout) :call db_ui#dbout#toggle_layout()<CR>
         \ | call s:set_mapping('<C-]>', '<Plug>(DBUI_JumpToForeignKey)')
         \ | call s:set_mapping('vic', '<Plug>(DBUI_YankCellValue)')
         \ | call s:set_mapping('yh', '<Plug>(DBUI_YankHeader)')
+        \ | call s:set_mapping('<Leader>R', '<Plug>(DBUI_ToggleResultLayout)')
         \ | omap <silent><buffer> ic :call db_ui#dbout#get_cell_value()<CR>
 augroup END
 
