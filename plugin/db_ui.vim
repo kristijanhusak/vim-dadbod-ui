@@ -136,7 +136,7 @@ augroup dbui
         \ | call s:set_mapping('vic', '<Plug>(DBUI_YankCellValue)')
         \ | call s:set_mapping('yh', '<Plug>(DBUI_YankHeader)')
         \ | call s:set_mapping('<Leader>R', '<Plug>(DBUI_ToggleResultLayout)')
-        \ | omap <silent><buffer> ic :call db_ui#dbout#get_cell_value()<CR>
+        \ | omap <silent><buffer> ic :call db_ui#dbout#get_cell_value('operator')<CR>
 augroup END
 
 command! DBUI call db_ui#open('<mods>')

@@ -43,7 +43,8 @@ function! db_ui#dbout#foldexpr(lnum) abort
   return -1
 endfunction
 
-function! db_ui#dbout#get_cell_value() abort
+function! db_ui#dbout#get_cell_value(...) abort
+  let is_operator = a:0 > 0
   let parsed = db#url#parse(b:db)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
@@ -54,8 +55,10 @@ function! db_ui#dbout#get_cell_value() abort
   let field_value = getline('.')[(cell_range.from):(cell_range.to)]
   let start_spaces = len(matchstr(field_value, '^[[:blank:]]*'))
   let end_spaces = len(matchstr(field_value, '[[:blank:]]*$'))
+  let old_selection = &selection
+  set selection=inclusive
   let from = cell_range.from + start_spaces + 1
-  let to = cell_range.to - end_spaces
+  let to = cell_range.to - end_spaces + (is_operator ? 1 : 0)
   call cursor(line('.'), from)
   let motion = max([(to - from), 0])
   let cmd = 'normal!v'
@@ -63,6 +66,7 @@ function! db_ui#dbout#get_cell_value() abort
     let cmd .= motion.'l'
   endif
   exe cmd
+  let &selection = old_selection
 endfunction
 
 function! db_ui#dbout#toggle_layout() abort
