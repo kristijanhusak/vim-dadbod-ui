@@ -12,6 +12,13 @@ function! s:query.new(drawer) abort
   let instance.drawer = a:drawer
   let instance.buffer_counter = {}
   let instance.last_query = []
+  let instance.last_query_time = 0
+  if get(g:, 'db_async', 0)
+    augroup dbui_async_queries
+      autocmd!
+      autocmd User DBQueryFinished call s:query_instance.async_query_finished()
+    augroup END
+  endif
   return instance
 endfunction
 
@@ -185,7 +192,7 @@ endfunction
 function! s:query.execute_query(...) abort
   let is_visual_mode = get(a:, 1, 0)
   let lines = self.get_lines(is_visual_mode)
-  let query_time = reltime()
+  let self.last_query_time = reltime()
   call db_ui#utils#echo_msg('Executing query...')
   if !is_visual_mode && search(s:bind_param_rgx, 'n') <= 0
     silent! exe '%DB'
@@ -194,7 +201,13 @@ function! s:query.execute_query(...) abort
     call self.execute_lines(db, lines, is_visual_mode)
   endif
   let self.last_query = lines
-  call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
+  if !get(g:, 'db_async', 0)
+    call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(self.last_query_time)))[0].' sec.')
+  endif
+endfunction
+
+function! s:query.async_query_finished() abort
+  call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(self.last_query_time)))[0].' sec.')
 endfunction
 
 function! s:query.execute_lines(db, lines, is_visual_mode) abort
