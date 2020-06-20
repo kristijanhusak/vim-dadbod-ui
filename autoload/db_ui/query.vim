@@ -16,7 +16,7 @@ function! s:query.new(drawer) abort
   if get(g:, 'db_async', 0)
     augroup dbui_async_queries
       autocmd!
-      autocmd User DBQueryFinished call s:query_instance.async_query_finished()
+      autocmd User DBQueryFinished call s:query_instance.print_query_time()
     augroup END
   endif
   return instance
@@ -202,11 +202,11 @@ function! s:query.execute_query(...) abort
   endif
   let self.last_query = lines
   if !get(g:, 'db_async', 0)
-    call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(self.last_query_time)))[0].' sec.')
+    call self.print_query_time()
   endif
 endfunction
 
-function! s:query.async_query_finished() abort
+function! s:query.print_query_time() abort
   call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(self.last_query_time)))[0].' sec.')
 endfunction
 
