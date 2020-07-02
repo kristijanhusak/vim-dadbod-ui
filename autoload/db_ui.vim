@@ -102,10 +102,12 @@ function! s:dbui.new() abort
   let instance.dbs = {}
   let instance.dbs_list = []
   let instance.save_path = ''
+  let instance.connections_path = ''
   let instance.drawer = {}
 
   if !empty(g:dbui_save_location)
     let instance.save_path = substitute(fnamemodify(g:dbui_save_location, ':p'), '\/$', '', '')
+    let instance.connections_path = printf('%s/%s', instance.save_path, 'connections.json')
   endif
 
   call instance.populate_dbs()
@@ -225,17 +227,11 @@ function! s:dbui.parse_url(url) abort
 endfunction
 
 function! s:dbui.populate_from_connections_file() abort
-  if empty(self.save_path)
-    return self
+  if empty(self.connections_path) || !filereadable(self.connections_path)
+    return
   endif
 
-  let config_path = printf('%s/%s', self.save_path, 'connections.json')
-
-  if !filereadable(config_path)
-    return self
-  endif
-
-  let file = db_ui#utils#readfile(config_path)
+  let file = db_ui#utils#readfile(self.connections_path)
 
   for conn in file
     call self.add_if_not_exists(conn.name, conn.url, 'file')

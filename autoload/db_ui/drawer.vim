@@ -154,19 +154,19 @@ function! s:drawer.rename_line() abort
 endfunction
 
 function! s:drawer.add_connection() abort
-  if empty(self.connections)
-    let self.connections = db_ui#connections#new(self)
-  endif
-
-  return self.connections.add()
+  return self.get_connections().add()
 endfunction
 
 function! s:drawer.delete_connection(db) abort
+  return self.get_connections().delete(a:db)
+endfunction
+
+function! s:drawer.get_connections() abort
   if empty(self.connections)
     let self.connections = db_ui#connections#new(self)
   endif
 
-  return self.connections.delete(a:db)
+  return self.connections
 endfunction
 
 function! s:drawer.toggle_help() abort
