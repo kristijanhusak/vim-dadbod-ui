@@ -146,11 +146,15 @@ endfunction
 
 function! s:drawer.rename_line() abort
   let item = self.get_current_item()
-  if item.type !=? 'buffer'
-    return
+  if item.type ==? 'buffer'
+    return self.rename_buffer(bufnr(item.file_path), item.dbui_db_key_name, get(item, 'saved', 0))
   endif
 
-  return self.rename_buffer(bufnr(item.file_path), item.dbui_db_key_name, get(item, 'saved', 0))
+  if item.type ==? 'db'
+    return self.get_connections().rename(self.dbui.dbs[item.dbui_db_key_name])
+  endif
+
+  return
 endfunction
 
 function! s:drawer.add_connection() abort
@@ -244,7 +248,7 @@ function! s:drawer.render_help() abort
     call self.add('" R - Redraw', 'noaction', 'help', '', '', 0)
     call self.add('" A - Add connection', 'noaction', 'help', '', '', 0)
     call self.add('" H - Toggle database details', 'noaction', 'help', '', '', 0)
-    call self.add('" r - Rename buffer/saved query', 'noaction', 'help', '', '', 0)
+    call self.add('" r - Rename/Edit buffer/connection/saved query', 'noaction', 'help', '', '', 0)
     call self.add('" q - Close drawer', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>W - (sql) Save currently opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>E - (sql) Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)

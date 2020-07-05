@@ -291,7 +291,8 @@ ic
 
 					      *<Plug>(DBUI_RenameLine)*
 <Plug>(DBUI_RenameLine)
-		Rename buffer or saved query under cursor. If it's a buffer,
+		Rename buffer or saved query under cursor, or edit a
+		connection added via |DBUIAddConnection|. If it's a buffer,
 		it must be written (executed) at least once. Alternative is to
 		use |DBUIRenameBuffer| from the buffer.
 		By default, mapped to `r`

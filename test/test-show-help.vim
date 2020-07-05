@@ -25,7 +25,7 @@ function! s:suite.should_show_help_text() abort
   call s:expect(getline(6)).to_equal('" R - Redraw')
   call s:expect(getline(7)).to_equal('" A - Add connection')
   call s:expect(getline(8)).to_equal('" H - Toggle database details')
-  call s:expect(getline(9)).to_equal('" r - Rename buffer/saved query')
+  call s:expect(getline(9)).to_equal('" r - Rename/Edit buffer/connection/saved query')
   call s:expect(getline(10)).to_equal('" q - Close drawer')
   call s:expect(getline(11)).to_equal('" <Leader>W - (sql) Save currently opened query')
   call s:expect(getline(12)).to_equal('" <Leader>E - (sql) Edit bind parameters in opened query')

@@ -62,6 +62,40 @@ function! s:connections.add_full_url() abort
   return saved
 endfunction
 
+function! s:connections.rename(db) abort
+  if a:db.source !=? 'file'
+    return db_ui#utils#echo_err('Cannot edit connections added via variables.')
+  endif
+
+  let connections = copy(self.read())
+  let idx = 0
+  let entry = {}
+  for conn in connections
+    if conn.name ==? a:db.name && conn.url ==? a:db.url
+      let entry = conn
+      break
+    endif
+    let idx += 1
+  endfor
+
+  let url = db_ui#utils#input('Edit connection url for "'.entry.name.'": ', entry.url)
+  try
+    let valid_url = db#url#parse(url)
+  catch /.*/
+    return db_ui#utils#echo_err(v:exception)
+  endtry
+
+  let name = ''
+
+  while empty(name)
+    let name = db_ui#utils#input('Edit connection name: ', entry.name)
+  endwhile
+
+  call remove(connections, idx)
+  let connections = insert(connections, {'name': name, 'url': url }, idx)
+  return self.write(connections)
+endfunction
+
 function! s:connections.enter_db_name(url) abort
   let name = db_ui#utils#input('Enter name: ', split(a:url, '/')[-1])
 
@@ -81,11 +115,11 @@ endfunction
 function s:connections.save(name, url) abort
   let file = self.get_file()
   let dir = fnamemodify(file, ':p:h')
-  
+
   if !isdirectory(dir)
     call mkdir(dir, 'p')
   endif
-  
+
   if !filereadable(file)
     call writefile(['[]'], file)
   endif
