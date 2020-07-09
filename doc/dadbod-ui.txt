@@ -19,6 +19,7 @@ vim-dadbod-ui			    *vim-dadbod-ui*
 7. Bind parameters 		   	    |vim-dadbod-ui-bind-parameters|
 8. Settings				    |vim-dadbod-ui-settings|
 9. Functions				    |vim-dadbod-ui-functions|
+10. Autocommands 			    |vim-dadbod-ui-autocommands|
 
 ==============================================================================
 1. Introduction					*vim-dadbod-ui-introduction*
@@ -617,9 +618,10 @@ g:db_ui_default_query (DEPRECATED)
 		schemes. It is deprecated in favor of |g:db_ui_table_helpers|
 
 		Default value: `SELECT * from "{table}" LIMIT 200;`
+
 ==============================================================================
 
-8. Functions					*vim-dadbod-ui-functions*
+9. Functions					*vim-dadbod-ui-functions*
 
 					      *db_ui#query()*
 db_ui#query({query})
@@ -654,5 +656,18 @@ db_ui#query({query})
 
 		autocmd FileType sql nnoremap <buffer><leader>i :call <sid>populate_query()
 <
+
+==============================================================================
+
+10. Autocommands				*vim-dadbod-ui-autocommands*
+
+					      *DBUIOpened*
+DBUIOpened
+		This autocommand is triggered when dbui drawer is opened, and
+		everything is set up. For example, to load additional
+		connections from custom env file using `vim-dotenv`, you could
+		do have something like this in your vimrc to load them:
+
+		`autocmd User DBUIOpened let b:dotenv = DotenvRead('.envrc') | norm R`
 
 vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:
