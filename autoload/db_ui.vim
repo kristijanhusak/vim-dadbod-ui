@@ -124,7 +124,7 @@ function! s:dbui.populate_dbs() abort
 
   for db in self.dbs_list
     let key_name = printf('%s_%s', db.name, db.source)
-    if !has_key(self.dbs, key_name)
+    if !has_key(self.dbs, key_name) || db.url !=? self.dbs[key_name].url
       let self.dbs[key_name] = self.generate_new_db_entry(db)
     else
       let self.dbs[key_name] = self.drawer.populate(self.dbs[key_name])
