@@ -80,12 +80,12 @@ function s:drawer.get_current_item() abort
   return self.content[line('.') - 1]
 endfunction
 
-function! s:drawer.rename_buffer(bufnr, db_key_name, is_saved_query) abort
-  let buffer = bufname(a:bufnr)
+function! s:drawer.rename_buffer(buffer, db_key_name, is_saved_query) abort
+  let bufnr = bufnr(a:buffer)
   let current_win = winnr()
   let current_ft = &filetype
 
-  if !filereadable(buffer)
+  if !filereadable(a:buffer)
     return db_ui#utils#echo_err('Only written queries can be renamed.')
   endif
 
@@ -93,15 +93,15 @@ function! s:drawer.rename_buffer(bufnr, db_key_name, is_saved_query) abort
     return db_ui#utils#echo_err('Buffer not attached to any database')
   endif
 
-  let is_saved = a:is_saved_query || (a:bufnr > -1 && getbufvar(a:bufnr, 'dbui_is_tmp') ==? 0)
-  let bufwin = bufwinnr(a:bufnr)
+  let is_saved = a:is_saved_query || (bufnr > -1 && getbufvar(bufnr, 'dbui_is_tmp') ==? 0)
+  let bufwin = bufwinnr(bufnr)
   let db = self.dbui.dbs[a:db_key_name]
   let db_slug = db_ui#utils#slug(db.name)
 
   if is_saved
-    let old_name = fnamemodify(buffer, ':t')
+    let old_name = fnamemodify(a:buffer, ':t')
   else
-    let old_name = substitute(fnamemodify(buffer, ':e'), '^'.db_slug.'-', '', '')
+    let old_name = substitute(fnamemodify(a:buffer, ':e'), '^'.db_slug.'-', '', '')
   endif
 
   let new_name = db_ui#utils#input('Enter new name: ', old_name)
@@ -111,32 +111,36 @@ function! s:drawer.rename_buffer(bufnr, db_key_name, is_saved_query) abort
   endif
 
   if is_saved
-    let new = printf('%s/%s', fnamemodify(buffer, ':p:h'), new_name)
+    let new = printf('%s/%s', fnamemodify(a:buffer, ':p:h'), new_name)
   else
-    let new = printf('%s.%s', fnamemodify(buffer, ':r'), db_slug.'-'.new_name)
+    let new = printf('%s.%s', fnamemodify(a:buffer, ':r'), db_slug.'-'.new_name)
   endif
 
-  call rename(buffer, new)
+  call rename(a:buffer, new)
   let new_bufnr = -1
 
   if bufwin > -1
     call self.get_query().open_buffer(db, new, 'edit', { 'is_tmp': !is_saved })
     let new_bufnr = bufnr('%')
-  elseif a:bufnr > -1
+  elseif bufnr > -1
     exe 'badd '.new
     let new_bufnr = bufnr(new)
     call add(db.buffers.list, new)
+  elseif index(db.buffers.list, a:buffer) > -1
+    call insert(db.buffers.list, new, index(db.buffers.list, a:buffer))
   endif
+
+  call filter(db.buffers.list, 'v:val !=? a:buffer')
 
   if new_bufnr > - 1
     call setbufvar(new_bufnr, 'dbui_is_tmp', !is_saved)
     call setbufvar(new_bufnr, 'dbui_db_key_name', db.key_name)
     call setbufvar(new_bufnr, 'db', db.conn)
-    call setbufvar(new_bufnr, 'dbui_db_table_name', getbufvar(buffer, 'dbui_db_table_name'))
-    call setbufvar(new_bufnr, 'dbui_bind_params', getbufvar(buffer, 'dbui_bind_params'))
+    call setbufvar(new_bufnr, 'dbui_db_table_name', getbufvar(a:buffer, 'dbui_db_table_name'))
+    call setbufvar(new_bufnr, 'dbui_bind_params', getbufvar(a:buffer, 'dbui_bind_params'))
   endif
 
-  silent! exe 'bw! '.buffer
+  silent! exe 'bw! '.a:buffer
   if winnr() !=? current_win
     wincmd p
   endif
@@ -147,7 +151,7 @@ endfunction
 function! s:drawer.rename_line() abort
   let item = self.get_current_item()
   if item.type ==? 'buffer'
-    return self.rename_buffer(bufnr(item.file_path), item.dbui_db_key_name, get(item, 'saved', 0))
+    return self.rename_buffer(item.file_path, item.dbui_db_key_name, get(item, 'saved', 0))
   endif
 
   if item.type ==? 'db'
@@ -286,7 +290,7 @@ function! s:drawer.add_db(db) abort
     if a:db.buffers.expanded
       for buf in a:db.buffers.list
         let buflabel = buf
-        if buf =~? '^'.a:db.save_path || empty(getbufvar(buf, 'dbui_is_tmp'))
+        if !self.dbui.is_tmp_location_buffer(buf) && (buf =~? '^'.a:db.save_path || empty(getbufvar(buf, 'dbui_is_tmp')))
           let buflabel = fnamemodify(buf, ':t')
         else
           let buflabel = substitute(fnamemodify(buf, ':e'), '^'.db_ui#utils#slug(a:db.name).'-', '', '').' *'
@@ -401,6 +405,23 @@ function! s:drawer.delete_line() abort
     call delete(item.file_path)
     call remove(db.saved_queries.list, index(db.saved_queries.list, item.file_path))
     call db_ui#utils#echo_msg('Deleted.')
+  endif
+
+  if self.dbui.is_tmp_location_buffer(item.file_path)
+    let choice = confirm('Are you sure you want to delete query?', "&Yes\n&No")
+    if choice !=? 1
+      return
+    endif
+
+    call delete(item.file_path)
+    call filter(db.buffers.list, 'v:val !=? item.file_path')
+    call db_ui#utils#echo_msg('Deleted.')
+  endif
+
+  let win = bufwinnr(item.file_path)
+  if  win > -1
+    silent! exe win.'wincmd w'
+    silent! exe 'b#'
   endif
 
   silent! exe 'bw!'.bufnr(item.file_path)

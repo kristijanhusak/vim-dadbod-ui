@@ -36,20 +36,32 @@ function! s:query.open(item, edit_action) abort
     let schema = a:item.schema
   endif
 
-  let buffer_name = printf('%s.%s', tempname(), self.generate_buffer_basename(db.name, suffix))
+  let buffer_name = self.generate_buffer_name(db.name, suffix)
   call self.open_buffer(db, buffer_name, a:edit_action, {'table': table, 'content': get(a:item, 'content'), 'is_tmp': 1, 'schema': schema })
 endfunction
 
-function! s:query.generate_buffer_basename(db_name, suffix) abort
+function! s:query.generate_buffer_name(db_name, suffix) abort
   let buffer_basename = db_ui#utils#slug(printf('%s-%s', a:db_name, a:suffix))
-  if !has_key(self.buffer_counter, buffer_basename)
-    let self.buffer_counter[buffer_basename] = 1
-    return buffer_basename
+  let buffer_name = buffer_basename
+
+  if !empty(self.drawer.dbui.tmp_location)
+    let basename = printf('%s/%s', self.drawer.dbui.tmp_location, localtime())
+    return printf('%s.%s-%s', basename, buffer_name, localtime())
   endif
 
-  let new_name = buffer_basename.'-'.self.buffer_counter[buffer_basename]
-  let self.buffer_counter[buffer_basename] += 1
-  return new_name
+  if !has_key(self.buffer_counter, buffer_basename)
+    let self.buffer_counter[buffer_basename] = 1
+  else
+    let buffer_name = buffer_basename.'-'.self.buffer_counter[buffer_basename]
+    let self.buffer_counter[buffer_basename] += 1
+  endif
+
+  let basename = tempname()
+  if !empty(self.drawer.dbui.tmp_location)
+    let basename = printf('%s/%s', self.drawer.dbui.tmp_location, localtime())
+  endif
+
+  return printf('%s.%s', basename, buffer_name)
 endfunction
 
 function! s:query.focus_window() abort

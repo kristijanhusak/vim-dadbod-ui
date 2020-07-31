@@ -441,6 +441,18 @@ g:db_ui_save_location
 
 		Default value: `~/.local/share/db_ui`
 
+					      *g:db_ui_tmp_query_location*
+g:db_ui_tmp_query_location
+		By default, all queries are created in temp folder, which is
+		cleared on vim quit. If you want all your queries to be
+		persisted in different location and read after vim restart
+		as buffers, set this value to some folder location.
+		For example, if you want to keep all your queries in folder
+		named `queries` in your home folder, you would add this:
+		`let g:db_ui_tmp_query_location = '~/queries'`
+
+		Default value: `''`
+
 					      *g:db_ui_table_helpers*
 g:db_ui_table_helpers
 		Dictionary containing custom table helpers. For more, see

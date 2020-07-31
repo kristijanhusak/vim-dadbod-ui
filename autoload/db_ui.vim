@@ -61,7 +61,7 @@ endfunction
 
 function! db_ui#rename_buffer() abort
   call s:init()
-  return s:dbui_instance.drawer.rename_buffer(bufnr('%'), get(b:, 'dbui_db_key_name'), 0)
+  return s:dbui_instance.drawer.rename_buffer(bufname('%'), get(b:, 'dbui_db_key_name'), 0)
 endfunction
 
 function! db_ui#get_conn_info(db_key_name) abort
@@ -103,11 +103,22 @@ function! s:dbui.new() abort
   let instance.dbs_list = []
   let instance.save_path = ''
   let instance.connections_path = ''
+  let instance.tmp_location = ''
   let instance.drawer = {}
+  let instance.old_buffers = []
 
   if !empty(g:dbui_save_location)
     let instance.save_path = substitute(fnamemodify(g:dbui_save_location, ':p'), '\/$', '', '')
     let instance.connections_path = printf('%s/%s', instance.save_path, 'connections.json')
+  endif
+
+  if !empty(g:dbui_tmp_query_location)
+    let tmp_loc = substitute(fnamemodify(g:dbui_tmp_query_location, ':p'), '\/$', '', '')
+    if !isdirectory(tmp_loc)
+      call mkdir(tmp_loc, 'p')
+    endif
+    let instance.tmp_location = tmp_loc
+    let instance.old_buffers = glob(tmp_loc.'/*', 1, 1)
   endif
 
   call instance.populate_dbs()
@@ -139,6 +150,7 @@ function! s:dbui.generate_new_db_entry(db) abort
     let save_path = printf('%s/%s', self.save_path, a:db.name)
   endif
   let scheme_info = db_ui#schemas#get(scheme)
+  let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".a:db.name."-"')
   return {
         \ 'url': a:db.url,
         \ 'conn': '',
@@ -150,7 +162,7 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
         \ 'schemas': {'expanded': 0, 'items': {}, 'list': [] },
         \ 'saved_queries': { 'expanded': 0, 'list': [] },
-        \ 'buffers': { 'expanded': 0, 'list': [] },
+        \ 'buffers': { 'expanded': 0, 'list': buffers },
         \ 'save_path': save_path,
         \ 'name': a:db.name,
         \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
@@ -248,6 +260,10 @@ function! s:dbui.add_if_not_exists(name, url, source) abort
   return add(self.dbs_list, {
         \ 'name': a:name, 'url': a:url, 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
         \ })
+endfunction
+
+function! s:dbui.is_tmp_location_buffer(buf) abort
+  return !empty(self.tmp_location) && a:buf =~? '^'.self.tmp_location
 endfunction
 
 function! db_ui#reset_state() abort
