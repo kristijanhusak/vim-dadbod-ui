@@ -11,6 +11,11 @@ function! db_ui#toggle() abort
   return s:dbui_instance.drawer.toggle()
 endfunction
 
+function! db_ui#save_dbout(file) abort
+  call s:init()
+  return s:dbui_instance.save_dbout(a:file)
+endfunction
+
 function! db_ui#find_buffer() abort
   call s:init()
   if !len(s:dbui_instance.dbs_list)
@@ -106,6 +111,7 @@ function! s:dbui.new() abort
   let instance.tmp_location = ''
   let instance.drawer = {}
   let instance.old_buffers = []
+  let instance.dbout_list = {}
 
   if !empty(g:dbui_save_location)
     let instance.save_path = substitute(fnamemodify(g:dbui_save_location, ':p'), '\/$', '', '')
@@ -124,6 +130,24 @@ function! s:dbui.new() abort
   call instance.populate_dbs()
   let instance.drawer = db_ui#drawer#new(instance)
   return instance
+endfunction
+
+function! s:dbui.save_dbout(file) abort
+  let db_input = ''
+  let content = ''
+  if has_key(self.dbout_list, a:file) && !empty(self.dbout_list[a:file])
+    return
+  endif
+  if exists('*getbufvar')
+    let db_input = getbufvar(a:file, 'db_input')
+  endif
+  if !empty(db_input) && filereadable(db_input)
+    let content = get(readfile(db_input, 1), 0)
+    if len(content) > 30
+      let content = printf('%s...', content[0:30])
+    endif
+  endif
+  let self.dbout_list[a:file] = content
 endfunction
 
 function! s:dbui.populate_dbs() abort

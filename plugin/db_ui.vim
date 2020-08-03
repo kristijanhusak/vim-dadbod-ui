@@ -127,6 +127,7 @@ augroup dbui
   autocmd FileType dbui call s:set_mapping('r', '<Plug>(DBUI_RenameLine)')
   autocmd FileType dbui call s:set_mapping('q', '<Plug>(DBUI_Quit)')
   autocmd BufRead,BufNewFile *.dbout set filetype=dbout
+  autocmd BufReadPost *.dbout nested call db_ui#save_dbout(expand('<afile>'))
   autocmd FileType dbout setlocal foldmethod=expr foldexpr=db_ui#dbout#foldexpr(v:lnum) | normal!zo
   autocmd FileType dbout
         \ nnoremap <silent><buffer> <Plug>(DBUI_JumpToForeignKey) :call db_ui#dbout#jump_to_foreign_table()<CR>

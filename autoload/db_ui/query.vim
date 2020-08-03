@@ -84,7 +84,7 @@ function! s:query.focus_window() abort
 
   if !found
     for win in range(1, winnr('$'))
-      if getwinvar(win, '&filetype') !=? 'dbui' && getwinvar(win, '&buftype') !=? 'nofile'
+      if getwinvar(win, '&filetype') !=? 'dbui' && getwinvar(win, '&buftype') !=? 'nofile' && getwinvar(win, '&modifiable')
         let found = 1
         exe win.'wincmd w'
         break

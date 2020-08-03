@@ -27,4 +27,15 @@ function! s:suite.should_write_query() abort
   write
   call s:expect(bufname('.dbout')).not.to_be_empty()
   call s:expect(getwinvar(bufwinnr('.dbout'), '&previewwindow')).to_equal(1)
+  pclose
+  :DBUI
+  norm G
+  call s:expect(getline('.')).to_equal(g:dbui_icons.collapsed.saved_queries.' Queries')
+  norm o
+  call s:expect(getline('.')).to_equal(g:dbui_icons.expanded.saved_queries.' Queries')
+  norm j
+  call s:expect(getline('.')).to_match('\'.g:dbui_icons.tables.' \d\+\.dbout')
+  call s:expect(bufwinnr('.dbout')).to_equal(-1)
+  norm o
+  call s:expect(bufwinnr('.dbout')).to_be_greater_than(-1)
 endfunction

@@ -11,6 +11,7 @@ function! s:drawer.new(dbui) abort
   let instance.dbui = a:dbui
   let instance.show_details = 0
   let instance.show_help = 0
+  let instance.show_dbout_list = 0
   let instance.content = []
   let instance.query = {}
   let instance.connections = {}
@@ -165,6 +166,11 @@ function! s:drawer.add_connection() abort
   return self.get_connections().add()
 endfunction
 
+function! s:drawer.toggle_dbout_queries() abort
+  let self.show_dbout_list = !self.show_dbout_list
+  return self.render()
+endfunction
+
 function! s:drawer.delete_connection(db) abort
   return self.get_connections().delete(a:db)
 endfunction
@@ -224,6 +230,23 @@ function! s:drawer.render(...) abort
   if empty(self.dbui.dbs_list)
     call self.add('" No connections', 'noaction', 'help', '', '', 0)
     call self.add('Add connection', 'call_method', 'add_connection', g:dbui_icons.add_connection, '', 0)
+  endif
+
+
+  if !empty(self.dbui.dbout_list)
+    call self.add('', 'noaction', 'help', '', '', 0)
+    call self.add('Queries', 'call_method', 'toggle_dbout_queries', self.get_toggle_icon('saved_queries', {'expanded': self.show_dbout_list}), '', 0)
+
+    if self.show_dbout_list
+      let entries = sort(keys(self.dbui.dbout_list))
+      for entry in entries
+        let content = ''
+        if !empty(self.dbui.dbout_list[entry])
+          let content = printf(' (%s)', self.dbui.dbout_list[entry].content)
+        endif
+        call self.add(fnamemodify(entry, ':t').content, 'open', 'dbout', g:dbui_icons.tables, '', 0, { 'file_path': entry })
+      endfor
+    endif
   endif
 
   let content = map(copy(self.content), 'repeat(" ", shiftwidth() * v:val.level).v:val.icon.(!empty(v:val.icon) ? " " : "").v:val.label')
@@ -346,6 +369,12 @@ function! s:drawer.toggle_line(edit_action) abort
 
   if item.action ==? 'call_method'
     return s:method(item.type)
+  endif
+
+  if item.type ==? 'dbout'
+    call self.get_query().focus_window()
+    silent! exe 'pedit' item.file_path
+    return
   endif
 
   if item.action ==? 'open'
