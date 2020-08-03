@@ -348,6 +348,7 @@ function! s:query.save_query() abort
 
     exe 'write '.full_name
     call self.drawer.render({ 'queries': 1 })
+    call self.open_buffer(db, full_name, 'edit')
   catch /.*/
     return db_ui#utils#echo_err(v:exception)
   endtry

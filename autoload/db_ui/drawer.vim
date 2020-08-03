@@ -404,6 +404,7 @@ function! s:drawer.delete_line() abort
 
     call delete(item.file_path)
     call remove(db.saved_queries.list, index(db.saved_queries.list, item.file_path))
+    call filter(db.buffers.list, 'v:val !=? item.file_path')
     call db_ui#utils#echo_msg('Deleted.')
   endif
 
