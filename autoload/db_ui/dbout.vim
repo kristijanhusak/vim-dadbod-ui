@@ -5,8 +5,9 @@ function! db_ui#dbout#jump_to_foreign_table() abort
     return db_ui#utils#echo_err(parsed.scheme.' scheme not supported for foreign key jump.')
   endif
 
-  let cell_range = s:get_cell_range(getline(scheme.cell_line_number), col('.'))
-  let field_name = trim(getline(scheme.cell_line_number - 1)[(cell_range.from):(cell_range.to)])
+  let cell_line_number = s:get_cell_line_number(scheme)
+  let cell_range = s:get_cell_range(getline(cell_line_number), col('.'))
+  let field_name = trim(getline(cell_line_number - 1)[(cell_range.from):(cell_range.to)])
   let field_value = trim(getline('.')[(cell_range.from):(cell_range.to)])
   let foreign_key_query = substitute(scheme.foreign_key_query, '{col_name}', field_name, '')
   let result = scheme.parse_results(db_ui#schemas#query({ 'conn': b:db }, foreign_key_query), 3)
@@ -51,7 +52,8 @@ function! db_ui#dbout#get_cell_value(...) abort
     return db_ui#utils#echo_err('Yanking cell value not supported for '.parsed.scheme.' scheme.')
   endif
 
-  let cell_range = s:get_cell_range(getline(scheme.cell_line_number), col('.'))
+  let cell_line_number = s:get_cell_line_number(scheme)
+  let cell_range = s:get_cell_range(getline(cell_line_number), col('.'))
   let field_value = getline('.')[(cell_range.from):(cell_range.to)]
   let start_spaces = len(matchstr(field_value, '^[[:blank:]]*'))
   let end_spaces = len(matchstr(field_value, '[[:blank:]]*$'))
@@ -101,9 +103,10 @@ function! db_ui#dbout#yank_header() abort
     return db_ui#utils#echo_err('Yanking headers not supported for '.parsed.scheme.' scheme.')
   endif
 
+  let cell_line_number = s:get_cell_line_number(scheme)
   let table_line = '-'
-  let column_line = getline(scheme.cell_line_number-1)
-  let underline = getline(scheme.cell_line_number)
+  let column_line = getline(cell_line_number-1)
+  let underline = getline(cell_line_number)
   let from = 0
   let to = 0
   let i = 0
@@ -137,4 +140,17 @@ function! s:get_cell_range(line, col) abort
   endwhile
 
   return {'from': from, 'to': to}
+endfunction
+
+function! s:get_cell_line_number(scheme) abort
+  let line = line('.')
+
+  while (line > a:scheme.cell_line_number)
+    if getline(line) =~? a:scheme.cell_line_pattern
+      return line
+    endif
+    let line -= 1
+  endwhile
+
+  return a:scheme.cell_line_number
 endfunction
