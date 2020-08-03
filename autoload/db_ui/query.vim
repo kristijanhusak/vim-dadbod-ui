@@ -324,22 +324,31 @@ function! s:query.edit_bind_parameters() abort
 endfunction
 
 function! s:query.save_query() abort
-  let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
-  if empty(db.save_path)
-    throw 'Save location is empty. Please provide valid directory to g:db_ui_save_location'
-  endif
+  try
+    let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
+    if empty(db.save_path)
+      throw 'Save location is empty. Please provide valid directory to g:db_ui_save_location'
+    endif
 
-  if !isdirectory(db.save_path)
-    call mkdir(db.save_path, 'p')
-  endif
+    if !isdirectory(db.save_path)
+      call mkdir(db.save_path, 'p')
+    endif
 
-  let name = db_ui#utils#input('Save as: ', '')
+    let name = db_ui#utils#input('Save as: ', '')
 
-  let full_name = printf('%s/%s', db.save_path, name)
-  if filereadable(full_name)
-    throw 'That file already exists. Please choose another name.'
-  endif
+    if empty(trim(name))
+      throw 'No valid name provided.'
+    endif
 
-  exe 'write '.full_name
-  call self.drawer.render({ 'queries': 1 })
+    let full_name = printf('%s/%s', db.save_path, name)
+
+    if filereadable(full_name)
+      throw 'That file already exists. Please choose another name.'
+    endif
+
+    exe 'write '.full_name
+    call self.drawer.render({ 'queries': 1 })
+  catch /.*/
+    return db_ui#utils#echo_err(v:exception)
+  endtry
 endfunction
