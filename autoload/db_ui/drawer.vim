@@ -235,10 +235,10 @@ function! s:drawer.render(...) abort
 
   if !empty(self.dbui.dbout_list)
     call self.add('', 'noaction', 'help', '', '', 0)
-    call self.add('Queries', 'call_method', 'toggle_dbout_queries', self.get_toggle_icon('saved_queries', {'expanded': self.show_dbout_list}), '', 0)
+    call self.add('Query results ('.len(self.dbui.dbout_list).')', 'call_method', 'toggle_dbout_queries', self.get_toggle_icon('saved_queries', {'expanded': self.show_dbout_list}), '', 0)
 
     if self.show_dbout_list
-      let entries = sort(keys(self.dbui.dbout_list))
+      let entries = sort(keys(self.dbui.dbout_list), function('s:sort_dbout'))
       for entry in entries
         let content = ''
         if !empty(self.dbui.dbout_list[entry])
@@ -589,4 +589,8 @@ function! s:drawer.get_nested(obj, val, ...) abort
   endfor
 
   return result
+endfunction
+
+function! s:sort_dbout(a1, a2)
+  return str2nr(fnamemodify(a:a1, ':t:r')) - str2nr(fnamemodify(a:a2, ':t:r'))
 endfunction

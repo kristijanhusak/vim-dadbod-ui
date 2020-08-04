@@ -148,6 +148,7 @@ function! s:dbui.save_dbout(file) abort
     endif
   endif
   let self.dbout_list[a:file] = content
+  call self.drawer.render()
 endfunction
 
 function! s:dbui.populate_dbs() abort
