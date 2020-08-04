@@ -45,7 +45,7 @@ function! s:query.generate_buffer_name(db_name, suffix) abort
   let buffer_name = buffer_basename
 
   if !empty(self.drawer.dbui.tmp_location)
-    let basename = printf('%s/%s', self.drawer.dbui.tmp_location, localtime())
+    let basename = printf('%s/db_ui', self.drawer.dbui.tmp_location)
     return printf('%s.%s-%s', basename, buffer_name, localtime())
   endif
 
