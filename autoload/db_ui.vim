@@ -102,6 +102,19 @@ function! db_ui#query(query) abort
   return scheme.parse_results(result, 0)
 endfunction
 
+function! db_ui#print_last_query_info() abort
+  call s:init()
+  let info = s:dbui_instance.drawer.get_query().get_last_query_info()
+  if empty(info.last_query)
+    return db_ui#utils#echo_msg('No queries ran.')
+  endif
+
+  let content = ['Last query:'] + info.last_query
+  let content += ['' + 'Time: '.info.last_query_time.' sec.']
+
+  return db_ui#utils#echo_msg(join(content, "\n"), 1)
+endfunction
+
 function! s:dbui.new() abort
   let instance = copy(self)
   let instance.dbs = {}

@@ -98,6 +98,13 @@ DBUIRenameBuffer
 
 		`:DBUIRenameBuffer`
 
+					      *DBUILastQueryInfo*
+DBUILastQueryInfo
+		Print information about last query that was ran.
+		It prints the query, and the time it took to finish.
+
+		`:DBUILastQueryInfo`
+
 ==============================================================================
 4. Connections 					*vim-dadbod-ui-connections*
 

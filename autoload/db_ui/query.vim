@@ -12,6 +12,7 @@ function! s:query.new(drawer) abort
   let instance.drawer = a:drawer
   let instance.buffer_counter = {}
   let instance.last_query = []
+  let instance.last_query_start_time = 0
   let instance.last_query_time = 0
   if get(g:, 'db_async', 0)
     augroup dbui_async_queries
@@ -204,7 +205,7 @@ endfunction
 function! s:query.execute_query(...) abort
   let is_visual_mode = get(a:, 1, 0)
   let lines = self.get_lines(is_visual_mode)
-  let self.last_query_time = reltime()
+  let self.last_query_start_time = reltime()
   call db_ui#utils#echo_msg('Executing query...')
   if !is_visual_mode && search(s:bind_param_rgx, 'n') <= 0
     silent! exe '%DB'
@@ -219,7 +220,8 @@ function! s:query.execute_query(...) abort
 endfunction
 
 function! s:query.print_query_time() abort
-  call db_ui#utils#echo_msg('Executing query...Done after '.split(reltimestr(reltime(self.last_query_time)))[0].' sec.')
+  let self.last_query_time = split(reltimestr(reltime(self.last_query_start_time)))[0]
+  call db_ui#utils#echo_msg('Executing query...Done after '.self.last_query_time.' sec.')
 endfunction
 
 function! s:query.execute_lines(db, lines, is_visual_mode) abort
@@ -352,4 +354,11 @@ function! s:query.save_query() abort
   catch /.*/
     return db_ui#utils#echo_err(v:exception)
   endtry
+endfunction
+
+function! s:query.get_last_query_info() abort
+  return {
+        \ 'last_query': self.last_query,
+        \ 'last_query_time': self.last_query_time
+        \ }
 endfunction
