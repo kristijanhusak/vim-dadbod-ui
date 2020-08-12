@@ -520,6 +520,10 @@ function! s:drawer.populate_tables(db) abort
     let a:db.tables.list = sort(temp_table_list)
   endif
 
+  if a:db.scheme =~? '^mysql'
+    call filter(a:db.tables.list, 'v:val !~? "^mysql: [Warning]" && v:val !~? "^Tables_in_"')
+  endif
+
   call self.populate_table_items(a:db.tables)
   return a:db
 endfunction
