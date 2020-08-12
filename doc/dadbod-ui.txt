@@ -193,7 +193,7 @@ the connection you want to delete.
 <Plug>(DBUI_SelectLine)
 		This mapping is used for toggling and opening everything in
 		the DBUI drawer.
-		By default, mapped to `o`.
+		By default, mapped to `o`, `Enter` and `Double click`.
 
 					      *<Plug>(DBUI_SelectLineVsplit)*
 <Plug>(DBUI_SelectLineVsplit)
