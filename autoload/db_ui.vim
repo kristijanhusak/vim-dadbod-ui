@@ -182,13 +182,18 @@ function! s:dbui.populate_dbs() abort
 endfunction
 
 function! s:dbui.generate_new_db_entry(db) abort
-  let scheme = get(self.parse_url(a:db.url), 'scheme', '')
+  let parsed_url = self.parse_url(a:db.url)
+  let scheme = get(parsed_url, 'scheme', '')
   let save_path = ''
   if !empty(self.save_path)
     let save_path = printf('%s/%s', self.save_path, a:db.name)
   endif
   let scheme_info = db_ui#schemas#get(scheme)
   let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".a:db.name."-"')
+  let schema_support = !empty(get(scheme_info, 'schemes_query', 0))
+  if schema_support && tolower(scheme) ==? 'mysql' && parsed_url.path !=? '/'
+    let schema_support = 0
+  endif
   return {
         \ 'url': a:db.url,
         \ 'conn': '',
@@ -204,7 +209,7 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'save_path': save_path,
         \ 'name': a:db.name,
         \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
-        \ 'schema_support': !empty(get(scheme_info, 'schemes_query', 0)),
+        \ 'schema_support': schema_support,
         \ 'quote': get(scheme_info, 'quote', 0),
         \ 'default_scheme': get(scheme_info, 'default_scheme', '')
         \ }
