@@ -521,7 +521,7 @@ function! s:drawer.populate_tables(db) abort
   endif
 
   if a:db.scheme =~? '^mysql'
-    call filter(a:db.tables.list, 'v:val !~? "^mysql: [Warning]" && v:val !~? "^Tables_in_"')
+    call filter(a:db.tables.list, 'v:val !~? "^mysql: \[Warning\]" && v:val !~? "^Tables_in_"')
   endif
 
   call self.populate_table_items(a:db.tables)
