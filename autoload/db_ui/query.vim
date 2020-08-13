@@ -142,7 +142,11 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   silent 1,$delete _
   call setline(1, split(content, "\n"))
   if g:dbui_auto_execute_table_helpers
-    write
+    if g:dbui_execute_on_save
+      write
+    else
+      call self.execute_query()
+    endif
   endif
 endfunction
 
