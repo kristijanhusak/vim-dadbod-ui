@@ -110,7 +110,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
     let bufnr = bufnr(a:buffer_name)
     if bufnr > -1
       silent! exe 'b '.bufnr
-      call self.setup_buffer(a:db, opts, a:buffer_name, was_single_win)
+      call self.setup_buffer(a:db, extend({'existing_buffer': 1 }, opts), a:buffer_name, was_single_win)
       return
     endif
   endif
@@ -150,6 +150,7 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   call self.resize_if_single(a:was_single_win)
   let b:dbui_db_key_name = a:db.key_name
   let b:db = a:db.conn
+  let is_existing_buffer = get(a:opts, 'existing_buffer', 0)
   if !exists('b:dbui_is_tmp') || has_key(a:opts, 'is_tmp')
     let b:dbui_is_tmp = get(a:opts, 'is_tmp', 0)
   endif
@@ -163,7 +164,9 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
     call self.drawer.render()
   endif
 
-  setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
+  if !is_existing_buffer
+    setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
+  endif
   nnoremap <buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
   nnoremap <buffer><Plug>(DBUI_ExecuteQuery) :call <sid>method('execute_query')<CR>
   vnoremap <buffer><Plug>(DBUI_ExecuteQuery) :<C-u>call <sid>method('execute_query', 1)<CR>

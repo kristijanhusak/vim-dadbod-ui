@@ -49,8 +49,12 @@ function! db_ui#find_buffer() abort
   let db = b:dbui_db_key_name
   let bufname = bufname('%')
 
+
   let is_tmp = get(b: ,'dbui_is_tmp', 0)
-  call s:dbui_instance.drawer.get_query().setup_buffer(s:dbui_instance.dbs[db], { 'is_tmp': is_tmp }, bufname, 0)
+  call s:dbui_instance.drawer.get_query().setup_buffer(s:dbui_instance.dbs[db], { 'is_tmp': is_tmp, 'existing_buffer': 1 }, bufname, 0)
+  if exists('*vim_dadbod_completion#fetch')
+    call vim_dadbod_completion#fetch(bufnr(''))
+  endif
   let s:dbui_instance.dbs[db].expanded = 1
   let s:dbui_instance.dbs[db].buffers.expanded = 1
   call s:dbui_instance.drawer.open()
