@@ -465,23 +465,11 @@ function! s:drawer.toggle_db(db) abort
 
   call self.load_saved_queries(a:db)
 
-  if !empty(a:db.conn)
-    return a:db
-  endif
+  call self.dbui.connect(a:db)
 
-  try
-    let query_time = reltime()
-    call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
-    let a:db.conn = db#connect(a:db.url)
-    let a:db.conn_error = ''
+  if !empty(a:db.conn)
     call self.populate(a:db)
-    if v:shell_error ==? 0
-      call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected after '.split(reltimestr(reltime(query_time)))[0].' sec.')
-    endif
-  catch /.*/
-    let a:db.conn_error = v:exception
-    return db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
-  endtry
+  endif
 endfunction
 
 function! s:drawer.populate(db) abort

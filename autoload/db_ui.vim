@@ -16,6 +16,26 @@ function! db_ui#save_dbout(file) abort
   return s:dbui_instance.save_dbout(a:file)
 endfunction
 
+function! s:get_db() abort
+  if !len(s:dbui_instance.dbs_list)
+    return {}
+  endif
+
+  if len(s:dbui_instance.dbs_list) ==? 1
+    return values(s:dbui_instance.dbs)[0]
+  endif
+
+  let options = map(copy(s:dbui_instance.dbs_list), '(v:key + 1).") ".v:val.name')
+  let selection = db_ui#utils#inputlist(['Select db to assign this buffer to:'] + options)
+  if selection < 1 || selection > len(options)
+    call db_ui#utils#echo_err('Wrong selection.')
+    return {}
+  endif
+  let selected_db = s:dbui_instance.dbs_list[selection - 1]
+  let selected_db = s:dbui_instance.dbs[selected_db.key_name]
+  return selected_db
+endfunction
+
 function! db_ui#find_buffer() abort
   call s:init()
   if !len(s:dbui_instance.dbs_list)
@@ -23,23 +43,14 @@ function! db_ui#find_buffer() abort
   endif
 
   if !exists('b:dbui_db_key_name')
-    if len(s:dbui_instance.dbs_list) ==? 1
-      let db = values(s:dbui_instance.dbs)[0]
-      let b:dbui_db_key_name = db.key_name
-      let b:db = db.conn
-      call db_ui#utils#echo_msg('Assigned buffer to db '.db.name)
-    else
-      let options = map(copy(s:dbui_instance.dbs_list), '(v:key + 1).") ".v:val.name')
-      let selection = db_ui#utils#inputlist(['Select db to assign this buffer to:'] + options)
-      if selection < 1 || selection > len(options)
-        return db_ui#utils#echo_err('Wrong selection.')
-      endif
-      let selected_db = s:dbui_instance.dbs_list[selection - 1]
-      let selected_db = s:dbui_instance.dbs[selected_db.key_name]
-      let b:dbui_db_key_name = selected_db.key_name
-      let b:db = selected_db.conn
-      call db_ui#utils#echo_msg('Assigned buffer to db '.selected_db.name)
+    let db = s:get_db()
+    if empty(db)
+      return db_ui#utils#echo_err('No database entries selected or found.')
     endif
+    call s:dbui_instance.connect(db)
+    call db_ui#utils#echo_msg('Assigned buffer to db '.db.name)
+    let b:dbui_db_key_name = db.key_name
+    let b:db = db.conn
   endif
 
   if !exists('b:dbui_db_key_name')
@@ -48,7 +59,6 @@ function! db_ui#find_buffer() abort
 
   let db = b:dbui_db_key_name
   let bufname = bufname('%')
-
 
   let is_tmp = get(b: ,'dbui_is_tmp', 0)
   call s:dbui_instance.drawer.get_query().setup_buffer(s:dbui_instance.dbs[db], { 'is_tmp': is_tmp, 'existing_buffer': 1 }, bufname, 0)
@@ -81,6 +91,7 @@ function! db_ui#get_conn_info(db_key_name) abort
     return {}
   endif
   let db = s:dbui_instance.dbs[a:db_key_name]
+  call s:dbui_instance.connect(db)
   return {
         \ 'url': db.url,
         \ 'conn': db.conn,
@@ -311,6 +322,28 @@ endfunction
 
 function! s:dbui.is_tmp_location_buffer(buf) abort
   return !empty(self.tmp_location) && a:buf =~? '^'.self.tmp_location
+endfunction
+
+function! s:dbui.connect(db) abort
+  if !empty(a:db.conn)
+    return a:db
+  endif
+
+  try
+    let query_time = reltime()
+    call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
+    let a:db.conn = db#connect(a:db.url)
+    let a:db.conn_error = ''
+    if v:shell_error ==? 0
+      call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected after '.split(reltimestr(reltime(query_time)))[0].' sec.')
+    endif
+  catch /.*/
+    let a:db.conn_error = v:exception
+    let a:db.conn = ''
+    call db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
+  endtry
+
+  return a:db
 endfunction
 
 function! db_ui#reset_state() abort

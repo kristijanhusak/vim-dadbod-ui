@@ -101,53 +101,11 @@ silent! call remove(s:dbui_icons, 'expanded')
 silent! call remove(s:dbui_icons, 'collapsed')
 let g:dbui_icons = extend(g:dbui_icons, s:dbui_icons)
 
-function! s:set_mapping(key, plug, ...) abort
-  if g:dbui_disable_mappings
-    return
-  endif
-  let mode = a:0 > 0 ? a:1 : 'n'
-
-  if hasmapto(a:plug, mode)
-    return
-  endif
-
-  let keys = a:key
-  if type(a:key) ==? type('')
-    let keys = [a:key]
-  endif
-
-  for key in keys
-    silent! exe mode.'map <buffer><nowait> '.key.' '.a:plug
-  endfor
-endfunction
-
 augroup dbui
   autocmd!
-  autocmd FileType sql call s:set_mapping('<Leader>W', '<Plug>(DBUI_SaveQuery)')
-  autocmd FileType sql call s:set_mapping('<Leader>E', '<Plug>(DBUI_EditBindParameters)')
-  autocmd FileType sql call s:set_mapping('<Leader>S', '<Plug>(DBUI_ExecuteQuery)')
-  autocmd FileType sql call s:set_mapping('<Leader>S', '<Plug>(DBUI_ExecuteQuery)', 'v')
-  autocmd FileType dbui call s:set_mapping(['o', '<CR>', '<2-LeftMouse>'], '<Plug>(DBUI_SelectLine)')
-  autocmd FileType dbui call s:set_mapping('S', '<Plug>(DBUI_SelectLineVsplit)')
-  autocmd FileType dbui call s:set_mapping('R', '<Plug>(DBUI_Redraw)')
-  autocmd FileType dbui call s:set_mapping('d', '<Plug>(DBUI_DeleteLine)')
-  autocmd FileType dbui call s:set_mapping('A', '<Plug>(DBUI_AddConnection)')
-  autocmd FileType dbui call s:set_mapping('H', '<Plug>(DBUI_ToggleDetails)')
-  autocmd FileType dbui call s:set_mapping('r', '<Plug>(DBUI_RenameLine)')
-  autocmd FileType dbui call s:set_mapping('q', '<Plug>(DBUI_Quit)')
   autocmd BufRead,BufNewFile *.dbout set filetype=dbout
   autocmd BufReadPost *.dbout nested call db_ui#save_dbout(expand('<afile>'))
   autocmd FileType dbout setlocal foldmethod=expr foldexpr=db_ui#dbout#foldexpr(v:lnum) | normal!zo
-  autocmd FileType dbout
-        \ nnoremap <silent><buffer> <Plug>(DBUI_JumpToForeignKey) :call db_ui#dbout#jump_to_foreign_table()<CR>
-        \ | nnoremap <silent><buffer> <Plug>(DBUI_YankCellValue) :call db_ui#dbout#get_cell_value()<CR>
-        \ | nnoremap <silent><buffer> <Plug>(DBUI_YankHeader) :call db_ui#dbout#yank_header()<CR>
-        \ | nnoremap <silent><buffer> <Plug>(DBUI_ToggleResultLayout) :call db_ui#dbout#toggle_layout()<CR>
-        \ | call s:set_mapping('<C-]>', '<Plug>(DBUI_JumpToForeignKey)')
-        \ | call s:set_mapping('vic', '<Plug>(DBUI_YankCellValue)')
-        \ | call s:set_mapping('yh', '<Plug>(DBUI_YankHeader)')
-        \ | call s:set_mapping('<Leader>R', '<Plug>(DBUI_ToggleResultLayout)')
-        \ | omap <silent><buffer> ic :call db_ui#dbout#get_cell_value('operator')<CR>
 augroup END
 
 command! DBUI call db_ui#open('<mods>')

@@ -58,3 +58,20 @@ function! db_ui#utils#quote_query_value(val) abort
 
   return "'".a:val."'"
 endfunction
+
+function! db_ui#utils#set_mapping(key, plug, ...)
+  let mode = a:0 > 0 ? a:1 : 'n'
+
+  if hasmapto(a:plug, mode)
+    return
+  endif
+
+  let keys = a:key
+  if type(a:key) ==? type('')
+    let keys = [a:key]
+  endif
+
+  for key in keys
+    silent! exe mode.'map <buffer><nowait> '.key.' '.a:plug
+  endfor
+endfunction
