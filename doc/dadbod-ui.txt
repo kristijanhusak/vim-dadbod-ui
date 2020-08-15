@@ -675,6 +675,15 @@ db_ui#query({query})
 
 		autocmd FileType sql nnoremap <buffer><leader>i :call <sid>populate_query()
 <
+					      *db_ui#connections_list()*
+db_ui#connections_list()
+		Return list of all available connections. These properties are
+		returned:
+
+		* name - Connection name
+		* source - Where is connection defined (file, g:dbs, env, dotenv)
+		* url - Connection url
+		* is_connected - Is DBUI connected to this database
 
 ==============================================================================
 

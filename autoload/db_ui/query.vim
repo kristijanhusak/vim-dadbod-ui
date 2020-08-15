@@ -171,15 +171,16 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   if !is_existing_buffer
     setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
   endif
+  let is_sql = &filetype ==? 'sql'
   nnoremap <buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
   nnoremap <buffer><Plug>(DBUI_ExecuteQuery) :call <sid>method('execute_query')<CR>
   vnoremap <buffer><Plug>(DBUI_ExecuteQuery) :<C-u>call <sid>method('execute_query', 1)<CR>
-  if b:dbui_is_tmp
+  if b:dbui_is_tmp && is_sql
     nnoremap <buffer><silent><Plug>(DBUI_SaveQuery) :call <sid>method('save_query')<CR>
   endif
   augroup db_ui_query
     autocmd! * <buffer>
-    if g:dbui_execute_on_save
+    if g:dbui_execute_on_save && is_sql
       autocmd BufWritePost <buffer> nested call s:method('execute_query')
     endif
     autocmd BufDelete,BufWipeout <buffer> silent! call s:method('remove_buffer', str2nr(expand('<abuf>')))

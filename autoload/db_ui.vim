@@ -16,24 +16,14 @@ function! db_ui#save_dbout(file) abort
   return s:dbui_instance.save_dbout(a:file)
 endfunction
 
-function! s:get_db() abort
-  if !len(s:dbui_instance.dbs_list)
-    return {}
-  endif
-
-  if len(s:dbui_instance.dbs_list) ==? 1
-    return values(s:dbui_instance.dbs)[0]
-  endif
-
-  let options = map(copy(s:dbui_instance.dbs_list), '(v:key + 1).") ".v:val.name')
-  let selection = db_ui#utils#inputlist(['Select db to assign this buffer to:'] + options)
-  if selection < 1 || selection > len(options)
-    call db_ui#utils#echo_err('Wrong selection.')
-    return {}
-  endif
-  let selected_db = s:dbui_instance.dbs_list[selection - 1]
-  let selected_db = s:dbui_instance.dbs[selected_db.key_name]
-  return selected_db
+function! db_ui#connections_list() abort
+  call s:init()
+  return map(copy(s:dbui_instance.dbs_list), {_,v-> {
+        \ 'name': v.name,
+        \ 'url': v.url,
+        \ 'is_connected': !empty(s:dbui_instance.dbs[v.key_name].conn),
+        \ 'source': v.source,
+        \ }})
 endfunction
 
 function! db_ui#find_buffer() abort
@@ -356,4 +346,24 @@ function! s:init() abort
   endif
 
   return s:dbui_instance
+endfunction
+
+function! s:get_db() abort
+  if !len(s:dbui_instance.dbs_list)
+    return {}
+  endif
+
+  if len(s:dbui_instance.dbs_list) ==? 1
+    return values(s:dbui_instance.dbs)[0]
+  endif
+
+  let options = map(copy(s:dbui_instance.dbs_list), '(v:key + 1).") ".v:val.name')
+  let selection = db_ui#utils#inputlist(['Select db to assign this buffer to:'] + options)
+  if selection < 1 || selection > len(options)
+    call db_ui#utils#echo_err('Wrong selection.')
+    return {}
+  endif
+  let selected_db = s:dbui_instance.dbs_list[selection - 1]
+  let selected_db = s:dbui_instance.dbs[selected_db.key_name]
+  return selected_db
 endfunction
