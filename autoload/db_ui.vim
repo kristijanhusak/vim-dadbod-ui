@@ -203,6 +203,7 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'url': a:db.url,
         \ 'conn': '',
         \ 'conn_error': '',
+        \ 'conn_tried': 0,
         \ 'source': a:db.source,
         \ 'scheme': scheme,
         \ 'table_helpers': db_ui#table_helpers#get(scheme),
@@ -333,6 +334,7 @@ function! s:dbui.connect(db) abort
     call db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
   endtry
 
+  let a:db.conn_tried = 1
   return a:db
 endfunction
 

@@ -39,7 +39,7 @@ function! s:drawer.open(...) abort
   nnoremap <silent><buffer> <Plug>(DBUI_DeleteLine) :call <sid>method('delete_line')<CR>
   let query_win_pos = g:dbui_win_position ==? 'left' ? 'botright' : 'topleft'
   silent! exe "nnoremap <silent><buffer> <Plug>(DBUI_SelectLineVsplit) :call <sid>method('toggle_line', 'vertical ".query_win_pos." split')<CR>"
-  nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call <sid>method('render', { 'dbs': 1, 'queries': 1 })<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call <sid>method('redraw')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_AddConnection) :call <sid>method('add_connection')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_ToggleDetails) :call <sid>method('toggle_details')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_RenameLine) :call <sid>method('rename_line')<CR>
@@ -54,6 +54,14 @@ endfunction
 
 function! s:drawer.is_opened() abort
   return bufwinnr('dbui') > -1
+endfunction
+
+function! s:drawer.redraw() abort
+  let item = self.get_current_item()
+  if item.level ==? 0
+    return self.render({ 'dbs': 1, 'queries': 1 })
+  endif
+  return self.render({'db_key_name': item.dbui_db_key_name, 'queries': 1 })
 endfunction
 
 function! s:drawer.toggle() abort
@@ -213,6 +221,14 @@ function! s:drawer.render(...) abort
     call db_ui#utils#echo_msg('Refreshing all databases...')
     call self.dbui.populate_dbs()
     call db_ui#utils#echo_msg('Refreshing all databases...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
+  endif
+
+  if !empty(get(opts, 'db_key_name', ''))
+    let query_time = reltime()
+    let db = self.dbui.dbs[opts.db_key_name]
+    call db_ui#utils#echo_msg('Refreshing database '.db.name.'...')
+    let self.dbui.dbs[opts.db_key_name] = self.populate(db)
+    call db_ui#utils#echo_msg('Refreshing database '.db.name.'...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   endif
 
   let view = winsaveview()
@@ -473,6 +489,9 @@ function! s:drawer.toggle_db(db) abort
 endfunction
 
 function! s:drawer.populate(db) abort
+  if empty(a:db.conn) && a:db.conn_tried
+    call self.dbui.connect(a:db)
+  endif
   if a:db.schema_support
     return self.populate_schemas(a:db)
   endif
