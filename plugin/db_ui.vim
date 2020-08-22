@@ -17,6 +17,7 @@ let g:dbui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helper
 let g:dbui_show_help = get(g:, 'db_ui_show_help', 1)
 let g:dbui_use_nerd_fonts = get(g:, 'db_ui_use_nerd_fonts', 0)
 let g:dbui_execute_on_save = get(g:, 'db_ui_execute_on_save', 1)
+let g:dbui_debug = get(g:, 'db_ui_debug', 0)
 let s:dbui_icons = get(g:, 'db_ui_icons', {})
 let s:expanded_icon = get(s:dbui_icons, 'expanded', '▾')
 let s:collapsed_icon = get(s:dbui_icons, 'collapsed', '▸')

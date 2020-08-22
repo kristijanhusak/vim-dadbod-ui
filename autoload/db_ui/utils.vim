@@ -75,3 +75,11 @@ function! db_ui#utils#set_mapping(key, plug, ...)
     silent! exe mode.'map <buffer><nowait> '.key.' '.a:plug
   endfor
 endfunction
+
+function! db_ui#utils#print_debug(msg) abort
+  if !g:dbui_debug
+    return
+  endif
+
+  echom '[DBUI Debug] '.string(a:msg)
+endfunction

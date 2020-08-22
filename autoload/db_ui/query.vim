@@ -216,6 +216,7 @@ function! s:query.execute_query(...) abort
   let self.last_query_start_time = reltime()
   call db_ui#utils#echo_msg('Executing query...')
   if !is_visual_mode && search(s:bind_param_rgx, 'n') <= 0
+    call db_ui#utils#print_debug({ 'message': 'Executing whole buffer', 'command': '%DB' })
     silent! exe '%DB'
   else
     let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
@@ -241,10 +242,13 @@ function! s:query.execute_lines(db, lines, is_visual_mode) abort
   endif
 
   if len(lines) ==? 1
+  call db_ui#utils#print_debug({'message': 'Executing single line', 'line': lines[0], 'command': 'DB '.lines[0] })
     silent! exe 'DB '.lines[0]
     return lines
   endif
 
+
+  call db_ui#utils#print_debug({'message': 'Executing multiple lines', 'lines': lines, 'input_filename': filename, 'command': 'DB < '.filename })
   call writefile(lines, filename)
   silent! exe 'DB < '.filename
   return lines

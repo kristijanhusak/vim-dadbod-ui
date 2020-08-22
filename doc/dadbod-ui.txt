@@ -630,6 +630,14 @@ g:db_ui_show_help
 
 		Default value: `1`
 
+					      *g:db_ui_debug*
+g:db_ui_debug
+		Set this to `1` to enable debug mode. This will print out some
+		additional information in the command line about the executed
+		query.
+
+		Default value: `0`
+
 					      *g:db_ui_default_query*
 g:db_ui_default_query (DEPRECATED)
 		This value was intially used as a default value for the table
