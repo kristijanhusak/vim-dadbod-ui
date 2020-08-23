@@ -234,7 +234,7 @@ function! s:query.print_query_time() abort
 endfunction
 
 function! s:query.execute_lines(db, lines, is_visual_mode) abort
-  let filename = tempname()
+  let filename = tempname().'.'.db#adapter#call(a:db.conn, 'input_extension', [], 'sql')
   let lines = copy(a:lines)
 
   if match(join(a:lines), '[^:]:\w\+') > -1
