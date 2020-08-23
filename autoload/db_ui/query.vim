@@ -248,14 +248,14 @@ function! s:query.execute_lines(db, lines, is_visual_mode) abort
 
   if len(lines) ==? 1
   call db_ui#utils#print_debug({'message': 'Executing single line', 'line': lines[0], 'command': 'DB '.lines[0] })
-    silent! exe 'DB '.lines[0]
+    exe 'DB '.lines[0]
     return lines
   endif
 
 
   call db_ui#utils#print_debug({'message': 'Executing multiple lines', 'lines': lines, 'input_filename': filename, 'command': 'DB < '.filename })
   call writefile(lines, filename)
-  silent! exe 'DB < '.filename
+  exe 'DB < '.filename
   return lines
 endfunction
 
