@@ -220,7 +220,7 @@ function! s:query.execute_query(...) abort
     silent! exe '%DB'
   else
     call db_ui#utils#print_debug({ 'message': 'Executing selected lines', 'command': '<,>%DB' })
-    silent! exe "'<,'>%DB"
+    silent! exe "'<,'>DB"
   endif
   let self.last_query = lines
   if !get(g:, 'db_async', 0)
