@@ -219,8 +219,8 @@ function! s:query.execute_query(...) abort
     call db_ui#utils#print_debug({ 'message': 'Executing whole buffer', 'command': '%DB' })
     silent! exe '%DB'
   else
-    let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
-    call self.execute_lines(db, lines, is_visual_mode)
+    call db_ui#utils#print_debug({ 'message': 'Executing selected lines', 'command': '<,>%DB' })
+    silent! exe "'<,'>%DB"
   endif
   let self.last_query = lines
   if !get(g:, 'db_async', 0)
@@ -231,27 +231,6 @@ endfunction
 function! s:query.print_query_time() abort
   let self.last_query_time = split(reltimestr(reltime(self.last_query_start_time)))[0]
   call db_ui#utils#echo_msg('Executing query...Done after '.self.last_query_time.' sec.')
-endfunction
-
-function! s:query.execute_lines(db, lines, is_visual_mode) abort
-  let filename = tempname()
-  let lines = copy(a:lines)
-
-  if match(join(a:lines), '[^:]:\w\+') > -1
-    let lines = self.inject_variables(lines)
-  endif
-
-  if len(lines) ==? 1
-  call db_ui#utils#print_debug({'message': 'Executing single line', 'line': lines[0], 'command': 'DB '.lines[0] })
-    silent! exe 'DB '.lines[0]
-    return lines
-  endif
-
-
-  call db_ui#utils#print_debug({'message': 'Executing multiple lines', 'lines': lines, 'input_filename': filename, 'command': 'DB < '.filename })
-  call writefile(lines, filename)
-  silent! exe 'DB < '.filename
-  return lines
 endfunction
 
 function! s:query.get_lines(is_visual_mode) abort
