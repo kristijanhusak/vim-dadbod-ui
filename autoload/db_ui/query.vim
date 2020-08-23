@@ -241,7 +241,7 @@ endfunction
 function! s:query.execute_lines(db, lines, is_visual_mode) abort
   let filename = tempname().'.'.db#adapter#call(a:db.conn, 'input_extension', [], 'sql')
   let lines = copy(a:lines)
-  let should_inject_vars = match(join(a:lines), '[^:]:\w\+') > -1
+  let should_inject_vars = match(join(a:lines), s:bind_param_rgx) > -1
 
   if should_inject_vars
     let lines = self.inject_variables(lines)
@@ -253,7 +253,7 @@ function! s:query.execute_lines(db, lines, is_visual_mode) abort
     return lines
   endif
 
-  if !should_inject_vars
+  if empty(should_inject_vars)
     call db_ui#utils#print_debug({'message': 'Executing visual selection', 'command': "'<,'>DB"})
     exe "'<,'>DB"
   else
