@@ -17,6 +17,7 @@ function! s:query.new(drawer) abort
   if get(g:, 'db_async', 0)
     augroup dbui_async_queries
       autocmd!
+      autocmd User DBQueryStart call s:query_instance.start_query()
       autocmd User DBQueryFinished call s:query_instance.print_query_time()
     augroup END
   endif
@@ -210,10 +211,14 @@ function! s:query.remove_buffer(bufnr)
   return self.drawer.render()
 endfunction
 
+function! s:query.start_query() abort
+  let self.last_query_start_time = reltime()
+endfunction
+
 function! s:query.execute_query(...) abort
   let is_visual_mode = get(a:, 1, 0)
   let lines = self.get_lines(is_visual_mode)
-  let self.last_query_start_time = reltime()
+  call self.start_query()
   call db_ui#utils#echo_msg('Executing query...')
   if !is_visual_mode && search(s:bind_param_rgx, 'n') <= 0
     call db_ui#utils#print_debug({ 'message': 'Executing whole buffer', 'command': '%DB' })
