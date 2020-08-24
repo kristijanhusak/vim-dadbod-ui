@@ -2,7 +2,7 @@ nnoremap <silent><buffer> <Plug>(DBUI_JumpToForeignKey) :call db_ui#dbout#jump_t
 nnoremap <silent><buffer> <Plug>(DBUI_YankCellValue) :call db_ui#dbout#get_cell_value()<CR>
 nnoremap <silent><buffer> <Plug>(DBUI_YankHeader) :call db_ui#dbout#yank_header()<CR>
 nnoremap <silent><buffer> <Plug>(DBUI_ToggleResultLayout) :call db_ui#dbout#toggle_layout()<CR>
-omap <silent><buffer> ic :call db_ui#dbout#get_cell_value('operator')<CR>
+omap <silent><buffer> ic :call db_ui#dbout#get_cell_value()<CR>
 
 if get(g:, 'dbui_disable_mappings', 0)
   finish
