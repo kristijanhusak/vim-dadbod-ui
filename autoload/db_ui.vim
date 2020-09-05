@@ -247,7 +247,19 @@ endfunction
 
 function! s:dbui.populate_from_dotenv() abort
   let prefix = g:dbui_dotenv_variable_prefix
-  for [name, url] in items(exists('*DotenvGet') ? DotenvGet() : {})
+  let all_envs = {}
+  if exists('*environ')
+    let all_envs = environ()
+  else
+    for item in systemlist('env')
+      let env = split(item, '=')
+      if len(env) > 1
+        let all_envs[env[0]] = join(env[1:], '')
+      endif
+    endfor
+  endif
+  let all_envs = extend(all_envs, exists('*DotenvGet') ? DotenvGet() : {})
+  for [name, url] in items(all_envs)
     if stridx(name, prefix) != -1
       let db_name = tolower(join(split(name, prefix)))
       call self.add_if_not_exists(db_name, url, 'dotenv')
