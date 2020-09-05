@@ -7,16 +7,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
         version:
           - nightly
           - stable
-          - v0.4.3
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - name: Setup System
+      - name: Setup Ubuntu System
+        if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get install sqlite3 libsqlite3-dev
+      - name: Setup Windows System
+        if: matrix.os == 'windows-latest'
+        run: |
+          choco install sqlite
       - uses: rhysd/action-setup-vim@v1
         id: vim
         with:
