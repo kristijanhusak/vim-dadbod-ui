@@ -24,7 +24,7 @@ endfunction
 
 function! s:connections.add() abort
   if empty(g:dbui_save_location)
-    return db_ui#utils#echo_err('Please set up valid save location via g:db_ui_save_location')
+    return db_ui#notifications#error('Please set up valid save location via g:db_ui_save_location')
   endif
 
   return self.add_full_url()
@@ -47,7 +47,7 @@ function! s:connections.add_full_url() abort
   try
     let valid_url = db#url#parse(url)
   catch /.*/
-    return db_ui#utils#echo_err(v:exception)
+    return db_ui#notifications#error(v:exception)
   endtry
 
   let saved = 0
@@ -64,7 +64,7 @@ endfunction
 
 function! s:connections.rename(db) abort
   if a:db.source !=? 'file'
-    return db_ui#utils#echo_err('Cannot edit connections added via variables.')
+    return db_ui#notifications#error('Cannot edit connections added via variables.')
   endif
 
   let connections = copy(self.read())
@@ -82,7 +82,7 @@ function! s:connections.rename(db) abort
   try
     let valid_url = db#url#parse(url)
   catch /.*/
-    return db_ui#utils#echo_err(v:exception)
+    return db_ui#notifications#error(v:exception)
   endtry
 
   let name = ''
@@ -100,7 +100,7 @@ function! s:connections.enter_db_name(url) abort
   let name = db_ui#utils#input('Enter name: ', split(a:url, '/')[-1])
 
   if empty(name)
-    call db_ui#utils#echo_err('Please enter valid name.')
+    call db_ui#notifications#error('Please enter valid name.')
     return 0
   endif
 
@@ -127,7 +127,7 @@ function s:connections.save(name, url) abort
   let file = self.read()
   let existing_connection = filter(copy(file), 'v:val.name ==? a:name')
   if !empty(existing_connection)
-    call db_ui#utils#echo_err('Connection with that name already exists. Please enter different name.')
+    call db_ui#notifications#error('Connection with that name already exists. Please enter different name.')
     return 0
   endif
   call add(file, {'name': a:name, 'url': a:url})

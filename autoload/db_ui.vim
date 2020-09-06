@@ -29,22 +29,22 @@ endfunction
 function! db_ui#find_buffer() abort
   call s:init()
   if !len(s:dbui_instance.dbs_list)
-    return db_ui#utils#echo_err('No database entries found in DBUI.')
+    return db_ui#notifications#error('No database entries found in DBUI.')
   endif
 
   if !exists('b:dbui_db_key_name')
     let db = s:get_db()
     if empty(db)
-      return db_ui#utils#echo_err('No database entries selected or found.')
+      return db_ui#notifications#error('No database entries selected or found.')
     endif
     call s:dbui_instance.connect(db)
-    call db_ui#utils#echo_msg('Assigned buffer to db '.db.name)
+    call db_ui#notifications#info('Assigned buffer to db '.db.name)
     let b:dbui_db_key_name = db.key_name
     let b:db = db.conn
   endif
 
   if !exists('b:dbui_db_key_name')
-    return db_ui#utils#echo_err('Unable to find in DBUI. Not a valid dbui query buffer.')
+    return db_ui#notifications#error('Unable to find in DBUI. Not a valid dbui query buffer.')
   endif
 
   let db = b:dbui_db_key_name
@@ -111,13 +111,13 @@ function! db_ui#print_last_query_info() abort
   call s:init()
   let info = s:dbui_instance.drawer.get_query().get_last_query_info()
   if empty(info.last_query)
-    return db_ui#utils#echo_msg('No queries ran.')
+    return db_ui#notifications#info('No queries ran.')
   endif
 
   let content = ['Last query:'] + info.last_query
   let content += ['' + 'Time: '.info.last_query_time.' sec.']
 
-  return db_ui#utils#echo_msg(join(content, "\n"), 1)
+  return db_ui#notifications#info(content)
 endfunction
 
 function! s:dbui.new() abort
@@ -282,7 +282,7 @@ function! s:dbui.populate_from_env() abort
   endif
 
   if empty(env_name)
-    return db_ui#utils#echo_err(
+    return db_ui#notifications#error(
           \ printf('Found %s variable for db url, but unable to parse the name. Please provide name via %s', g:db_ui_env_variable_url, g:db_ui_env_variable_name))
   endif
 
@@ -294,7 +294,7 @@ function! s:dbui.parse_url(url) abort
   try
     return db#url#parse(a:url)
   catch /.*/
-    call db_ui#utils#echo_err(v:exception)
+    call db_ui#notifications#error(v:exception)
     return {}
   endtry
 endfunction
@@ -316,7 +316,7 @@ endfunction
 function! s:dbui.add_if_not_exists(name, url, source) abort
   let existing = get(filter(copy(self.dbs_list), 'v:val.name ==? a:name && v:val.source ==? a:source'), 0, {})
   if !empty(existing)
-    return db_ui#utils#echo_warning(printf('Warning: Duplicate connection name "%s" in "%s" source. First one added has precedence.', a:name, a:source))
+    return db_ui#notifications#warning(printf('Warning: Duplicate connection name "%s" in "%s" source. First one added has precedence.', a:name, a:source))
   endif
   return add(self.dbs_list, {
         \ 'name': a:name, 'url': a:url, 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
@@ -334,18 +334,20 @@ function! s:dbui.connect(db) abort
 
   try
     let query_time = reltime()
-    call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...')
+    call db_ui#notifications#info('Connecting to db '.a:db.name.'...', { 'echo': 1 })
     let a:db.conn = db#connect(a:db.url)
     let a:db.conn_error = ''
     if v:shell_error ==? 0
-      call db_ui#utils#echo_msg('Connecting to db '.a:db.name.'...Connected after '.split(reltimestr(reltime(query_time)))[0].' sec.')
+      call db_ui#notifications#info('Connected to db '.a:db.name.' after '.split(reltimestr(reltime(query_time)))[0].' sec.')
     endif
   catch /.*/
     let a:db.conn_error = v:exception
     let a:db.conn = ''
-    call db_ui#utils#echo_err('Error connecting to db '.a:db.name.': '.v:exception)
+    call db_ui#notifications#error('Error connecting to db '.a:db.name.': '.v:exception, {'width': 80 })
   endtry
 
+  redraw!
+  echo ''
   let a:db.conn_tried = 1
   return a:db
 endfunction
@@ -374,7 +376,7 @@ function! s:get_db() abort
   let options = map(copy(s:dbui_instance.dbs_list), '(v:key + 1).") ".v:val.name')
   let selection = db_ui#utils#inputlist(['Select db to assign this buffer to:'] + options)
   if selection < 1 || selection > len(options)
-    call db_ui#utils#echo_err('Wrong selection.')
+    call db_ui#notifications#error('Wrong selection.')
     return {}
   endif
   let selected_db = s:dbui_instance.dbs_list[selection - 1]
