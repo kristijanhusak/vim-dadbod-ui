@@ -13,10 +13,6 @@ function! s:suite.after() abort
 endfunction
 
 function! s:suite.should_return_error_on_duplicate_connnections_from_same_source() abort
-  let g:db_ui_messages = []
-  :redir => g:db_ui_messages
   :DBUI
-  :redir END
-  call s:expect(get(filter(split(g:db_ui_messages, "\n"), '!empty(v:val)'), 0)).to_equal(
-        \ '[DBUI] Warning: Duplicate connection name "db-ui-database" in "g:dbs" source. First one added has precedence.')
+  call s:expect(db_ui#notifications#get_last_msg()).to_equal('Warning: Duplicate connection name "db-ui-database" in "g:dbs" source. First one added has precedence.')
 endfunction

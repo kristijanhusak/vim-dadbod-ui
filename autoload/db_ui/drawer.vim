@@ -95,11 +95,11 @@ function! s:drawer.rename_buffer(buffer, db_key_name, is_saved_query) abort
   let current_ft = &filetype
 
   if !filereadable(a:buffer)
-    return db_ui#utils#echo_err('Only written queries can be renamed.')
+    return db_ui#notifications#error('Only written queries can be renamed.')
   endif
 
   if empty(a:db_key_name)
-    return db_ui#utils#echo_err('Buffer not attached to any database')
+    return db_ui#notifications#error('Buffer not attached to any database')
   endif
 
   let is_saved = a:is_saved_query || (bufnr > -1 && getbufvar(bufnr, 'dbui_is_tmp') ==? 0)
@@ -116,7 +116,7 @@ function! s:drawer.rename_buffer(buffer, db_key_name, is_saved_query) abort
   let new_name = db_ui#utils#input('Enter new name: ', old_name)
 
   if empty(new_name)
-    return db_ui#utils#echo_err('Valid name must be provided.')
+    return db_ui#notifications#error('Valid name must be provided.')
   endif
 
   if is_saved
@@ -218,17 +218,17 @@ function! s:drawer.render(...) abort
 
   if get(opts, 'dbs', 0)
     let query_time = reltime()
-    call db_ui#utils#echo_msg('Refreshing all databases...')
+    call db_ui#notifications#info('Refreshing all databases...')
     call self.dbui.populate_dbs()
-    call db_ui#utils#echo_msg('Refreshing all databases...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
+    call db_ui#notifications#info('Refreshing all databases...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   endif
 
   if !empty(get(opts, 'db_key_name', ''))
     let query_time = reltime()
     let db = self.dbui.dbs[opts.db_key_name]
-    call db_ui#utils#echo_msg('Refreshing database '.db.name.'...')
+    call db_ui#notifications#info('Refreshing database '.db.name.'...')
     let self.dbui.dbs[opts.db_key_name] = self.populate(db)
-    call db_ui#utils#echo_msg('Refreshing database '.db.name.'...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
+    call db_ui#notifications#info('Refreshing database '.db.name.'...Done after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   endif
 
   let view = winsaveview()
@@ -430,7 +430,7 @@ function! s:drawer.delete_line() abort
   if item.action ==? 'toggle' && item.type ==? 'db'
     let db = self.dbui.dbs[item.dbui_db_key_name]
     if db.source !=? 'file'
-      return db_ui#utils#echo_err('Cannot delete this connection.')
+      return db_ui#notifications#error('Cannot delete this connection.')
     endif
     return self.delete_connection(db)
   endif
@@ -450,7 +450,7 @@ function! s:drawer.delete_line() abort
     call delete(item.file_path)
     call remove(db.saved_queries.list, index(db.saved_queries.list, item.file_path))
     call filter(db.buffers.list, 'v:val !=? item.file_path')
-    call db_ui#utils#echo_msg('Deleted.')
+    call db_ui#notifications#info('Deleted.')
   endif
 
   if self.dbui.is_tmp_location_buffer(item.file_path)
@@ -461,7 +461,7 @@ function! s:drawer.delete_line() abort
 
     call delete(item.file_path)
     call filter(db.buffers.list, 'v:val !=? item.file_path')
-    call db_ui#utils#echo_msg('Deleted.')
+    call db_ui#notifications#info('Deleted.')
   endif
 
   let win = bufwinnr(item.file_path)
@@ -512,7 +512,7 @@ function! s:drawer.populate_tables(db) abort
 
   let tables = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
   if v:shell_error !=? 0
-    return db_ui#utils#echo_err(printf('Error loading tables. Reason: %s', get(tables, 0, 'Unknown')), 1)
+    return db_ui#notifications#error(printf('Error loading tables. Reason: %s', get(tables, 0, 'Unknown')), 1)
   endif
 
   let a:db.tables.list = tables

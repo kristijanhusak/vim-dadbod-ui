@@ -219,7 +219,7 @@ function! s:query.execute_query(...) abort
   let is_visual_mode = get(a:, 1, 0)
   let lines = self.get_lines(is_visual_mode)
   call self.start_query()
-  call db_ui#utils#echo_msg('Executing query...')
+  call db_ui#notifications#info('Executing query...')
   if !is_visual_mode && search(s:bind_param_rgx, 'n') <= 0
     call db_ui#utils#print_debug({ 'message': 'Executing whole buffer', 'command': '%DB' })
     silent! exe '%DB'
@@ -235,7 +235,7 @@ endfunction
 
 function! s:query.print_query_time() abort
   let self.last_query_time = split(reltimestr(reltime(self.last_query_start_time)))[0]
-  call db_ui#utils#echo_msg('Executing query...Done after '.self.last_query_time.' sec.')
+  call db_ui#notifications#info('Executing query...Done after '.self.last_query_time.' sec.')
 endfunction
 
 function! s:query.execute_lines(db, lines, is_visual_mode) abort
@@ -319,7 +319,7 @@ endfunction
 
 function! s:query.edit_bind_parameters() abort
   if !exists('b:dbui_bind_params') || empty(b:dbui_bind_params)
-    return db_ui#utils#echo_msg('No bind parameters to edit.')
+    return db_ui#notifications#info('No bind parameters to edit.')
   endif
 
   let variable_names = keys(b:dbui_bind_params)
@@ -327,7 +327,7 @@ function! s:query.edit_bind_parameters() abort
   let selection = db_ui#utils#inputlist(opts)
 
   if selection < 1 || selection > len(variable_names)
-    return db_ui#utils#echo_err('Wrong selection.')
+    return db_ui#notifications#error('Wrong selection.')
   endif
 
   let var_name = variable_names[selection - 1]
@@ -337,15 +337,15 @@ function! s:query.edit_bind_parameters() abort
   if action ==? 1
     redraw!
     let b:dbui_bind_params[var_name] = db_ui#utils#input('Enter new value: ', variable)
-    return db_ui#utils#echo_msg('Changed.')
+    return db_ui#notifications#info('Changed.')
   endif
 
   if action ==? 2
     unlet b:dbui_bind_params[var_name]
-    return db_ui#utils#echo_msg('Deleted.')
+    return db_ui#notifications#info('Deleted.')
   endif
 
-  return db_ui#utils#echo_msg('Canceled')
+  return db_ui#notifications#info('Canceled')
 endfunction
 
 function! s:query.save_query() abort
@@ -375,7 +375,7 @@ function! s:query.save_query() abort
     call self.drawer.render({ 'queries': 1 })
     call self.open_buffer(db, full_name, 'edit')
   catch /.*/
-    return db_ui#utils#echo_err(v:exception)
+    return db_ui#notifications#error(v:exception)
   endtry
 endfunction
 

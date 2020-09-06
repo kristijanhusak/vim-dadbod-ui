@@ -2,7 +2,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
   let parsed = db#url#parse(b:db)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
-    return db_ui#utils#echo_err(parsed.scheme.' scheme not supported for foreign key jump.')
+    return db_ui#notifications#error(parsed.scheme.' scheme not supported for foreign key jump.')
   endif
 
   let cell_line_number = s:get_cell_line_number(scheme)
@@ -12,7 +12,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
   let foreign_key_query = substitute(scheme.foreign_key_query, '{col_name}', field_name, '')
   let result = scheme.parse_results(db_ui#schemas#query({ 'conn': b:db }, foreign_key_query), 3)
   if empty(result)
-    return db_ui#utils#echo_err('No valid foreign key found.')
+    return db_ui#notifications#error('No valid foreign key found.')
   endif
 
   let [foreign_table_name, foreign_column_name,foreign_table_schema] = result[0]
@@ -48,7 +48,7 @@ function! db_ui#dbout#get_cell_value() abort
   let parsed = db#url#parse(b:db)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
-    return db_ui#utils#echo_err('Yanking cell value not supported for '.parsed.scheme.' scheme.')
+    return db_ui#notifications#error('Yanking cell value not supported for '.parsed.scheme.' scheme.')
   endif
 
   let cell_line_number = s:get_cell_line_number(scheme)
@@ -74,7 +74,7 @@ function! db_ui#dbout#toggle_layout() abort
   let parsed = db#url#parse(b:db)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if !has_key(scheme, 'layout_flag')
-    return db_ui#utils#echo_err('Toggling layout not supported for '.parsed.scheme.' scheme.')
+    return db_ui#notifications#error('Toggling layout not supported for '.parsed.scheme.' scheme.')
   endif
   let content = join(readfile(b:db_input), "\n")
   let expanded_layout = get(b:, 'db_ui_expanded_layout', 0)
@@ -99,7 +99,7 @@ function! db_ui#dbout#yank_header() abort
   let parsed = db#url#parse(b:db)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
-    return db_ui#utils#echo_err('Yanking headers not supported for '.parsed.scheme.' scheme.')
+    return db_ui#notifications#error('Yanking headers not supported for '.parsed.scheme.' scheme.')
   endif
 
   let cell_line_number = s:get_cell_line_number(scheme)
