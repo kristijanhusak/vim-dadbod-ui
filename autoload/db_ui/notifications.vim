@@ -84,9 +84,9 @@ function! s:notification_nvim(msg, opts) abort
   let delay = get(a:opts, 'delay', s:delay)
   let type = get(a:opts, 'type', 'info')
   let pos = get(a:opts, 'pos', s:pos)
-  let pos_map = {'topleft': 'NW', 'topright': 'NE', 'botleft': 'SW', 'botright': 'SE'}
+  let pos_map = {'topleft': 'NW', 'topright': 'NE', 'botleft': 'SW', 'botright': 'SE', 'top': 'NW', 'bottom': 'SW'}
 
-  let pos_opts = s:get_pos(pos)
+  let pos_opts = s:get_pos(pos, width)
   let pos_opts.anchor = pos_map[pos]
   let opts = extend(pos_opts, {
         \ 'relative': 'editor',
@@ -114,9 +114,11 @@ function! s:notification_vim(msg, opts) abort
   let type = get(a:opts, 'type', 'info')
   let pos = get(a:opts, 'pos', s:pos)
   let title = get(a:opts, 'title', s:title)
-  let pos_opts = s:get_pos(pos)
+  let pos_opts = s:get_pos(pos, width)
   let pos_opts.line = pos_opts.row
   unlet! pos_opts.row
+  let pos_map = {'top': 'topleft', 'bottom': 'botleft'}
+  let pos = has_key(pos_map, pos) ? pos_map[pos] : pos
   let opts = extend(pos_opts, {
         \ 'pos': pos,
         \ 'minwidth': width,
@@ -192,13 +194,23 @@ function! s:setup_colors(use_echo) abort
   endif
 endfunction
 
-function! s:get_pos(pos) abort
+function! s:get_pos(pos, width) abort
   let min_col = s:neovim_float ? 1 : 2
   let min_row = s:neovim_float ? 0 : 1
   let max_col = &columns - 1
   let dbout_opened = len(filter(range(1, winnr('$')), 'getwinvar(v:val, "&filetype") ==? "dbout"')) > 0
-  let max_lines = &lines - 3 - (dbout_opened ? (&previewheight + 1) : 0)
+  let max_row = &lines - 3 - (dbout_opened ? (&previewheight + 1) : 0)
   let pos_data = {'col': min_col, 'row': min_row}
+
+  if a:pos ==? 'top'
+    let pos_data.row = min_row
+    let pos_data.col = (&columns / 2) - (a:width / 2)
+  endif
+
+  if a:pos ==? 'bottom'
+    let pos_data.row = max_row
+    let pos_data.col = (&columns / 2) - (a:width / 2)
+  endif
 
   if a:pos ==? 'topright'
     let pos_data.col = max_col
@@ -207,12 +219,12 @@ function! s:get_pos(pos) abort
 
   if a:pos ==? 'botleft'
     let pos_data.col = min_col
-    let pos_data.row = max_lines
+    let pos_data.row = max_row
   endif
 
   if a:pos ==? 'botright'
     let pos_data.col = max_col
-    let pos_data.row = max_lines
+    let pos_data.row = max_row
   endif
 
   return pos_data
