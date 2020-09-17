@@ -1,6 +1,6 @@
 let s:query_instance = {}
 let s:query = {}
-let s:bind_param_rgx = '[^:]:\w\+'
+let s:bind_param_rgx = '\(^\|[[:blank:]]\):\w\+'
 
 function! db_ui#query#new(drawer) abort
   let s:query_instance = s:query.new(a:drawer)
