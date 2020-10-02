@@ -201,16 +201,22 @@ function! s:drawer.toggle_details() abort
   return self.render()
 endfunction
 
+function! s:drawer.focus() abort
+  if &filetype ==? 'dbui'
+    return 0
+  endif
+
+  let winnr = bufwinnr('dbui')
+  if winnr > -1
+    exe winnr.'wincmd w'
+    return 1
+  endif
+  return 0
+endfunction
+
 function! s:drawer.render(...) abort
   let opts = get(a:, 1, {})
-  let restore_win = 0
-  if &filetype !=? 'dbui'
-    let winnr = bufwinnr('dbui')
-    if winnr > -1
-      let restore_win = 1
-      exe winnr.'wincmd w'
-    endif
-  endif
+  let restore_win = self.focus()
 
   if &filetype !=? 'dbui'
     return
@@ -473,6 +479,7 @@ function! s:drawer.delete_line() abort
   endif
 
   silent! exe 'bw!'.bufnr(item.file_path)
+  call self.focus()
   call self.render()
 endfunction
 
