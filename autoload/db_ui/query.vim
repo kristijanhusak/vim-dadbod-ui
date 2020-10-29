@@ -67,7 +67,7 @@ function! s:query.generate_buffer_name(db_name, suffix) abort
 endfunction
 
 function! s:query.focus_window() abort
-  let win_pos = g:dbui_win_position ==? 'left' ? 'botright' : 'topleft'
+  let win_pos = g:db_ui_win_position ==? 'left' ? 'botright' : 'topleft'
   let win_cmd = 'vertical '.win_pos.' new'
   if winnr('$') ==? 1
     silent! exe win_cmd
@@ -103,7 +103,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   let opts = get(a:, '1', {})
   let table = get(opts, 'table', '')
   let schema = get(opts, 'schema', '')
-  let default_content = get(opts, 'content', g:dbui_default_query)
+  let default_content = get(opts, 'content', g:db_ui_default_query)
   let was_single_win = winnr('$') ==? 1
 
   if a:edit_action ==? 'edit'
@@ -142,8 +142,8 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   let content = substitute(content, '{last_query}', join(self.last_query, "\n"), 'g')
   silent 1,$delete _
   call setline(1, split(content, "\n"))
-  if g:dbui_auto_execute_table_helpers
-    if g:dbui_execute_on_save
+  if g:db_ui_auto_execute_table_helpers
+    if g:db_ui_execute_on_save
       write
     else
       call self.execute_query()
@@ -181,7 +181,7 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   endif
   augroup db_ui_query
     autocmd! * <buffer>
-    if g:dbui_execute_on_save && is_sql
+    if g:db_ui_execute_on_save && is_sql
       autocmd BufWritePost <buffer> nested call s:method('execute_query')
     endif
     autocmd BufDelete,BufWipeout <buffer> silent! call s:method('remove_buffer', str2nr(expand('<abuf>')))
@@ -199,7 +199,7 @@ endfunction
 function! s:query.resize_if_single(is_single_win) abort
   if a:is_single_win
     exe bufwinnr('dbui').'wincmd w'
-    exe 'vertical resize '.g:dbui_winwidth
+    exe 'vertical resize '.g:db_ui_winwidth
     wincmd p
   endif
 endfunction

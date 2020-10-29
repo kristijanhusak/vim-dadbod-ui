@@ -54,7 +54,7 @@ function! db_ui#utils#set_mapping(key, plug, ...)
 endfunction
 
 function! db_ui#utils#print_debug(msg) abort
-  if !g:dbui_debug
+  if !g:db_ui_debug
     return
   endif
 

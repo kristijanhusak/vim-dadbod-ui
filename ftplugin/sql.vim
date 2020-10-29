@@ -1,4 +1,4 @@
-if get(g:, 'dbui_disable_mappings', 0)
+if get(g:, 'db_ui_disable_mappings', 0)
   finish
 endif
 

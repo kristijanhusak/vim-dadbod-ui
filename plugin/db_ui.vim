@@ -3,21 +3,21 @@ if exists('g:loaded_dbui')
 endif
 let g:loaded_dbui = 1
 
-let g:dbui_winwidth = get(g:, 'db_ui_winwidth', 40)
-let g:dbui_win_position = get(g:, 'db_ui_win_position', 'left')
-let g:dbui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')
-let g:dbui_save_location = get(g:, 'db_ui_save_location', '~/.local/share/db_ui')
-let g:dbui_tmp_query_location = get(g:, 'db_ui_tmp_query_location', '')
-let g:dbui_dotenv_variable_prefix = get(g:, 'db_ui_dotenv_variable_prefix', 'DB_UI_')
-let g:dbui_env_variable_url = get(g:, 'db_ui_env_variable_url', 'DBUI_URL')
-let g:dbui_env_variable_name = get(g:, 'db_ui_env_variable_name', 'DBUI_NAME')
-let g:dbui_disable_mappings = get(g:, 'db_ui_disable_mappings', 0)
-let g:dbui_table_helpers = get(g:, 'db_ui_table_helpers', {})
-let g:dbui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpers', 0)
-let g:dbui_show_help = get(g:, 'db_ui_show_help', 1)
-let g:dbui_use_nerd_fonts = get(g:, 'db_ui_use_nerd_fonts', 0)
-let g:dbui_execute_on_save = get(g:, 'db_ui_execute_on_save', 1)
-let g:dbui_debug = get(g:, 'db_ui_debug', 0)
+let g:db_ui_winwidth = get(g:, 'db_ui_winwidth', 40)
+let g:db_ui_win_position = get(g:, 'db_ui_win_position', 'left')
+let g:db_ui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')
+let g:db_ui_save_location = get(g:, 'db_ui_save_location', '~/.local/share/db_ui')
+let g:db_ui_tmp_query_location = get(g:, 'db_ui_tmp_query_location', '')
+let g:db_ui_dotenv_variable_prefix = get(g:, 'db_ui_dotenv_variable_prefix', 'DB_UI_')
+let g:db_ui_env_variable_url = get(g:, 'db_ui_env_variable_url', 'DBUI_URL')
+let g:db_ui_env_variable_name = get(g:, 'db_ui_env_variable_name', 'DBUI_NAME')
+let g:db_ui_disable_mappings = get(g:, 'db_ui_disable_mappings', 0)
+let g:db_ui_table_helpers = get(g:, 'db_ui_table_helpers', {})
+let g:db_ui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpers', 0)
+let g:db_ui_show_help = get(g:, 'db_ui_show_help', 1)
+let g:db_ui_use_nerd_fonts = get(g:, 'db_ui_use_nerd_fonts', 0)
+let g:db_ui_execute_on_save = get(g:, 'db_ui_execute_on_save', 1)
+let g:db_ui_debug = get(g:, 'db_ui_debug', 0)
 let s:dbui_icons = get(g:, 'db_ui_icons', {})
 let s:expanded_icon = get(s:dbui_icons, 'expanded', '▾')
 let s:collapsed_icon = get(s:dbui_icons, 'collapsed', '▸')
@@ -38,7 +38,7 @@ else
   silent! call remove(s:dbui_icons, 'collapsed')
 endif
 
-let g:dbui_icons = {
+let g:db_ui_icons = {
       \ 'expanded': {
       \   'db': s:expanded_icon,
       \   'buffers': s:expanded_icon,
@@ -66,8 +66,8 @@ let g:dbui_icons = {
       \ 'connection_error': '✕',
       \ }
 
-if g:dbui_use_nerd_fonts
-  let g:dbui_icons = {
+if g:db_ui_use_nerd_fonts
+  let g:db_ui_icons = {
         \ 'expanded': {
         \   'db': s:expanded_icon.' ',
         \   'buffers': s:expanded_icon.' ',
@@ -96,11 +96,11 @@ if g:dbui_use_nerd_fonts
         \ }
 endif
 
-let g:dbui_icons.expanded = extend(g:dbui_icons.expanded, s:expanded_icons)
-let g:dbui_icons.collapsed = extend(g:dbui_icons.collapsed, s:collapsed_icons)
+let g:db_ui_icons.expanded = extend(g:db_ui_icons.expanded, s:expanded_icons)
+let g:db_ui_icons.collapsed = extend(g:db_ui_icons.collapsed, s:collapsed_icons)
 silent! call remove(s:dbui_icons, 'expanded')
 silent! call remove(s:dbui_icons, 'collapsed')
-let g:dbui_icons = extend(g:dbui_icons, s:dbui_icons)
+let g:db_ui_icons = extend(g:db_ui_icons, s:dbui_icons)
 
 augroup dbui
   autocmd!

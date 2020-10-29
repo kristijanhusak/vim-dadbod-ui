@@ -131,13 +131,13 @@ function! s:dbui.new() abort
   let instance.old_buffers = []
   let instance.dbout_list = {}
 
-  if !empty(g:dbui_save_location)
-    let instance.save_path = substitute(fnamemodify(g:dbui_save_location, ':p'), '\/$', '', '')
+  if !empty(g:db_ui_save_location)
+    let instance.save_path = substitute(fnamemodify(g:db_ui_save_location, ':p'), '\/$', '', '')
     let instance.connections_path = printf('%s/%s', instance.save_path, 'connections.json')
   endif
 
-  if !empty(g:dbui_tmp_query_location)
-    let tmp_loc = substitute(fnamemodify(g:dbui_tmp_query_location, ':p'), '\/$', '', '')
+  if !empty(g:db_ui_tmp_query_location)
+    let tmp_loc = substitute(fnamemodify(g:db_ui_tmp_query_location, ':p'), '\/$', '', '')
     if !isdirectory(tmp_loc)
       call mkdir(tmp_loc, 'p')
     endif
@@ -246,7 +246,7 @@ function! s:dbui.populate_from_global_variable() abort
 endfunction
 
 function! s:dbui.populate_from_dotenv() abort
-  let prefix = g:dbui_dotenv_variable_prefix
+  let prefix = g:db_ui_dotenv_variable_prefix
   let all_envs = {}
   if exists('*environ')
     let all_envs = environ()
@@ -272,11 +272,11 @@ function! s:dbui.env(var) abort
 endfunction
 
 function! s:dbui.populate_from_env() abort
-  let env_url = self.env(g:dbui_env_variable_url)
+  let env_url = self.env(g:db_ui_env_variable_url)
   if empty(env_url)
     return self
   endif
-  let env_name = self.env(g:dbui_env_variable_name)
+  let env_name = self.env(g:db_ui_env_variable_name)
   if empty(env_name)
     let env_name = get(split(env_url, '/'), -1, '')
   endif

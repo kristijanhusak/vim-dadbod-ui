@@ -41,25 +41,25 @@ function! s:suite.should_prompt_to_set_bind_parameters() abort
 endfunction
 
 function! s:suite.should_prompt_to_edit_bind_parameters() abort
-  let g:dbui_test_option = 1
+  let g:db_ui_test_option = 1
   function! db_ui#utils#inputlist(msg) abort
-    return g:dbui_test_option
+    return g:db_ui_test_option
   endfunction
 
-  let g:dbui_bind_param_keys = keys(b:dbui_bind_params)
-  let g:dbui_new_bind_params = {
+  let g:db_ui_bind_param_keys = keys(b:dbui_bind_params)
+  let g:db_ui_new_bind_params = {
         \ ':contactId': '2',
         \ ':shouldSkip': '',
         \ ':firstName': 'Peter'
         \ }
 
   function! db_ui#utils#input(msg, default) abort
-    return g:dbui_new_bind_params[g:dbui_bind_param_keys[g:dbui_test_option - 1]]
+    return g:db_ui_new_bind_params[g:db_ui_bind_param_keys[g:db_ui_test_option - 1]]
   endfunction
   norm ,E
-  let g:dbui_test_option = 2
+  let g:db_ui_test_option = 2
   norm ,E
-  let g:dbui_test_option = 3
+  let g:db_ui_test_option = 3
   norm ,E
   call s:expect(b:dbui_bind_params[':contactId']).to_equal(2)
   call s:expect(b:dbui_bind_params[':firstName']).to_equal('Peter')

@@ -28,16 +28,16 @@ function! s:drawer.open(...) abort
   if !empty(mods)
     silent! exe mods.' new dbui'
   else
-    let win_pos = g:dbui_win_position ==? 'left' ? 'topleft' : 'botright'
+    let win_pos = g:db_ui_win_position ==? 'left' ? 'topleft' : 'botright'
     silent! exe 'vertical '.win_pos.' new dbui'
-    silent! exe 'vertical '.win_pos.' resize '.g:dbui_winwidth
+    silent! exe 'vertical '.win_pos.' resize '.g:db_ui_winwidth
   endif
   setlocal filetype=dbui buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap cursorline nospell nomodifiable winfixwidth nonumber norelativenumber
 
   call self.render()
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>method('toggle_line', 'edit')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_DeleteLine) :call <sid>method('delete_line')<CR>
-  let query_win_pos = g:dbui_win_position ==? 'left' ? 'botright' : 'topleft'
+  let query_win_pos = g:db_ui_win_position ==? 'left' ? 'botright' : 'topleft'
   silent! exe "nnoremap <silent><buffer> <Plug>(DBUI_SelectLineVsplit) :call <sid>method('toggle_line', 'vertical ".query_win_pos." split')<CR>"
   nnoremap <silent><buffer> <Plug>(DBUI_Redraw) :call <sid>method('redraw')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_AddConnection) :call <sid>method('add_connection')<CR>
@@ -253,7 +253,7 @@ function! s:drawer.render(...) abort
 
   if empty(self.dbui.dbs_list)
     call self.add('" No connections', 'noaction', 'help', '', '', 0)
-    call self.add('Add connection', 'call_method', 'add_connection', g:dbui_icons.add_connection, '', 0)
+    call self.add('Add connection', 'call_method', 'add_connection', g:db_ui_icons.add_connection, '', 0)
   endif
 
 
@@ -268,7 +268,7 @@ function! s:drawer.render(...) abort
         if !empty(self.dbui.dbout_list[entry])
           let content = printf(' (%s)', self.dbui.dbout_list[entry].content)
         endif
-        call self.add(fnamemodify(entry, ':t').content, 'open', 'dbout', g:dbui_icons.tables, '', 0, { 'file_path': entry })
+        call self.add(fnamemodify(entry, ':t').content, 'open', 'dbout', g:db_ui_icons.tables, '', 0, { 'file_path': entry })
       endfor
     endif
   endif
@@ -287,7 +287,7 @@ function! s:drawer.render(...) abort
 endfunction
 
 function! s:drawer.render_help() abort
-  if g:dbui_show_help
+  if g:db_ui_show_help
     call self.add('" Press ? for help', 'noaction', 'help', '', '', 0)
     call self.add('', 'noaction', 'help', '', '', 0)
   endif
@@ -319,9 +319,9 @@ endfunction
 function! s:drawer.add_db(db) abort
   let db_name = a:db.name
   if !empty(a:db.conn_error)
-    let db_name .= ' '.g:dbui_icons.connection_error
+    let db_name .= ' '.g:db_ui_icons.connection_error
   elseif !empty(a:db.conn)
-    let db_name .= ' '.g:dbui_icons.connection_ok
+    let db_name .= ' '.g:db_ui_icons.connection_ok
   endif
   if self.show_details
     let db_name .= ' ('.a:db.scheme.' - '.a:db.source.')'
@@ -331,7 +331,7 @@ function! s:drawer.add_db(db) abort
     return a:db
   endif
 
-  call self.add('New query', 'open', 'query', g:dbui_icons.new_query, a:db.key_name, 1)
+  call self.add('New query', 'open', 'query', g:db_ui_icons.new_query, a:db.key_name, 1)
   if !empty(a:db.buffers.list)
     call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', self.get_toggle_icon('buffers', a:db.buffers), a:db.key_name, 1)
     if a:db.buffers.expanded
@@ -342,14 +342,14 @@ function! s:drawer.add_db(db) abort
         else
           let buflabel = substitute(fnamemodify(buf, ':e'), '^'.db_ui#utils#slug(a:db.name).'-', '', '').' *'
         endif
-        call self.add(buflabel, 'open', 'buffer', g:dbui_icons.buffers, a:db.key_name, 2, { 'file_path': buf })
+        call self.add(buflabel, 'open', 'buffer', g:db_ui_icons.buffers, a:db.key_name, 2, { 'file_path': buf })
       endfor
     endif
   endif
   call self.add('Saved queries ('.len(a:db.saved_queries.list).')', 'toggle', 'saved_queries', self.get_toggle_icon('saved_queries', a:db.saved_queries), a:db.key_name, 1)
   if a:db.saved_queries.expanded
     for saved_query in a:db.saved_queries.list
-      call self.add(fnamemodify(saved_query, ':t'), 'open', 'buffer', g:dbui_icons.saved_query, a:db.key_name, 2, { 'file_path': saved_query, 'saved': 1 })
+      call self.add(fnamemodify(saved_query, ':t'), 'open', 'buffer', g:db_ui_icons.saved_query, a:db.key_name, 2, { 'file_path': saved_query, 'saved': 1 })
     endfor
   endif
 
@@ -379,7 +379,7 @@ function! s:drawer.render_tables(tables, db, path, level, schema) abort
     call self.add(table, 'toggle', a:path.'->'.table, self.get_toggle_icon('table', a:tables.items[table]), a:db.key_name, a:level)
     if a:tables.items[table].expanded
       for [helper_name, helper] in items(a:db.table_helpers)
-        call self.add(helper_name, 'open', 'table', g:dbui_icons.tables, a:db.key_name, a:level + 1, {'table': table, 'content': helper, 'schema': a:schema })
+        call self.add(helper_name, 'open', 'table', g:db_ui_icons.tables, a:db.key_name, a:level + 1, {'table': table, 'content': helper, 'schema': a:schema })
       endfor
     endif
   endfor
@@ -589,10 +589,10 @@ endfunction
 
 function! s:drawer.get_toggle_icon(type, item) abort
   if a:item.expanded
-    return g:dbui_icons.expanded[a:type]
+    return g:db_ui_icons.expanded[a:type]
   endif
 
-  return g:dbui_icons.collapsed[a:type]
+  return g:db_ui_icons.collapsed[a:type]
 endfunction
 
 function! s:drawer.get_nested(obj, val, ...) abort

@@ -19,7 +19,7 @@ let s:postgres = {
       \ }
 
 let s:sqlite = {
-      \ 'List': g:dbui_default_query,
+      \ 'List': g:db_ui_default_query,
       \ 'Indexes': "SELECT * FROM pragma_index_list('{table}')",
       \ 'Foreign Keys': "SELECT * FROM pragma_foreign_key_list('{table}')",
       \ 'Primary Keys': "SELECT * FROM pragma_index_list('{table}') WHERE origin = 'pk'"
@@ -109,7 +109,7 @@ let s:sqlserver = {
 let s:helpers = {
       \ 'postgresql': s:postgres,
       \ 'mysql': s:mysql,
-      \ 'oracle': { 'List': g:dbui_default_query },
+      \ 'oracle': { 'List': g:db_ui_default_query },
       \ 'sqlite': s:sqlite,
       \ 'sqlserver': s:sqlserver,
       \ 'mongodb': { 'List': '{table}.find()'},
@@ -132,9 +132,9 @@ let s:scheme_map = {
       \ }
 
 function db_ui#table_helpers#get(scheme) abort
-  let result = extend(get(s:all, a:scheme, { 'List': '' }), get(g:dbui_table_helpers, a:scheme, {}))
+  let result = extend(get(s:all, a:scheme, { 'List': '' }), get(g:db_ui_table_helpers, a:scheme, {}))
   if has_key(s:scheme_map, a:scheme)
-    let result = extend(result, get(g:dbui_table_helpers, s:scheme_map[a:scheme], {}))
+    let result = extend(result, get(g:db_ui_table_helpers, s:scheme_map[a:scheme], {}))
   endif
 
   return result

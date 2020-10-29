@@ -9,7 +9,7 @@ function! s:suite.before() abort
 endfunction
 
 function! s:suite.after() abort
-  call SetOptionVariable('db_ui_table_helpers', {'sqlite': {'List': g:dbui_default_query }})
+  call SetOptionVariable('db_ui_table_helpers', {'sqlite': {'List': g:db_ui_default_query }})
   call Cleanup()
 endfunction
 

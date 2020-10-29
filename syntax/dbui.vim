@@ -1,5 +1,5 @@
 syntax clear
-for [icon_name, icon] in items(g:dbui_icons)
+for [icon_name, icon] in items(g:db_ui_icons)
   if type(icon) ==? type({})
     for [nested_icon_name, nested_icon] in items(icon)
       let name = 'dbui_'.icon_name.'_'.nested_icon_name
@@ -11,9 +11,9 @@ for [icon_name, icon] in items(g:dbui_icons)
   endif
 endfor
 
-exe 'syn match dbui_connection_source /\('.g:dbui_icons.expanded.db.'\s\|'.g:dbui_icons.collapsed.db.'\s\)\@<!([^)]*)$/'
-exe 'syn match dbui_connection_ok /'.g:dbui_icons.connection_ok.'/'
-exe 'syn match dbui_connection_error /'.g:dbui_icons.connection_error.'/'
+exe 'syn match dbui_connection_source /\('.g:db_ui_icons.expanded.db.'\s\|'.g:db_ui_icons.collapsed.db.'\s\)\@<!([^)]*)$/'
+exe 'syn match dbui_connection_ok /'.g:db_ui_icons.connection_ok.'/'
+exe 'syn match dbui_connection_error /'.g:db_ui_icons.connection_error.'/'
 syn match dbui_help /^".*$/
 syn match dbui_help_key /^"\s\zs[^ ]*\ze\s-/ containedin=dbui_help
 hi default link dbui_connection_source Comment

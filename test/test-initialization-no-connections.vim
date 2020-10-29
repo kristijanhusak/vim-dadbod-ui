@@ -10,7 +10,7 @@ function! s:suite.should_open_empty_dbui_with_button_to_add_connection() abort
   :DBUI
   call s:expect(&filetype).to_equal('dbui')
   call s:expect(getline(1)).to_equal('" No connections')
-  call s:expect(getline(2)).to_equal(g:dbui_icons.add_connection.' Add connection')
+  call s:expect(getline(2)).to_equal(g:db_ui_icons.add_connection.' Add connection')
 endfunction
 
 function! s:suite.should_add_connection_from_empty_dbui_drawer() abort
@@ -26,5 +26,5 @@ function! s:suite.should_add_connection_from_empty_dbui_drawer() abort
   endfunction
 
   norm jo
-  call s:expect(getline(1)).to_equal(g:dbui_icons.collapsed.db.' test-add-from-empty')
+  call s:expect(getline(1)).to_equal(g:db_ui_icons.collapsed.db.' test-add-from-empty')
 endfunction

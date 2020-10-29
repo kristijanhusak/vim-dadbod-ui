@@ -30,11 +30,11 @@ function! s:suite.should_write_query() abort
   pclose
   :DBUI
   norm G
-  call s:expect(getline('.')).to_equal(g:dbui_icons.collapsed.saved_queries.' Query results (1)')
+  call s:expect(getline('.')).to_equal(g:db_ui_icons.collapsed.saved_queries.' Query results (1)')
   norm o
-  call s:expect(getline('.')).to_equal(g:dbui_icons.expanded.saved_queries.' Query results (1)')
+  call s:expect(getline('.')).to_equal(g:db_ui_icons.expanded.saved_queries.' Query results (1)')
   norm j
-  call s:expect(getline('.')).to_match('\'.g:dbui_icons.tables.' \d\+\.dbout')
+  call s:expect(getline('.')).to_match('\'.g:db_ui_icons.tables.' \d\+\.dbout')
   call s:expect(bufwinnr('.dbout')).to_equal(-1)
   norm o
   call s:expect(bufwinnr('.dbout')).to_be_greater_than(-1)

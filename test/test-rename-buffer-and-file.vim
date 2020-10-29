@@ -23,7 +23,7 @@ function! s:suite.should_rename_buffer() abort
   write
   :DBUIFindBuffer
   normal r
-  call s:expect(getline('.')).to_equal('    '.g:dbui_icons.buffers.' custom-buffer-name *')
+  call s:expect(getline('.')).to_equal('    '.g:db_ui_icons.buffers.' custom-buffer-name *')
 endfunction
 
 function! s:suite.should_rename_saved_query() abort

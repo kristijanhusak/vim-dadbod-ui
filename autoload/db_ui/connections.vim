@@ -23,7 +23,7 @@ function! s:connections.new(drawer) abort
 endfunction
 
 function! s:connections.add() abort
-  if empty(g:dbui_save_location)
+  if empty(g:db_ui_save_location)
     return db_ui#notifications#error('Please set up valid save location via g:db_ui_save_location')
   endif
 
@@ -108,7 +108,7 @@ function! s:connections.enter_db_name(url) abort
 endfunction
 
 function! s:connections.get_file() abort
-  let save_folder = substitute(fnamemodify(g:dbui_save_location, ':p'), '\/$', '', '')
+  let save_folder = substitute(fnamemodify(g:db_ui_save_location, ':p'), '\/$', '', '')
   return printf('%s/%s', save_folder, 'connections.json')
 endfunction
 

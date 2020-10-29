@@ -4,7 +4,7 @@ nnoremap <silent><buffer> <Plug>(DBUI_YankHeader) :call db_ui#dbout#yank_header(
 nnoremap <silent><buffer> <Plug>(DBUI_ToggleResultLayout) :call db_ui#dbout#toggle_layout()<CR>
 omap <silent><buffer> ic :call db_ui#dbout#get_cell_value()<CR>
 
-if get(g:, 'dbui_disable_mappings', 0)
+if get(g:, 'db_ui_disable_mappings', 0)
   finish
 endif
 
