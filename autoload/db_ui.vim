@@ -117,7 +117,7 @@ function! db_ui#print_last_query_info() abort
   let content = ['Last query:'] + info.last_query
   let content += ['' + 'Time: '.info.last_query_time.' sec.']
 
-  return db_ui#notifications#info(content)
+  return db_ui#notifications#info(content, {'echo': 1})
 endfunction
 
 function! s:dbui.new() abort
