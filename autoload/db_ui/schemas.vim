@@ -86,53 +86,19 @@ let s:mysql = {
       \ 'quote': 0,
       \ }
 
-let s:oracle_foreign_key_query =<< EOF
-	select
-		l.column_name,
-		l.owner,
-		l.table_name
-	from
-		all_constraints n,
-		all_cons_columns l,
-		all_users u
-	where
-		n.constraint_type = 'R'
-	and
-		n.constraint_name = l.constraint_name
-	and
-		n.owner = l.owner
-	and
-		l.owner = u.username
-	and
-		u.common = 'NO'
-	and exists
-	(
-		SELECT a.constraint_name, a.table_name
-		FROM all_constraints a
-		WHERE a.constraint_name = n.r_constraint_name
-		AND a.constraint_type = 'P'
-	)
-	order by
-		l.table_name,
-		l.owner,
-		l.column_name
-	;
-EOF
-
-let s:oracle_foreign_key_query = join(s:oracle_foreign_key_query)
-let s:oracle_args = 'echo "%s" | '
+let s:oracle_args = "echo \"SET linesize 4000;\nSET pagesize 4000;\nCOLUMN owner FORMAT a20;\nCOLUMN table_name FORMAT a25;\nCOLUMN column_name FORMAT a25;\n%s\" | "
 let s:oracle = {
-      \ 'args': s:oracle_args,
-      \ 'cell_line_number': 1,
-      \ 'cell_line_pattern': '^-\+$',
-      \ 'default_scheme': '',
-      \ 'foreign_key_query': printf(s:oracle_args, s:oracle_foreign_key_query),
-      \ 'parse_results': {results, min_len -> s:results_parser(results[1:], '\t', min_len)},
-      \ 'quote': 0,
-      \ 'schemes_query': printf(s:oracle_args, "SELECT username FROM all_users WHERE common = 'NO';"),
-      \ 'schemes_tables_query': printf(s:oracle_args, "SELECT t.owner, t.table_name FROM all_tables t, all_users u WHERE t.owner = u.username AND u.common = 'NO';"),
-      \ 'select_foreign_key_query': 'SELECT * FROM %s.%s WHERE %s = %s;',
-      \ }
+\   'args': s:oracle_args,
+\   'cell_line_number': 1,
+\   'cell_line_pattern': '^-\+\( \+-\+\)*',
+\   'default_scheme': '',
+\   'foreign_key_query': printf(s:oracle_args, "SELECT DISTINCT RFRD.table_name, RFRD.column_name, RFRD.owner FROM all_cons_columns RFRD JOIN all_constraints CON ON RFRD.constraint_name = CON.r_constraint_name JOIN all_cons_columns RFRING ON CON.constraint_name = RFRING.constraint_name JOIN all_users U ON CON.owner = U.username WHERE CON.constraint_type = 'R' AND U.common = 'NO' AND RFRING.column_name = '{col_name}';"),
+\   'parse_results': {results, min_len -> s:results_parser(results[15:-5], '\s\s\+', min_len)},
+\   'quote': 1,
+\   'schemes_query': printf(s:oracle_args, "SELECT username FROM all_users WHERE common = 'NO' ORDER BY username;"),
+\   'schemes_tables_query': printf(s:oracle_args, "SELECT T.owner, T.table_name FROM all_tables T JOIN all_users U ON T.owner = U.username WHERE U.common = 'NO' ORDER BY T.table_name;"),
+\   'select_foreign_key_query': 'SELECT * FROM %s.%s WHERE %s = %s;',
+\ }
 
 let s:schemas = {
       \ 'postgres': s:postgresql,
@@ -156,5 +122,12 @@ endfunction
 
 function! db_ui#schemas#query(db, query) abort
   let base_query = db#adapter#dispatch(a:db.conn, 'interactive')
-  return map(systemlist(printf('%s %s', base_query, a:query)), 'substitute(v:val, "\r$", "", "")')
+  return map(
+  \   systemlist(
+  \     a:db.scheme ==# 'oracle' ?
+  \       printf('%s %s', a:query, base_query) :
+  \       printf('%s %s', base_query, a:query)
+  \   ),
+  \   'substitute(v:val, "\r$", "", "")'
+  \ )
 endfunction

@@ -32,16 +32,24 @@ let s:mysql = {
       \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
       \ }
 
-let s:oracle_constraint_from = ' FROM all_constraints n, all_cons_columns l '
-let s:oracle_constraint_and = " n.constraint_name = l.constraint_name AND n.owner = l.owner AND l.table_name = '{table}' ORDER BY "
-let s:oracle_key_cmd = 'SELECT l.column_name'.s:oracle_constraint_from."WHERE n.constraint_type = '%s' AND".s:oracle_constraint_and.'l.column_name'
+let s:oracle_from = ' FROM all_constraints N JOIN all_cons_columns L ON N.constraint_name = L.constraint_name AND N.owner = L.owner '
+let s:oracle_order_by = " L.table_name = '{table}' ORDER BY "
+let s:oracle_key_cmd = 'SELECT L.table_name, L.column_name'.s:oracle_from."WHERE N.constraint_type = '%s' AND".s:oracle_order_by.'L.column_name;'
+
 let s:oracle = {
-      \ 'Columns': 'DESCRIBE {optional_schema}{table};',
-      \ 'Foreign Keys': printf(s:oracle_key_cmd, 'F'),
-      \ 'Indexes': "SELECT n.index_name".s:oracle_constraint_from."WHERE".s:oracle_constraint_and."n.index_name",
-      \ 'List': 'SELECT * FROM {optional_schema}{table} LIMIT 200;',
-      \ 'Primary Keys': printf(s:oracle_key_cmd, 'P')
-      \ }
+\   'Columns': 'DESCRIBE "{schema}"."{table}";',
+\   'Foreign Keys': printf(s:oracle_key_cmd, 'R'),
+\   'Indexes': "SELECT DISTINCT N.owner, N.index_name, N.constraint_type".s:oracle_from."WHERE".s:oracle_order_by."N.index_name;",
+\   'List': 'SELECT * FROM "{schema}"."{table}";',
+\   'Primary Keys': printf(s:oracle_key_cmd, 'P'),
+\   'References': "SELECT RFRING.owner, RFRING.table_name, RFRING.column_name FROM all_cons_columns RFRING JOIN all_constraints N ON RFRING.constraint_name = N.constraint_name JOIN all_cons_columns RFRD ON N.r_constraint_name = RFRD.constraint_name JOIN all_users U ON N.owner = U.username WHERE N.constraint_type = 'R' AND U.common = 'NO' AND RFRD.owner = '{schema}' AND RFRD.table_name = '{table}' ORDER BY RFRING.owner, RFRING.table_name, RFRING.column_name;",
+\ }
+
+for [helper, query] in items(s:oracle)
+	if helper !=? 'Columns' && helper !=? 'List'
+		let s:oracle[helper] = "SET linesize 4000;\nSET pagesize 4000;\n\nCOLUMN column_name FORMAT a20;\nCOLUMN constraint_type FORMAT a20;\nCOLUMN index_name FORMAT a20;\nCOLUMN owner FORMAT a20;\nCOLUMN table_name FORMAT a20;\n\n".query
+	endif
+endfor
 
 let s:sqlserver_column_summary_query = "
       \ select c.column_name + ' (' + \n
