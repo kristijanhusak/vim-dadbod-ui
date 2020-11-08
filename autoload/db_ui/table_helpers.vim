@@ -32,6 +32,17 @@ let s:mysql = {
       \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
       \ }
 
+let s:oracle_constraint_from = ' FROM all_constraints n, all_cons_columns l '
+let s:oracle_constraint_and = " n.constraint_name = l.constraint_name AND n.owner = l.owner AND l.table_name = '{table}' ORDER BY "
+let s:oracle_key_cmd = 'SELECT l.column_name'.s:oracle_constraint_from."WHERE n.constraint_type = '%s' AND".s:oracle_constraint_and.'l.column_name'
+let s:oracle = {
+      \ 'Columns': 'DESCRIBE {optional_schema}{table};',
+      \ 'Foreign Keys': printf(s:oracle_key_cmd, 'F'),
+      \ 'Indexes': "SELECT n.index_name".s:oracle_constraint_from."WHERE".s:oracle_constraint_and."n.index_name",
+      \ 'List': 'SELECT * FROM {optional_schema}{table} LIMIT 200;',
+      \ 'Primary Keys': printf(s:oracle_key_cmd, 'P')
+      \ }
+
 let s:sqlserver_column_summary_query = "
       \ select c.column_name + ' (' + \n
       \     isnull(( select 'PK, ' from information_schema.table_constraints as k join information_schema.key_column_usage as kcu on k.constraint_name = kcu.constraint_name where constraint_type='PRIMARY KEY' and k.table_name = c.table_name and kcu.column_name = c.column_name), '') + \n
@@ -109,7 +120,7 @@ let s:sqlserver = {
 let s:helpers = {
       \ 'postgresql': s:postgres,
       \ 'mysql': s:mysql,
-      \ 'oracle': { 'List': g:db_ui_default_query },
+      \ 'oracle': s:oracle,
       \ 'sqlite': s:sqlite,
       \ 'sqlserver': s:sqlserver,
       \ 'mongodb': { 'List': '{table}.find()'},

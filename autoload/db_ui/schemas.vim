@@ -85,11 +85,61 @@ let s:mysql = {
       \ 'layout_flag': '\\G',
       \ 'quote': 0,
       \ }
+
+let s:oracle_foreign_key_query =<< EOF
+	select
+		l.column_name,
+		l.owner,
+		l.table_name
+	from
+		all_constraints n,
+		all_cons_columns l,
+		all_users u
+	where
+		n.constraint_type = 'R'
+	and
+		n.constraint_name = l.constraint_name
+	and
+		n.owner = l.owner
+	and
+		l.owner = u.username
+	and
+		u.common = 'NO'
+	and exists
+	(
+		SELECT a.constraint_name, a.table_name
+		FROM all_constraints a
+		WHERE a.constraint_name = n.r_constraint_name
+		AND a.constraint_type = 'P'
+	)
+	order by
+		l.table_name,
+		l.owner,
+		l.column_name
+	;
+EOF
+
+let s:oracle_foreign_key_query = join(s:oracle_foreign_key_query)
+let s:oracle_args = 'echo "%s" | '
+let s:oracle = {
+      \ 'args': s:oracle_args,
+      \ 'cell_line_number': 1,
+      \ 'cell_line_pattern': '^-\+$',
+      \ 'default_scheme': '',
+      \ 'foreign_key_query': printf(s:oracle_args, s:oracle_foreign_key_query),
+      \ 'parse_results': {results, min_len -> s:results_parser(results[1:], '\t', min_len)},
+      \ 'quote': 0,
+      \ 'schemes_query': printf(s:oracle_args, "SELECT username FROM all_users WHERE common = 'NO';"),
+      \ 'schemes_tables_query': printf(s:oracle_args, "SELECT t.owner, t.table_name FROM all_tables t, all_users u WHERE t.owner = u.username AND u.common = 'NO';"),
+      \ 'select_foreign_key_query': 'SELECT * FROM %s.%s WHERE %s = %s;',
+      \ }
+
 let s:schemas = {
       \ 'postgres': s:postgresql,
       \ 'postgresql': s:postgresql,
       \ 'sqlserver': s:sqlserver,
       \ 'mysql': s:mysql,
+      \ 'oracle': s:oracle,
       \ }
 
 if !exists('g:db_adapter_postgres')
