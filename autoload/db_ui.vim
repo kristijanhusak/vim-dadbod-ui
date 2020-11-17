@@ -179,7 +179,10 @@ function! s:dbui.populate_dbs() abort
   for db in self.dbs_list
     let key_name = printf('%s_%s', db.name, db.source)
     if !has_key(self.dbs, key_name) || db.url !=? self.dbs[key_name].url
-      let self.dbs[key_name] = self.generate_new_db_entry(db)
+      let new_entry = self.generate_new_db_entry(db)
+      if !empty(new_entry)
+        let self.dbs[key_name] = new_entry
+      endif
     else
       let self.dbs[key_name] = self.drawer.populate(self.dbs[key_name])
     endif
@@ -188,6 +191,9 @@ endfunction
 
 function! s:dbui.generate_new_db_entry(db) abort
   let parsed_url = self.parse_url(a:db.url)
+  if empty(parsed_url)
+    return parsed_url
+  endif
   let scheme = get(parsed_url, 'scheme', '')
   let save_path = ''
   if !empty(self.save_path)
