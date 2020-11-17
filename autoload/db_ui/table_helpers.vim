@@ -32,6 +32,74 @@ let s:mysql = {
       \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
       \ }
 
+let s:oracle_from = "
+      \FROM all_constraints N\n
+      \JOIN all_cons_columns L\n\t
+      \ON N.constraint_name = L.constraint_name\n\t
+      \AND N.owner = L.owner"
+let s:oracle_qualify_and_order_by = "
+      \L.table_name = '{table}'\n
+      \ORDER BY\n\t"
+let s:oracle_key_cmd = "
+      \SELECT\n\t
+      \L.table_name,\n\t
+      \L.column_name\n
+      \" . s:oracle_from . "\n
+      \WHERE\n\t
+      \N.constraint_type = '%s'\n\t
+      \AND " . s:oracle_qualify_and_order_by . "L.column_name"
+
+let s:oracle = {
+      \ 'Columns': 'DESCRIBE "{schema}"."{table}"',
+      \ 'Foreign Keys': printf(s:oracle_key_cmd, 'R'),
+      \ 'Indexes': "
+            \SELECT DISTINCT\n\t
+            \N.owner\n\t
+            \N.index_name,\n\t
+            \N.constraint_type\n
+            \" . s:oracle_from . "\n
+            \WHERE\n\t
+            \" . s:oracle_qualify_and_order_by . "N.index_name",
+      \ 'List': 'SELECT * FROM "{schema}"."{table}"',
+      \ 'Primary Keys': printf(s:oracle_key_cmd, 'P'),
+      \ 'References': "
+            \SELECT\n\t
+            \RFRING.owner,\n\t
+            \RFRING.table_name,\n\t
+            \RFRING.column_name\n
+            \FROM all_cons_columns RFRING\n
+            \JOIN all_constraints N\n\t
+            \ON RFRING.constraint_name = N.constraint_name\n
+            \JOIN all_cons_columns RFRD\n\t
+            \ON N.r_constraint_name = RFRD.constraint_name\n
+            \JOIN all_users U\n\t
+            \ON N.owner = U.username\n
+            \WHERE\n\t
+            \N.constraint_type = 'R'\n
+            \AND\n\t
+            \U.common = 'NO'\n
+            \AND\n\t
+            \RFRD.owner = '{schema}'\n
+            \AND\n\t
+            \RFRD.table_name = '{table}'\n
+            \ORDER BY\n\t
+            \RFRING.owner,\n\t
+            \RFRING.table_name,\n\t
+            \RFRING.column_name",
+      \ }
+
+for [helper, query] in items(s:oracle)
+   let s:oracle[helper] = "
+      \SET linesize 4000;\n
+      \SET pagesize 4000;\n\n
+      \COLUMN column_name FORMAT a20;\n
+      \COLUMN constraint_type FORMAT a20;\n
+      \COLUMN index_name FORMAT a20;\n
+      \COLUMN owner FORMAT a20;\n
+      \COLUMN table_name FORMAT a20;\n\n
+      \" . query . "\n;"
+endfor
+
 let s:sqlserver_column_summary_query = "
       \ select c.column_name + ' (' + \n
       \     isnull(( select 'PK, ' from information_schema.table_constraints as k join information_schema.key_column_usage as kcu on k.constraint_name = kcu.constraint_name where constraint_type='PRIMARY KEY' and k.table_name = c.table_name and kcu.column_name = c.column_name), '') + \n
@@ -109,7 +177,7 @@ let s:sqlserver = {
 let s:helpers = {
       \ 'postgresql': s:postgres,
       \ 'mysql': s:mysql,
-      \ 'oracle': { 'List': g:db_ui_default_query },
+      \ 'oracle': s:oracle,
       \ 'sqlite': s:sqlite,
       \ 'sqlserver': s:sqlserver,
       \ 'mongodb': { 'List': '{table}.find()'},

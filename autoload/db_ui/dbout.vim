@@ -10,7 +10,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
   let field_name = trim(getline(cell_line_number - 1)[(cell_range.from):(cell_range.to)])
   let field_value = trim(getline('.')[(cell_range.from):(cell_range.to)])
   let foreign_key_query = substitute(scheme.foreign_key_query, '{col_name}', field_name, '')
-  let result = scheme.parse_results(db_ui#schemas#query({ 'conn': b:db }, foreign_key_query), 3)
+  let result = scheme.parse_results(db_ui#schemas#query({ 'conn': b:db, 'scheme': parsed.scheme }, foreign_key_query), 3)
   if empty(result)
     return db_ui#notifications#error('No valid foreign key found.')
   endif
