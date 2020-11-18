@@ -54,7 +54,7 @@ let s:oracle = {
       \ 'Foreign Keys': printf(s:oracle_key_cmd, 'R'),
       \ 'Indexes': "
             \SELECT DISTINCT\n\t
-            \N.owner\n\t
+            \N.owner,\n\t
             \N.index_name,\n\t
             \N.constraint_type\n
             \" . s:oracle_from . "\n
