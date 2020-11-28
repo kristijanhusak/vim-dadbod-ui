@@ -21,7 +21,7 @@ endfunction
 
 function! s:drawer.open(...) abort
   if self.is_opened()
-    silent! exe bufwinnr('dbui').'wincmd w'
+    silent! exe self.get_winnr().'wincmd w'
     return
   endif
   let mods = get(a:, 1, '')
@@ -53,7 +53,16 @@ function! s:drawer.open(...) abort
 endfunction
 
 function! s:drawer.is_opened() abort
-  return bufwinnr('dbui') > -1
+  return self.get_winnr() > -1
+endfunction
+
+function! s:drawer.get_winnr() abort
+  for nr in range(1, winnr('$'))
+    if getwinvar(nr, '&filetype') ==? 'dbui'
+      return nr
+    endif
+  endfor
+  return -1
 endfunction
 
 function! s:drawer.redraw() abort
@@ -73,7 +82,7 @@ endfunction
 
 function! s:drawer.quit() abort
   if self.is_opened()
-    silent! exe 'bd'.bufnr('dbui')
+    silent! exe 'bd'.winbufnr(self.get_winnr())
   endif
 endfunction
 
@@ -206,7 +215,7 @@ function! s:drawer.focus() abort
     return 0
   endif
 
-  let winnr = bufwinnr('dbui')
+  let winnr = self.get_winnr()
   if winnr > -1
     exe winnr.'wincmd w'
     return 1

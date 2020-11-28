@@ -198,7 +198,7 @@ endfunction
 
 function! s:query.resize_if_single(is_single_win) abort
   if a:is_single_win
-    exe bufwinnr('dbui').'wincmd w'
+    exe self.drawer.get_winnr().'wincmd w'
     exe 'vertical resize '.g:db_ui_winwidth
     wincmd p
   endif
