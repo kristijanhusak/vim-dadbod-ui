@@ -27,7 +27,9 @@ endfunction
 function! s:query.open(item, edit_action) abort
   let db = self.drawer.dbui.dbs[a:item.dbui_db_key_name]
   if a:item.type ==? 'buffer'
-    return self.open_buffer(db, a:item.file_path, a:edit_action)
+    return self.open_buffer(db, a:item.file_path, a:edit_action, {
+          \ 'is_tmp': self.drawer.dbui.is_tmp_location_buffer(a:item.file_path)
+          \ })
   endif
   let suffix = 'query'
   let table = ''
