@@ -206,6 +206,13 @@ function! s:dbui.generate_new_db_entry(db) abort
   if schema_support && tolower(scheme) ==? 'mysql' && parsed_url.path !=? '/'
     let schema_support = 0
   endif
+
+  let l:db_expanded = 0
+  let l:tables_expanded = (1 is s:get_ui_drawer_settings(a:db.name, 'tables.expanded')) ? 1 : 0
+  if 1 is l:tables_expanded
+    let l:db_expanded = 1
+  endif
+
   return {
         \ 'url': a:db.url,
         \ 'conn': '',
@@ -214,8 +221,8 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'source': a:db.source,
         \ 'scheme': scheme,
         \ 'table_helpers': db_ui#table_helpers#get(scheme),
-        \ 'expanded': 0,
-        \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
+        \ 'expanded': l:db_expanded,
+        \ 'tables': {'expanded': l:tables_expanded , 'items': {}, 'list': [] },
         \ 'schemas': {'expanded': 0, 'items': {}, 'list': [] },
         \ 'saved_queries': { 'expanded': 0, 'list': [] },
         \ 'buffers': { 'expanded': 0, 'list': buffers },
@@ -226,6 +233,29 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'quote': get(scheme_info, 'quote', 0),
         \ 'default_scheme': get(scheme_info, 'default_scheme', '')
         \ }
+endfunction
+
+function s:get_ui_drawer_settings(db_name, path) abort
+  let l:drawer_settings = get(g:, 'db_ui_drawer_settings', {})
+
+  if empty(l:drawer_settings) || type(l:drawer_settings) !=# type({})
+    return {}
+  endif
+
+  try
+    let l:db_settings = l:drawer_settings.databases[a:db_name]
+    if empty(a:path)
+      return l:db_settings
+    endif
+
+    for l:part in split(a:path, '\.')
+      let l:db_settings = l:db_settings[l:part]
+    endfor
+
+    return l:db_settings
+  catch /^Vim\%((\a\+)\)\=:E716/
+    return {}
+  endtry
 endfunction
 
 function! s:dbui.populate_from_global_variable() abort
