@@ -118,6 +118,7 @@ let s:oracle = {
       \   'cell_line_pattern': '^-\+\( \+-\+\)*',
       \   'default_scheme': '',
       \   'foreign_key_query': printf(s:oracle_args, s:oracle_foreign_key_query),
+      \   'has_virtual_results': v:true,
       \   'parse_results': {results, min_len -> s:results_parser(results[15:-5], '\s\s\+', min_len)},
       \   'quote': 1,
       \   'schemes_query': printf(s:oracle_args, "SELECT username FROM all_users WHERE common = 'NO' ORDER BY username"),
