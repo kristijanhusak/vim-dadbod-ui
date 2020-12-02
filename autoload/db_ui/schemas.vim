@@ -98,7 +98,7 @@ let s:oracle_args = 'echo "'.join(
       \    ";\n"
       \ ).';" |'
 let s:oracle_foreign_key_query = "
-      \ SELECT DISTINCT RFRD.table_name, RFRD.column_name, RFRD.owner
+      \SELECT DISTINCT RFRD.table_name, RFRD.column_name, RFRD.owner
       \ FROM all_cons_columns RFRD
       \ JOIN all_constraints CON ON RFRD.constraint_name = CON.r_constraint_name
       \ JOIN all_cons_columns RFRING ON CON.constraint_name = RFRING.constraint_name
@@ -107,7 +107,7 @@ let s:oracle_foreign_key_query = "
       \ AND U.common = 'NO'
       \ AND RFRING.column_name = '{col_name}'"
 let s:oracle_schemes_tables_query = "
-      \ SELECT T.owner, T.table_name
+      \SELECT T.owner, T.table_name
       \ FROM all_tables T
       \ JOIN all_users U ON T.owner = U.username
       \ WHERE U.common = 'NO'
