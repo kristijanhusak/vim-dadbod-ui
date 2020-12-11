@@ -33,12 +33,13 @@ function! db_ui#find_buffer() abort
   endif
 
   if !exists('b:dbui_db_key_name')
-    let db = s:get_db()
+    let saved_query_db = s:dbui_instance.drawer.get_query().get_saved_query_db_name()
+    let db = s:get_db(saved_query_db)
     if empty(db)
       return db_ui#notifications#error('No database entries selected or found.')
     endif
     call s:dbui_instance.connect(db)
-    call db_ui#notifications#info('Assigned buffer to db '.db.name)
+    call db_ui#notifications#info('Assigned buffer to db '.db.name, {'delay': 10000 })
     let b:dbui_db_key_name = db.key_name
     let b:db = db.conn
   endif
@@ -66,6 +67,7 @@ function! db_ui#find_buffer() abort
     let row += 1
   endfor
   call cursor(row, 0)
+  wincmd p
 endfunction
 
 function! db_ui#rename_buffer() abort
@@ -371,9 +373,17 @@ function! s:init() abort
   return s:dbui_instance
 endfunction
 
-function! s:get_db() abort
+function! s:get_db(saved_query_db) abort
   if !len(s:dbui_instance.dbs_list)
     return {}
+  endif
+
+  if !empty(a:saved_query_db)
+    let saved_db = get(filter(copy(s:dbui_instance.dbs_list), 'v:val.name ==? a:saved_query_db'), 0, {})
+    if empty(saved_db)
+      return {}
+    endif
+    return s:dbui_instance.dbs[saved_db.key_name]
   endif
 
   if len(s:dbui_instance.dbs_list) ==? 1

@@ -24,6 +24,8 @@ function! s:suite.should_find_buffer_in_dbui_drawer() abort
   call s:expect(getline('.')).to_equal(g:db_ui_icons.expanded.db.' dadbod_ui_test '.g:db_ui_icons.connection_ok)
   wincmd p
   :DBUIFindBuffer
+  call s:expect(&filetype).to_equal('sql')
+  wincmd p
   call s:expect(&filetype).to_equal('dbui')
   call s:expect(getline('.')).to_equal('    '.g:db_ui_icons.buffers.' contacts-List *')
 endfunction
@@ -38,12 +40,13 @@ function! s:suite.should_find_non_dbui_buffer_in_dbui_drawer() abort
     return 1
   endfunction
   :DBUIFindBuffer
-  call s:expect(&filetype).to_equal('dbui')
-  call s:expect(getline(5)).to_equal('    '.g:db_ui_icons.buffers.' '.self.filename)
-  wincmd p
   call s:expect(&filetype).to_equal('sql')
   call s:expect(b:dbui_db_key_name).to_equal('dadbod_ui_test_g:dbs')
   call s:expect(b:db).to_equal(g:dbs[0].url)
+  wincmd p
+  call s:expect(&filetype).to_equal('dbui')
+  call s:expect(getline(5)).to_equal('    '.g:db_ui_icons.buffers.' '.self.filename)
+  wincmd p
   write
   call s:expect(bufname('.dbout')).not.to_be_empty()
   call s:expect(getwinvar(bufwinnr('.dbout'), '&previewwindow')).to_equal(1)

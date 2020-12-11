@@ -22,6 +22,7 @@ function! s:suite.should_rename_buffer() abort
   call setline(1, ['select * from contacts'])
   write
   :DBUIFindBuffer
+  wincmd p
   normal r
   call s:expect(getline('.')).to_equal('    '.g:db_ui_icons.buffers.' custom-buffer-name *')
 endfunction

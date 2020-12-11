@@ -171,7 +171,7 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
     call self.drawer.render()
   endif
 
-  if !is_existing_buffer
+  if &filetype !=? 'sql' || !is_existing_buffer
     setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
   endif
   let is_sql = &filetype ==? 'sql'
@@ -386,4 +386,13 @@ function! s:query.get_last_query_info() abort
         \ 'last_query': self.last_query,
         \ 'last_query_time': self.last_query_time
         \ }
+endfunction
+
+function! s:query.get_saved_query_db_name() abort
+  let path = expand('%:p:h:h')
+  if path ==? self.drawer.dbui.save_path
+    return expand('%:p:h:t')
+  endif
+
+  return ''
 endfunction
