@@ -26,8 +26,8 @@ let s:sqlite = {
       \ }
 
 let s:mysql = {
-      \ 'List': 'SELECT * from {optional_schema}{table} LIMIT 200',
-      \ 'Indexes': 'SHOW INDEXES FROM {optional_schema}{table}',
+      \ 'List': 'SELECT * from {optional_schema}`{table}` LIMIT 200',
+      \ 'Indexes': 'SHOW INDEXES FROM {optional_schema}`{table}`',
       \ 'Foreign Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'FOREIGN KEY'",
       \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
       \ }
@@ -164,7 +164,7 @@ let s:sqlserver_constraints_query = "
       \ where TABLE_NAME = '{table}' and u.TABLE_SCHEMA = '{schema}'"
 
 let s:sqlserver = {
-      \ 'List': 'select top 200 * from {optional_schema}{table}',
+      \ 'List': 'select top 200 * from {optional_schema}[{table}]',
       \ 'Columns': s:sqlserver_column_summary_query,
       \ 'Indexes': 'exec sp_helpindex ''{schema}.{table}''',
       \ 'Foreign Keys': s:sqlserver_foreign_keys_query,
