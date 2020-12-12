@@ -49,7 +49,7 @@ function! db_ui#utils#set_mapping(key, plug, ...)
   endif
 
   for key in keys
-    silent! exe mode.'map <buffer><nowait> '.key.' '.a:plug
+    silent! exe mode.'map <silent><buffer><nowait> '.key.' '.a:plug
   endfor
 endfunction
 

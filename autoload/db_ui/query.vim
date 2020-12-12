@@ -175,11 +175,11 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
     setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
   endif
   let is_sql = &filetype ==? 'sql'
-  nnoremap <buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
-  nnoremap <buffer><Plug>(DBUI_ExecuteQuery) :call <sid>method('execute_query')<CR>
-  vnoremap <buffer><Plug>(DBUI_ExecuteQuery) :<C-u>call <sid>method('execute_query', 1)<CR>
+  nnoremap <silent><buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
+  nnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :call <sid>method('execute_query')<CR>
+  vnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :<C-u>call <sid>method('execute_query', 1)<CR>
   if b:dbui_is_tmp && is_sql
-    nnoremap <buffer><silent><Plug>(DBUI_SaveQuery) :call <sid>method('save_query')<CR>
+    nnoremap <silent><buffer><silent><Plug>(DBUI_SaveQuery) :call <sid>method('save_query')<CR>
   endif
   augroup db_ui_query
     autocmd! * <buffer>
@@ -325,17 +325,22 @@ function! s:query.edit_bind_parameters() abort
   endif
 
   let variable_names = keys(b:dbui_bind_params)
-  let opts = ['Select bind parameter to edit/delete:'] + map(copy(variable_names), '(v:key + 1).") ".v:val." (".(trim(b:dbui_bind_params[v:val]) ==? "" ? "Not provided" : b:dbui_bind_params[v:val]).")"')
-  let selection = db_ui#utils#inputlist(opts)
+  if len(variable_names) > 1
+    let opts = ['Select bind parameter to edit/delete:'] + map(copy(variable_names), '(v:key + 1).") ".v:val." (".(trim(b:dbui_bind_params[v:val]) ==? "" ? "Not provided" : b:dbui_bind_params[v:val]).")"')
+    let selection = db_ui#utils#inputlist(opts)
 
-  if selection < 1 || selection > len(variable_names)
-    return db_ui#notifications#error('Wrong selection.')
+    if selection < 1 || selection > len(variable_names)
+      return db_ui#notifications#error('Wrong selection.')
+    endif
+
+    let var_name = variable_names[selection - 1]
+    let variable = b:dbui_bind_params[var_name]
+  else
+    let var_name = variable_names[0]
+    let variable = b:dbui_bind_params[var_name]
   endif
-
-  let var_name = variable_names[selection - 1]
-  let variable = b:dbui_bind_params[var_name]
   redraw!
-  let action = confirm('Select action for '.var_name.'? ', "&Edit\n&Delete\n&Cancel")
+  let action = confirm('Select action for '.var_name.' param? ', "&Edit\n&Delete\n&Cancel")
   if action ==? 1
     redraw!
     let b:dbui_bind_params[var_name] = db_ui#utils#input('Enter new value: ', variable)
