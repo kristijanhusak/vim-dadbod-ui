@@ -67,6 +67,7 @@ function! db_ui#find_buffer() abort
     let row += 1
   endfor
   call cursor(row, 0)
+  call s:dbui_instance.drawer.render({ 'db_key_name': db, 'queries': 1 })
   wincmd p
 endfunction
 
