@@ -42,24 +42,22 @@ function! s:connections.delete(db) abort
 endfunction
 
 function! s:connections.add_full_url() abort
-  let url = db_ui#utils#input('Enter connection url: ', '')
+  let url = ''
 
   try
+    let url = db_ui#utils#input('Enter connection url: ', url)
     let valid_url = db#url#parse(url)
   catch /.*/
     return db_ui#notifications#error(v:exception)
   endtry
 
-  let saved = 0
-
-  while !saved
+  try
     let name = self.enter_db_name(url)
-    if !empty(name)
-      let saved = self.save(name, url)
-    endif
-  endwhile
+  catch /.*/
+    return db_ui#notifications#error(v:exception)
+  endtry
 
-  return saved
+  return self.save(name, url)
 endfunction
 
 function! s:connections.rename(db) abort
@@ -78,8 +76,9 @@ function! s:connections.rename(db) abort
     let idx += 1
   endfor
 
-  let url = db_ui#utils#input('Edit connection url for "'.entry.name.'": ', entry.url)
+  let url = entry.url
   try
+    let url = db_ui#utils#input('Edit connection url for "'.entry.name.'": ', url)
     let valid_url = db#url#parse(url)
   catch /.*/
     return db_ui#notifications#error(v:exception)
@@ -87,9 +86,14 @@ function! s:connections.rename(db) abort
 
   let name = ''
 
-  while empty(name)
+  try
     let name = db_ui#utils#input('Edit connection name: ', entry.name)
-  endwhile
+    if empty(trim(name))
+      throw 'Please enter valid name.'
+    endif
+  catch /.*/
+    return db_ui#notifications#error(v:exception)
+  endtry
 
   call remove(connections, idx)
   let connections = insert(connections, {'name': name, 'url': url }, idx)
@@ -99,9 +103,8 @@ endfunction
 function! s:connections.enter_db_name(url) abort
   let name = db_ui#utils#input('Enter name: ', split(a:url, '/')[-1])
 
-  if empty(name)
-    call db_ui#notifications#error('Please enter valid name.')
-    return 0
+  if empty(trim(name))
+    throw 'Please enter valid name.'
   endif
 
   return name

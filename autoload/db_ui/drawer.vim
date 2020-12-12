@@ -122,7 +122,11 @@ function! s:drawer.rename_buffer(buffer, db_key_name, is_saved_query) abort
     let old_name = substitute(fnamemodify(a:buffer, ':e'), '^'.db_slug.'-', '', '')
   endif
 
-  let new_name = db_ui#utils#input('Enter new name: ', old_name)
+  try
+    let new_name = db_ui#utils#input('Enter new name: ', old_name)
+  catch /.*/
+    return db_ui#notifications#error(v:exception)
+  endtry
 
   if empty(new_name)
     return db_ui#notifications#error('Valid name must be provided.')

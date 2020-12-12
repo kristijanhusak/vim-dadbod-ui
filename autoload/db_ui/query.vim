@@ -247,7 +247,11 @@ function! s:query.execute_lines(db, lines, is_visual_mode) abort
   let should_inject_vars = match(join(a:lines), s:bind_param_rgx) > -1
 
   if should_inject_vars
-    let lines = self.inject_variables(lines)
+    try
+      let lines = self.inject_variables(lines)
+    catch /.*/
+      return db_ui#notifications#error(v:exception)
+    endtry
   endif
 
   if len(lines) ==? 1
@@ -299,12 +303,14 @@ function! s:query.inject_variables(lines) abort
     echo "Please provide bind parameters. Empty values are ignored and considered a raw value.\n\n"
   endif
 
+  let bind_params = copy(b:dbui_bind_params)
   for var in vars
-    if !has_key(b:dbui_bind_params, var)
-      let b:dbui_bind_params[var] = db_ui#utils#input('Enter value for bind parameter '.var.' -> ', '')
+    if !has_key(bind_params, var)
+      let bind_params[var] = db_ui#utils#input('Enter value for bind parameter '.var.' -> ', '')
     endif
   endfor
 
+  let b:dbui_bind_params = bind_params
   let content = []
 
   for line in a:lines
@@ -344,7 +350,11 @@ function! s:query.edit_bind_parameters() abort
   let action = confirm('Select action for '.var_name.' param? ', "&Edit\n&Delete\n&Cancel")
   if action ==? 1
     redraw!
-    let b:dbui_bind_params[var_name] = db_ui#utils#input('Enter new value: ', variable)
+    try
+      let b:dbui_bind_params[var_name] = db_ui#utils#input('Enter new value: ', variable)
+    catch /.*/
+      return db_ui#notifications#error(v:exception)
+    endtry
     return db_ui#notifications#info('Changed.')
   endif
 
@@ -367,7 +377,11 @@ function! s:query.save_query() abort
       call mkdir(db.save_path, 'p')
     endif
 
-    let name = db_ui#utils#input('Save as: ', '')
+    try
+      let name = db_ui#utils#input('Save as: ', '')
+    catch /.*/
+      return db_ui#notifications#error(v:exception)
+    endtry
 
     if empty(trim(name))
       throw 'No valid name provided.'
