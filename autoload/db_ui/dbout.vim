@@ -14,7 +14,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
   let field_value = trim(getline('.')[cell_range.from : cell_range.to])
 
   let foreign_key_query = substitute(scheme.foreign_key_query, '{col_name}', field_name, '')
-  let result = scheme.parse_results(db_ui#schemas#query({ 'conn': b:db, 'scheme': parsed.scheme }, foreign_key_query), 3)
+  let result = scheme.parse_results(db_ui#schemas#query(b:db, scheme, foreign_key_query), 3)
 
   if empty(result)
     return db_ui#notifications#error('No valid foreign key found.')
@@ -22,6 +22,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
 
   let [foreign_table_name, foreign_column_name,foreign_table_schema] = result[0]
   let query = printf(scheme.select_foreign_key_query, foreign_table_schema, foreign_table_name, foreign_column_name, db_ui#utils#quote_query_value(field_value))
+
   exe 'DB '.query
 endfunction
 
