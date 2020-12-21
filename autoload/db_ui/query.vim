@@ -135,8 +135,6 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
     let optional_schema = optional_schema.'.'
   endif
 
-  let b:dbui_table_name = table
-  let b:dbui_schema_name = schema
   let content = substitute(default_content, '{table}', table, 'g')
   let content = substitute(content, '{optional_schema}', optional_schema, 'g')
   let content = substitute(content, '{schema}', schema, 'g')
@@ -157,6 +155,8 @@ endfunction
 function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   call self.resize_if_single(a:was_single_win)
   let b:dbui_db_key_name = a:db.key_name
+  let b:dbui_table_name = get(a:opts, 'table', '')
+  let b:dbui_schema_name = get(a:opts, 'schema', '')
   let b:db = a:db.conn
   let is_existing_buffer = get(a:opts, 'existing_buffer', 0)
   if !exists('b:dbui_is_tmp') || has_key(a:opts, 'is_tmp')
