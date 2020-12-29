@@ -148,7 +148,7 @@ function! db_ui#schemas#get(scheme) abort
   return get(s:schemas, a:scheme, {})
 endfunction
 
-function! db_ui#schemas#format_query(db, scheme, query) abort
+function! s:format_query(db, scheme, query) abort
   let base_query = db#adapter#dispatch(
   \   type(a:db) == v:t_string ? a:db : a:db.conn,
   \   'interactive'
@@ -161,6 +161,8 @@ function! db_ui#schemas#format_query(db, scheme, query) abort
 endfunction
 
 function! db_ui#schemas#query(db, scheme, query) abort
-  let formatted_query = db_ui#schemas#format_query(a:db, a:scheme, a:query)
-  return map(systemlist(formatted_query), {_, val -> substitute(val, "\r$", "", "")})
+  return map(
+  \   systemlist(s:format_query(a:db, a:scheme, a:query)),
+  \   {_, val -> substitute(val, "\r$", "", "")}
+  \ )
 endfunction
