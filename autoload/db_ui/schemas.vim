@@ -26,9 +26,9 @@ let s:postgres_foreign_key_query = "
 let s:postgres_list_schema_query = "
     \ SELECT nspname as schema_name
     \ FROM pg_catalog.pg_namespace
-    \ WHERE schema_name !~ '^pg_'
-    \   and pg_catalog.has_schema_privilege(current_user, schema_name, 'USAGE')
-    \ order by schema_name"
+    \ WHERE nspname !~ '^pg_temp_'
+    \   and pg_catalog.has_schema_privilege(current_user, nspname, 'USAGE')
+    \ order by nspname"
 
 let s:postgresql_args = '-A -c "%s"'
 let s:postgresql = {
