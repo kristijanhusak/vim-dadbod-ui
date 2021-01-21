@@ -23,11 +23,18 @@ let s:postgres_foreign_key_query = "
       \       ON ccu.constraint_name = tc.constraint_name
       \ WHERE constraint_type = 'FOREIGN KEY' and kcu.column_name = '{col_name}' LIMIT 1"
 
+let s:postgres_list_schema_query = "
+    \ SELECT nspname as schema_name
+    \ FROM pg_catalog.pg_namespace
+    \ WHERE schema_name !~ '^pg_'
+    \   and pg_catalog.has_schema_privilege(current_user, schema_name, 'USAGE')
+    \ order by schema_name"
+
 let s:postgresql_args = '-A -c "%s"'
 let s:postgresql = {
       \ 'args': s:postgresql_args,
       \ 'foreign_key_query': printf(s:postgresql_args, s:postgres_foreign_key_query),
-      \ 'schemes_query': printf(s:postgresql_args, 'SELECT schema_name FROM information_schema.schemata'),
+      \ 'schemes_query': printf(s:postgresql_args, s:postgres_list_schema_query),
       \ 'schemes_tables_query': printf(s:postgresql_args, 'SELECT table_schema, table_name FROM information_schema.tables'),
       \ 'select_foreign_key_query': 'select * from "%s"."%s" where "%s" = %s',
       \ 'cell_line_number': 2,
