@@ -6,17 +6,24 @@ function! db_ui#dbout#jump_to_foreign_table() abort
   endif
 
   let cell_line_number = s:get_cell_line_number(scheme)
-  let cell_range = s:get_cell_range(getline(cell_line_number), col('.'))
-  let field_name = trim(getline(cell_line_number - 1)[(cell_range.from):(cell_range.to)])
-  let field_value = trim(getline('.')[(cell_range.from):(cell_range.to)])
+  let cell_range = s:get_cell_range(cell_line_number, getcurpos(), scheme)
+
+  let virtual_cell_range = get(cell_range, 'virtual', cell_range)
+  let field_name = trim(getline(cell_line_number - 1)[virtual_cell_range.from : virtual_cell_range.to])
+
+  let field_value = trim(getline('.')[cell_range.from : cell_range.to])
+
   let foreign_key_query = substitute(scheme.foreign_key_query, '{col_name}', field_name, '')
-  let result = scheme.parse_results(db_ui#schemas#query({ 'conn': b:db, 'scheme': parsed.scheme }, foreign_key_query), 3)
+  let Parser = get(scheme, 'parse_virtual_results', scheme.parse_results)
+  let result = Parser(db_ui#schemas#query(b:db, scheme, foreign_key_query), 3)
+
   if empty(result)
     return db_ui#notifications#error('No valid foreign key found.')
   endif
 
   let [foreign_table_name, foreign_column_name,foreign_table_schema] = result[0]
   let query = printf(scheme.select_foreign_key_query, foreign_table_schema, foreign_table_name, foreign_column_name, db_ui#utils#quote_query_value(field_value))
+
   exe 'DB '.query
 endfunction
 
@@ -52,7 +59,7 @@ function! db_ui#dbout#get_cell_value() abort
   endif
 
   let cell_line_number = s:get_cell_line_number(scheme)
-  let cell_range = s:get_cell_range(getline(cell_line_number), col('.'))
+  let cell_range = s:get_cell_range(cell_line_number, getcurpos(), scheme)
   let field_value = getline('.')[(cell_range.from):(cell_range.to)]
   let start_spaces = len(matchstr(field_value, '^[[:blank:]]*'))
   let end_spaces = len(matchstr(field_value, '[[:blank:]]*$'))
@@ -123,22 +130,73 @@ function! db_ui#dbout#yank_header() abort
   call setreg(v:register, csv_columns)
 endfunction
 
-function! s:get_cell_range(line, col) abort
+function! s:get_cell_range(cell_line_number, curpos, scheme) abort
+  if get(a:scheme, 'has_virtual_results', v:false)
+    return s:get_virtual_cell_range(a:cell_line_number, a:curpos)
+  endif
+
+  let line = getline(a:cell_line_number)
   let table_line = '-'
-  let col = a:col - 1
+
+  let col = a:curpos[2] - 1
   let from = 0
-  let to = 0
-  while col >= 0 && a:line[col] ==? table_line
+
+  while col >= 0 && line[col] ==? table_line
     let from = col
     let col -= 1
   endwhile
-  let col = a:col - 1
-  while col <= len(a:line) && a:line[col] ==? table_line
+
+  let col = a:curpos[2] - 1
+  let to = 0
+
+  while col <= len(line) && line[col] ==? table_line
     let to = col
     let col += 1
   endwhile
 
   return {'from': from, 'to': to}
+endfunction
+
+function! s:get_virtual_cell_range(cell_line_number, curpos) abort
+  let line = getline(a:cell_line_number)
+  let position = a:curpos[1:]
+  let table_line = '-'
+
+  let col = position[-1] - 1
+  let virtual_from = 0
+
+  while col >= 0 && line[col] ==? table_line
+    let virtual_from = col
+    let col -= 1
+  endwhile
+
+  let col = position[-1] - 1
+  let virtual_to = 0
+
+  while col <= len(line) && line[col] ==? table_line
+    let virtual_to = col
+    let col += 1
+  endwhile
+
+  let position_above = insert(position[1:], position[0] - 1)
+
+  call cursor(add(position_above[:-2], virtual_from))
+  norm! j
+  let from = col('.')
+
+  call cursor(add(position_above[:-2], virtual_to))
+  norm! j
+  let to = col('.')
+
+  call cursor(position)
+
+  " NOTE: 'virtual' refers to a position in reference to virtcol().
+  "       other fields reference col()
+  return {
+  \   'from': max([from, 0]),
+  \   'to': max([to, 0]),
+  \   'virtual': {'from': max([virtual_from, 0]), 'to': max([virtual_to, 0])}
+  \}
 endfunction
 
 function! s:get_cell_line_number(scheme) abort

@@ -93,7 +93,7 @@ let s:mysql = {
       \ 'quote': 0,
       \ }
 
-let s:oracle_args = 'echo "'.join(
+let s:oracle_args = join(
       \    [
            \  'SET linesize 4000',
            \  'SET pagesize 4000',
@@ -103,9 +103,9 @@ let s:oracle_args = 'echo "'.join(
            \  '%s',
       \    ],
       \    ";\n"
-      \ ).';" |'
+      \ ).';'
 let s:oracle_foreign_key_query = "
-      \ SELECT DISTINCT RFRD.table_name, RFRD.column_name, RFRD.owner
+      \SELECT DISTINCT RFRD.table_name, RFRD.column_name, RFRD.owner
       \ FROM all_cons_columns RFRD
       \ JOIN all_constraints CON ON RFRD.constraint_name = CON.r_constraint_name
       \ JOIN all_cons_columns RFRING ON CON.constraint_name = RFRING.constraint_name
@@ -114,7 +114,7 @@ let s:oracle_foreign_key_query = "
       \ AND U.common = 'NO'
       \ AND RFRING.column_name = '{col_name}'"
 let s:oracle_schemes_tables_query = "
-      \ SELECT T.owner, T.table_name
+      \SELECT T.owner, T.table_name
       \ FROM all_tables T
       \ JOIN all_users U ON T.owner = U.username
       \ WHERE U.common = 'NO'
@@ -125,11 +125,14 @@ let s:oracle = {
       \   'cell_line_pattern': '^-\+\( \+-\+\)*',
       \   'default_scheme': '',
       \   'foreign_key_query': printf(s:oracle_args, s:oracle_foreign_key_query),
+      \   'has_virtual_results': v:true,
       \   'parse_results': {results, min_len -> s:results_parser(results[15:-5], '\s\s\+', min_len)},
-      \   'quote': 1,
+      \   'parse_virtual_results': {results, min_len -> s:results_parser(results[15:-4], '\s\s\+', min_len)},
+      \   'pipe_query': v:true,
+      \   'quote': v:true,
       \   'schemes_query': printf(s:oracle_args, "SELECT username FROM all_users WHERE common = 'NO' ORDER BY username"),
       \   'schemes_tables_query': printf(s:oracle_args, s:oracle_schemes_tables_query),
-      \   'select_foreign_key_query': printf(s:oracle_args, 'SELECT * FROM %s.%s WHERE %s = %s'),
+      \   'select_foreign_key_query': printf(s:oracle_args, 'SELECT * FROM "%s"."%s" WHERE "%s" = %s'),
       \ }
 
 let s:schemas = {
@@ -152,14 +155,21 @@ function! db_ui#schemas#get(scheme) abort
   return get(s:schemas, a:scheme, {})
 endfunction
 
-function! db_ui#schemas#query(db, query) abort
-  let base_query = db#adapter#dispatch(a:db.conn, 'interactive')
+function! s:format_query(db, scheme, query) abort
+  let base_query = db#adapter#dispatch(
+  \   type(a:db) == v:t_string ? a:db : a:db.conn,
+  \   'interactive'
+  \ )
+  let format_expression = '%s %s'
+
+  return get(a:scheme, 'pipe_query', v:false) ?
+  \  printf(format_expression, 'echo "'.a:query.'" |', base_query) :
+  \  printf(format_expression, base_query, a:query)
+endfunction
+
+function! db_ui#schemas#query(db, scheme, query) abort
   return map(
-  \   systemlist(
-  \     a:db.scheme ==# 'oracle' ?
-  \       printf('%s %s', a:query, base_query) :
-  \       printf('%s %s', base_query, a:query)
-  \   ),
-  \   'substitute(v:val, "\r$", "", "")'
+  \   systemlist(s:format_query(a:db, a:scheme, a:query)),
+  \   {_, val -> substitute(val, "\r$", "", "")}
   \ )
 endfunction

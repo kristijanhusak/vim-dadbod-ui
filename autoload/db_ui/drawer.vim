@@ -571,8 +571,8 @@ function! s:drawer.populate_schemas(db) abort
     return a:db
   endif
   let scheme = db_ui#schemas#get(a:db.scheme)
-  let schemas = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_query), 1)
-  let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme.schemes_tables_query), 2)
+  let schemas = scheme.parse_results(db_ui#schemas#query(a:db, scheme, scheme.schemes_query), 1)
+  let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme, scheme.schemes_tables_query), 2)
   let tables_by_schema = {}
   for [scheme_name, table] in tables
     if !has_key(tables_by_schema, scheme_name)
