@@ -184,7 +184,7 @@ function! s:setup_colors(use_echo) abort
   endif
 
   if (s:neovim_float || s:vim_popup) && !a:use_echo
-    silent! exe 'hi NotificationInfo guifg='.normal_bg.' guibg='.normal_fg
+    silent! exe 'hi NotificationInfo guifg='.normal_fg.' guibg='.normal_bg
     silent! exe 'hi NotificationError guifg='.error_fg.' guibg='.error_bg
     silent! exe 'hi NotificationWarning guifg='.warning_fg.' guibg='.warning_bg
   else
