@@ -45,7 +45,6 @@ function! s:notification(msg, opts) abort
     return
   endif
   let use_echo = get(a:opts, 'echo', 0)
-  call s:setup_colors(use_echo)
 
   if s:neovim_float && !use_echo
     return s:notification_nvim(a:msg, a:opts)
@@ -138,7 +137,7 @@ endfunction
 function! s:notification_echo(msg, opts) abort
   let type = get(a:opts, 'type', 'info')
   let title = get(a:opts, 'title', s:title)
-  silent! exe 'echohl '.s:hl_by_type[type]
+  silent! exe 'echohl Echo'.s:hl_by_type[type]
   redraw!
   let title = !empty(title) ? title.' ' : ''
   if type(a:msg) ==? type('')
@@ -155,7 +154,7 @@ function! s:notification_echo(msg, opts) abort
   let s:last_msg = a:msg
 endfunction
 
-function! s:setup_colors(use_echo) abort
+function! s:setup_colors() abort
   let warning_fg = ''
   let warning_bg = ''
   let error_fg = ''
@@ -183,15 +182,13 @@ function! s:setup_colors(use_echo) abort
     let normal_fg = '#FFFFFF'
   endif
 
-  if (s:neovim_float || s:vim_popup) && !a:use_echo
-    silent! exe 'hi NotificationInfo guifg='.normal_bg.' guibg='.normal_fg
-    silent! exe 'hi NotificationError guifg='.error_fg.' guibg='.error_bg
-    silent! exe 'hi NotificationWarning guifg='.warning_fg.' guibg='.warning_bg
-  else
-    silent! exe 'hi NotificationInfo guifg='.normal_fg.' guibg=NONE'
-    silent! exe 'hi NotificationError guifg='.error_bg.' guibg=NONE'
-    silent! exe 'hi NotificationWarning guifg='.warning_bg.' guibg=NONE'
-  endif
+  call s:set_hl('NotificationInfo', normal_bg, normal_fg)
+  call s:set_hl('NotificationError', error_fg, error_bg)
+  call s:set_hl('NotificationWarning', warning_fg, warning_bg)
+
+  call s:set_hl('EchoNotificationInfo', normal_fg, 'NONE')
+  call s:set_hl('EchoNotificationError', error_bg, 'NONE')
+  call s:set_hl('EchoNotificationWarning', warning_bg, 'NONE')
 endfunction
 
 function! s:get_pos(pos, width) abort
@@ -229,3 +226,11 @@ function! s:get_pos(pos, width) abort
 
   return pos_data
 endfunction
+
+function! s:set_hl(name, fg, bg) abort
+  if !hlexists(a:name)
+    silent! exe 'hi '.a:name.' guifg='.a:fg.' guibg='.a:bg
+  endif
+endfunction
+
+call s:setup_colors()
