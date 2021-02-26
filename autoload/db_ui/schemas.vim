@@ -31,11 +31,14 @@ let s:postgres_list_schema_query = "
     \ order by nspname"
 
 let s:postgresql_args = '-A -c "%s"'
+let s:postgres_tables_and_views = "
+      \ SELECT table_schema, table_name FROM information_schema.tables UNION ALL
+      \ select schemaname, matviewname from pg_matviews;"
 let s:postgresql = {
       \ 'args': s:postgresql_args,
       \ 'foreign_key_query': printf(s:postgresql_args, s:postgres_foreign_key_query),
       \ 'schemes_query': printf(s:postgresql_args, s:postgres_list_schema_query),
-      \ 'schemes_tables_query': printf(s:postgresql_args, 'SELECT table_schema, table_name FROM information_schema.tables'),
+      \ 'schemes_tables_query': printf(s:postgresql_args, s:postgres_tables_and_views),
       \ 'select_foreign_key_query': 'select * from "%s"."%s" where "%s" = %s',
       \ 'cell_line_number': 2,
       \ 'cell_line_pattern': '^-\++-\+',
