@@ -124,6 +124,29 @@ function! db_ui#print_last_query_info() abort
   return db_ui#notifications#info(content, {'echo': 1})
 endfunction
 
+function! db_ui#statusline(...)
+  let db_key_name = get(b:, 'dbui_db_key_name', '')
+  if empty(db_key_name) || empty(s:dbui_instance)
+    return ''
+  end
+  let opts = get(a:, 1, {})
+  let prefix = get(opts, 'prefix', 'DBUI: ')
+  let separator = get(opts, 'separator', ' -> ')
+  let show = get(opts, 'show', ['db_name', 'schema', 'table'])
+  let db_table = get(b:, 'dbui_table_name', '')
+  let db_schema = get(b:, 'dbui_schema_name', '')
+  let db = s:dbui_instance.dbs[db_key_name]
+  let data = { 'db_name': db.name, 'schema': db_schema, 'table': db_table }
+  let content = []
+  for item in show
+    let entry = get(data, item, '')
+    if !empty(entry)
+      call add(content, entry)
+    endif
+  endfor
+  return prefix..join(content, separator)
+endfunction
+
 function! s:dbui.new() abort
   let instance = copy(self)
   let instance.dbs = {}

@@ -650,6 +650,33 @@ g:db_ui_default_query (DEPRECATED)
 
 9. Functions					*vim-dadbod-ui-functions*
 
+					      *db_ui#statusline()*
+db_ui#statusline({opts})
+		Return statusline information. For example, when table `posts`
+		is opened from schema named `public` in database named `my-blog-db`,
+		result will be this:
+>
+		DBUI: my_blog -> public -> posts
+<
+		Function accepts optional dictionary with these properties set
+		as default:
+>
+		{
+		  'prefix': 'DBUI: ',
+		  'separator': ' -> ',
+		  'show': ['db_name', 'schema', 'table']
+		}
+<
+		For example, just to show DB name and table without prefix
+		separated by a dash (`my_blog - posts`), you would call statusline like this:
+>
+		call db_ui#statusline({
+		  \ 'show': ['db_name', 'table'],
+		  \ 'separator' : ' - ',
+		  \ 'prefix': ''
+		  \ })
+<
+
 					      *db_ui#query()*
 db_ui#query({query})
 		Execute query and return results as array of arrays.
