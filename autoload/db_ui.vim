@@ -144,7 +144,7 @@ function! db_ui#statusline(...)
       call add(content, entry)
     endif
   endfor
-  return prefix..join(content, separator)
+  return prefix.join(content, separator)
 endfunction
 
 function! s:dbui.new() abort
