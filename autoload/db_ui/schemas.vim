@@ -163,6 +163,9 @@ function! s:format_query(db, scheme, query) abort
   \   type(a:db) == v:t_string ? a:db : a:db.conn,
   \   'interactive'
   \ )
+  if type(base_query) ==? type([])
+    let base_query = join(base_query)
+  endif
   let format_expression = '%s %s'
 
   return get(a:scheme, 'pipe_query', v:false) ?
