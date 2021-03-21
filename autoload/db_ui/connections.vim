@@ -45,8 +45,8 @@ function! s:connections.add_full_url() abort
   let url = ''
 
   try
-    let url = db_ui#utils#input('Enter connection url: ', url)
-    let valid_url = db#url#parse(url)
+    let url = db#resolve(db_ui#utils#input('Enter connection url: ', url))
+    call db#url#parse(url)
   catch /.*/
     return db_ui#notifications#error(v:exception)
   endtry
@@ -78,8 +78,8 @@ function! s:connections.rename(db) abort
 
   let url = entry.url
   try
-    let url = db_ui#utils#input('Edit connection url for "'.entry.name.'": ', url)
-    let valid_url = db#url#parse(url)
+    let url = db#resolve(db_ui#utils#input('Edit connection url for "'.entry.name.'": ', url))
+    call db#url#parse(url)
   catch /.*/
     return db_ui#notifications#error(v:exception)
   endtry
@@ -96,7 +96,7 @@ function! s:connections.rename(db) abort
   endtry
 
   call remove(connections, idx)
-  let connections = insert(connections, {'name': name, 'url': db#resolve(url) }, idx)
+  let connections = insert(connections, {'name': name, 'url': url }, idx)
   return self.write(connections)
 endfunction
 
@@ -133,7 +133,7 @@ function s:connections.save(name, url) abort
     call db_ui#notifications#error('Connection with that name already exists. Please enter different name.')
     return 0
   endif
-  call add(file, {'name': a:name, 'url': db#resolve(a:url)})
+  call add(file, {'name': a:name, 'url': a:url})
   return self.write(file)
 endfunction
 
