@@ -126,9 +126,16 @@ endfunction
 
 function! db_ui#statusline(...)
   let db_key_name = get(b:, 'dbui_db_key_name', '')
-  if empty(db_key_name) || empty(s:dbui_instance)
+  let dbout = get(b:, 'db', '')
+  if empty(s:dbui_instance) || (&filetype !=? 'dbout' && empty(db_key_name))
     return ''
   end
+  if &filetype ==? 'dbout'
+    let last_query_time = s:dbui_instance.drawer.get_query().last_query_time
+    if !empty(last_query_time)
+      return 'Last query time: '.last_query_time.' sec.'
+    endif
+  endif
   let opts = get(a:, 1, {})
   let prefix = get(opts, 'prefix', 'DBUI: ')
   let separator = get(opts, 'separator', ' -> ')
