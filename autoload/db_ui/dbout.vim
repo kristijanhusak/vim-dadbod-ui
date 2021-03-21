@@ -211,3 +211,65 @@ function! s:get_cell_line_number(scheme) abort
 
   return a:scheme.cell_line_number
 endfunction
+
+let s:progress_icons = ['/', '—', '\', '|']
+let s:progress = {
+      \ 'win': -1,
+      \ 'buf': -1,
+      \ 'timer': -1,
+      \ 'counter': 0,
+      \ 'icon_counter': 0,
+      \ }
+
+function s:progress_tick(timer) abort
+  let s:progress.counter += 100
+  if s:progress.icon_counter > 3
+    let s:progress.icon_counter = 0
+  endif
+  let secs = string(s:progress.counter * 0.001).'s'
+  let content = ' '.s:progress_icons[s:progress.icon_counter].' Execute query - '.secs
+  call nvim_buf_set_lines(s:progress.buf, 0, -1, v:false, [content])
+  let s:progress.icon_counter += 1
+endfunction
+
+function! s:progress_hide() abort
+  silent! call nvim_win_close(s:progress.win, v:true)
+  silent! call timer_stop(s:progress.timer)
+  let s:progress.counter = 0
+  let s:progress.icon_counter = 0
+  let s:progress.win = -1
+  let s:progress.buf = -1
+  let s:progress.timer = -1
+endfunction
+
+function! s:progress_show() abort
+  call s:progress_hide()
+  let outwin = get(filter(range(1, winnr('$')), 'getwinvar(v:val, "&filetype") ==? "dbout"'), 0, -1)
+  if outwin < 0
+    return
+  endif
+  let outwin = win_getid(outwin)
+  let s:progress.buf = nvim_create_buf(v:false, v:true)
+  call nvim_buf_set_lines(s:progress.buf, 0, -1, v:false, ['| Execute query - 0.0s'])
+  let opts = {
+        \ 'relative': 'win',
+        \ 'win': outwin,
+        \ 'width': 24,
+        \ 'height': 1,
+        \ 'row': winheight(outwin) / 2,
+        \ 'col': winwidth(outwin) / 2 - 12,
+        \ 'focusable': v:false,
+        \ 'style': 'minimal'
+        \ }
+  let s:progress.win = nvim_open_win(s:progress.buf, v:false, opts)
+  let s:progress.timer = timer_start(100, function('s:progress_tick'), { 'repeat': -1 })
+endfunction
+
+
+if has('nvim') && exists('*nvim_open_win') && get(g:, 'db_async', 0)
+  augroup dbui_async_queries_dbout
+    autocmd!
+    autocmd User DBQueryStart call s:progress_show()
+    autocmd User DBQueryFinished call s:progress_hide()
+  augroup END
+endif
