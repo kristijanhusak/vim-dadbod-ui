@@ -15,9 +15,14 @@ function! s:suite.should_prompt_to_set_bind_parameters() abort
   norm ojo
   call s:expect(&filetype).to_equal('sql')
   let g:db_ui_cast_not_considered_bind_param = 1
-  norm!Iselect *, name::text from contacts where id = :contactId and first_name = :firstName and last_name = ":shouldSkip"
+  let g:db_ui_string_content_not_considered_bind_param = 1
+  norm!Iselect *, name::text from contacts where id = :contactId and first_name = :firstName and last_name = ":shouldSkip" and settings = '{:ignored 123}'
   runtime autoload/db_ui/utils.vim
   function! db_ui#utils#input(msg, default) abort
+    if stridx(a:msg, ':ignored') > -1
+      let g:db_ui_string_content_not_considered_bind_param = 0
+      return ''
+    endif
     if stridx(a:msg, ':text') > -1
       let g:db_ui_cast_not_considered_bind_param = 0
       return ''
@@ -34,6 +39,7 @@ function! s:suite.should_prompt_to_set_bind_parameters() abort
   endfunction
   write
   call s:expect(g:db_ui_cast_not_considered_bind_param).to_equal(1)
+  call s:expect(g:db_ui_string_content_not_considered_bind_param).to_equal(1)
   call s:expect(get(b:, 'dbui_bind_params')).to_be_dict()
   call s:expect(b:dbui_bind_params[':contactId']).to_equal(1)
   call s:expect(b:dbui_bind_params[':firstName']).to_equal('John')

@@ -1,6 +1,6 @@
 let s:query_instance = {}
 let s:query = {}
-let s:bind_param_rgx = '\(^\|[[:blank:]]\):\w\+'
+let s:bind_param_rgx = '\(^\|[[:blank:]]\|[^:]\)\(:\w\+\)'
 
 function! db_ui#query#new(drawer) abort
   let s:query_instance = s:query.new(a:drawer)
@@ -290,8 +290,10 @@ endfunction
 function! s:query.inject_variables(lines) abort
   let vars = []
   for line in a:lines
-    call substitute(line, '[^:]\(:\w\+\)', '\=add(vars, submatch(1))', 'g')
+    call substitute(line, s:bind_param_rgx, '\=add(vars, submatch(2))', 'g')
   endfor
+
+  call filter(vars, {i,var -> !search(printf("'[^']*%s[^']*'", var), 'n')})
 
   if !exists('b:dbui_bind_params')
     let b:dbui_bind_params = {}
