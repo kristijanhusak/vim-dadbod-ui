@@ -135,6 +135,7 @@ function! db_ui#statusline(...)
     if !empty(last_query_time)
       return 'Last query time: '.last_query_time.' sec.'
     endif
+    return ''
   endif
   let opts = get(a:, 1, {})
   let prefix = get(opts, 'prefix', 'DBUI: ')
