@@ -228,12 +228,20 @@ function s:progress_tick(timer) abort
   endif
   let secs = string(s:progress.counter * 0.001).'s'
   let content = ' '.s:progress_icons[s:progress.icon_counter].' Execute query - '.secs
-  call nvim_buf_set_lines(s:progress.buf, 0, -1, v:false, [content])
+  if has('nvim')
+    call nvim_buf_set_lines(s:progress.buf, 0, -1, v:false, [content])
+  else
+    call popup_settext(s:progress.win, content)
+  endif
   let s:progress.icon_counter += 1
 endfunction
 
 function! s:progress_hide() abort
-  silent! call nvim_win_close(s:progress.win, v:true)
+  if has('nvim')
+    silent! call nvim_win_close(s:progress.win, v:true)
+  else
+    silent! call popup_close(s:progress.win)
+  endif
   silent! call timer_stop(s:progress.timer)
   let s:progress.counter = 0
   let s:progress.icon_counter = 0
@@ -242,13 +250,11 @@ function! s:progress_hide() abort
   let s:progress.timer = -1
 endfunction
 
-function! s:progress_show() abort
-  call s:progress_hide()
-  let outwin = get(filter(range(1, winnr('$')), 'getwinvar(v:val, "&filetype") ==? "dbout"'), 0, -1)
-  if outwin < 0
-    return
-  endif
-  let outwin = win_getid(outwin)
+function! s:get_out_win()
+endfunction
+
+function! s:progress_show_neovim(outwin) abort
+  let outwin = win_getid(a:outwin)
   let s:progress.buf = nvim_create_buf(v:false, v:true)
   call nvim_buf_set_lines(s:progress.buf, 0, -1, v:false, ['| Execute query - 0.0s'])
   let opts = {
@@ -265,8 +271,35 @@ function! s:progress_show() abort
   let s:progress.timer = timer_start(100, function('s:progress_tick'), { 'repeat': -1 })
 endfunction
 
+function! s:progress_show_vim(outwin)
+  let pos = win_screenpos(a:outwin)
+  let s:progress.win = popup_create('| Execute query - 0.0s', {
+        \ 'line': pos[0] + (winheight(a:outwin) / 2),
+        \ 'col': pos[1] + (winwidth(a:outwin) / 2) - 12,
+        \ 'minwidth': 24,
+        \ 'maxwidth': 24,
+        \ 'minheight': 1,
+        \ 'maxheight': 1,
+        \ })
+  let s:progress.timer = timer_start(100, function('s:progress_tick'), { 'repeat': -1 })
+endfunction
 
-if has('nvim') && exists('*nvim_open_win') && get(g:, 'db_async', 0)
+function! s:progress_show()
+  call s:progress_hide()
+  let outwin = get(filter(range(1, winnr('$')), 'getwinvar(v:val, "&filetype") ==? "dbout"'), 0, -1)
+  if outwin < 0
+    return
+  endif
+
+  if has('nvim')
+    return s:progress_show_neovim(outwin)
+  endif
+
+  return s:progress_show_vim(outwin)
+endfunction
+
+
+if exists('*nvim_open_win') || exists('*popup_create')
   augroup dbui_async_queries_dbout
     autocmd!
     autocmd User DBQueryStart call s:progress_show()

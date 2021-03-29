@@ -14,13 +14,11 @@ function! s:query.new(drawer) abort
   let instance.last_query = []
   let instance.last_query_start_time = 0
   let instance.last_query_time = 0
-  if get(g:, 'db_async', 0)
-    augroup dbui_async_queries
-      autocmd!
-      autocmd User DBQueryStart call s:query_instance.start_query()
-      autocmd User DBQueryFinished call s:query_instance.print_query_time()
-    augroup END
-  endif
+  augroup dbui_async_queries
+    autocmd!
+    autocmd User DBQueryStart call s:query_instance.start_query()
+    autocmd User DBQueryFinished call s:query_instance.print_query_time()
+  augroup END
   return instance
 endfunction
 
@@ -231,7 +229,7 @@ function! s:query.execute_query(...) abort
     call self.execute_lines(db, lines, is_visual_mode)
   endif
   let self.last_query = lines
-  if !get(g:, 'db_async', 0)
+  if !exists('#User#DBQueryStart')
     call self.print_query_time()
   endif
 endfunction
