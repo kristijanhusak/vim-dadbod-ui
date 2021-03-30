@@ -286,7 +286,7 @@ endfunction
 
 function! s:progress_show()
   call s:progress_hide()
-  let outwin = get(filter(range(1, winnr('$')), 'getwinvar(v:val, "&filetype") ==? "dbout"'), 0, -1)
+  let outwin = get(filter(range(1, winnr('$')), 'getwinvar(v:val, "&filetype") ==? "dbout"'), -1, -1)
   if outwin < 0
     return
   endif
