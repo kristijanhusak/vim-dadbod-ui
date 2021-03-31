@@ -69,7 +69,7 @@ function! s:connections.rename(db) abort
   let idx = 0
   let entry = {}
   for conn in connections
-    if conn.name ==? a:db.name && conn.url ==? a:db.url
+    if conn.name ==? a:db.name && db#resolve(conn.url) ==? a:db.url
       let entry = conn
       break
     endif
