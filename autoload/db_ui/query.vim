@@ -170,10 +170,10 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
     call self.drawer.render()
   endif
 
-  if &filetype !=? 'sql' || !is_existing_buffer
-    setlocal filetype=sql nolist noswapfile nowrap cursorline nospell modifiable
+  if &filetype !=? a:db.filetype || !is_existing_buffer
+    silent! exe 'setlocal filetype='.a:db.filetype.' nolist noswapfile nowrap cursorline nospell modifiable'
   endif
-  let is_sql = &filetype ==? 'sql'
+  let is_sql = &filetype ==? a:db.filetype
   nnoremap <silent><buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
   nnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :call <sid>method('execute_query')<CR>
   vnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :<C-u>call <sid>method('execute_query', 1)<CR>

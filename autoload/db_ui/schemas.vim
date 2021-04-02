@@ -94,6 +94,7 @@ let s:mysql = {
       \ 'default_scheme': '',
       \ 'layout_flag': '\\G',
       \ 'quote': 0,
+      \ 'filetype': 'mysql',
       \ }
 
 let s:oracle_args = join(
@@ -136,6 +137,7 @@ let s:oracle = {
       \   'schemes_query': printf(s:oracle_args, "SELECT username FROM all_users WHERE common = 'NO' ORDER BY username"),
       \   'schemes_tables_query': printf(s:oracle_args, s:oracle_schemes_tables_query),
       \   'select_foreign_key_query': printf(s:oracle_args, 'SELECT * FROM "%s"."%s" WHERE "%s" = %s'),
+      \   'filetype': 'plsql',
       \ }
 
 let s:schemas = {

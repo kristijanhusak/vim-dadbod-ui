@@ -240,6 +240,7 @@ function! s:dbui.generate_new_db_entry(db) abort
   if schema_support && tolower(scheme) ==? 'mysql' && parsed_url.path !=? '/'
     let schema_support = 0
   endif
+  let filetype = get(scheme_info, 'filetype', 'sql')
   return {
         \ 'url': a:db.url,
         \ 'conn': '',
@@ -258,7 +259,8 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
         \ 'schema_support': schema_support,
         \ 'quote': get(scheme_info, 'quote', 0),
-        \ 'default_scheme': get(scheme_info, 'default_scheme', '')
+        \ 'default_scheme': get(scheme_info, 'default_scheme', ''),
+        \ 'filetype': filetype
         \ }
 endfunction
 
