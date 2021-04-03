@@ -17,6 +17,7 @@ let g:db_ui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpe
 let g:db_ui_show_help = get(g:, 'db_ui_show_help', 1)
 let g:db_ui_use_nerd_fonts = get(g:, 'db_ui_use_nerd_fonts', 0)
 let g:db_ui_execute_on_save = get(g:, 'db_ui_execute_on_save', 1)
+let g:db_ui_force_echo_notifications = get(g:, 'db_ui_force_echo_notifications', 0)
 let g:db_ui_debug = get(g:, 'db_ui_debug', 0)
 let s:dbui_icons = get(g:, 'db_ui_icons', {})
 let s:expanded_icon = get(s:dbui_icons, 'expanded', '▾')

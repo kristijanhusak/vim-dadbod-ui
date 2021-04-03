@@ -644,6 +644,13 @@ g:db_ui_debug
 
 		Default value: `0`
 
+					      *g:db_ui_force_echo_notifications*
+g:db_ui_force_echo_notifications
+		Notifications are shown via popups when supported. To force
+		echoing messages to command line set this value to 1.
+
+		Default value: `0`
+
 					      *g:db_ui_default_query*
 g:db_ui_default_query (DEPRECATED)
 		This value was intially used as a default value for the table

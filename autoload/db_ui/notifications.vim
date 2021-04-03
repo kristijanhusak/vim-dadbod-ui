@@ -45,6 +45,9 @@ function! s:notification(msg, opts) abort
     return
   endif
   let use_echo = get(a:opts, 'echo', 0)
+  if !use_echo
+    let use_echo = g:db_ui_force_echo_notifications
+  endif
 
   if s:neovim_float && !use_echo
     return s:notification_nvim(a:msg, a:opts)
@@ -195,8 +198,13 @@ function! s:get_pos(pos, width) abort
   let min_col = s:neovim_float ? 1 : 2
   let min_row = s:neovim_float ? 0 : 1
   let max_col = &columns - 1
-  let dbout_opened = len(filter(range(1, winnr('$')), 'getwinvar(v:val, "&filetype") ==? "dbout"')) > 0
-  let max_row = &lines - 3 - (dbout_opened ? (&previewheight + 1) : 0)
+  let dbout_buffers = filter(range(1, winnr('$')), 'getwinvar(v:val, "&filetype") ==? "dbout"')
+  let extra_height = 0
+  if len(dbout_buffers)
+    let extra_height = max(map(copy(dbout_buffers), 'winheight(v:val)'))
+    let extra_height += 1
+  endif
+  let max_row = &lines - 3 - extra_height
   let pos_data = {'col': min_col, 'row': min_row}
 
   if a:pos ==? 'top'
