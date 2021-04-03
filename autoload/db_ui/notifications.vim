@@ -234,3 +234,14 @@ function! s:set_hl(name, fg, bg) abort
 endfunction
 
 call s:setup_colors()
+
+function! s:hide_notifications() abort
+  if has('nvim')
+    return s:nvim_close()
+  endif
+  if exists('*popup_close')
+    return popup_close(s:win)
+  endif
+endfunction
+
+command DBUIHideNotifications call s:hide_notifications()

@@ -105,6 +105,12 @@ DBUILastQueryInfo
 
 		`:DBUILastQueryInfo`
 
+					      *DBUIHideNotifications*
+DBUIHideNotifications
+		Hide all floating notifications that are currently shown.
+
+		`:DBUIHideNotifications`
+
 ==============================================================================
 4. Connections 					*vim-dadbod-ui-connections*
 

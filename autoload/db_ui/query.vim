@@ -220,7 +220,6 @@ function! s:query.execute_query(...) abort
   let is_visual_mode = get(a:, 1, 0)
   let lines = self.get_lines(is_visual_mode)
   call self.start_query()
-  call db_ui#notifications#info('Executing query...')
   if !is_visual_mode && search(s:bind_param_rgx, 'n') <= 0
     call db_ui#utils#print_debug({ 'message': 'Executing whole buffer', 'command': '%DB' })
     silent! exe '%DB'
@@ -228,10 +227,14 @@ function! s:query.execute_query(...) abort
     let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
     call self.execute_lines(db, lines, is_visual_mode)
   endif
-  let self.last_query = lines
-  if !exists('#User#DBQueryStart')
+  let has_async = exists('*db#job#run')
+  if has_async
+    call db_ui#notifications#info('Executing query...')
+  endif
+  if !has_async
     call self.print_query_time()
   endif
+  let self.last_query = lines
 endfunction
 
 function! s:query.print_query_time() abort
