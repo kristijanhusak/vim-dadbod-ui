@@ -25,11 +25,9 @@ endfunction
 function! s:query.open(item, edit_action) abort
   let db = self.drawer.dbui.dbs[a:item.dbui_db_key_name]
   if a:item.type ==? 'buffer'
-    return self.open_buffer(db, a:item.file_path, a:edit_action, {
-          \ 'is_tmp': self.drawer.dbui.is_tmp_location_buffer(a:item.file_path)
-          \ })
+    return self.open_buffer(db, a:item.file_path, a:edit_action)
   endif
-  let suffix = 'query'
+  let label = get(a:item, 'label', '')
   let table = ''
   let schema = ''
   if a:item.type !=? 'query'
@@ -38,33 +36,31 @@ function! s:query.open(item, edit_action) abort
     let schema = a:item.schema
   endif
 
-  let buffer_name = self.generate_buffer_name(db.name, suffix)
-  call self.open_buffer(db, buffer_name, a:edit_action, {'table': table, 'content': get(a:item, 'content'), 'is_tmp': 1, 'schema': schema })
+  let buffer_name = self.generate_buffer_name(db, { 'schema': schema, 'table': table, 'label': label })
+  call self.open_buffer(db, buffer_name, a:edit_action, {'table': table, 'content': get(a:item, 'content'), 'schema': schema })
 endfunction
 
-function! s:query.generate_buffer_name(db_name, suffix) abort
-  let buffer_basename = db_ui#utils#slug(printf('%s-%s', a:db_name, a:suffix))
-  let buffer_name = buffer_basename
+function! s:query.generate_buffer_name(db, opts) abort
   let time = exists('*strftime') ? strftime('%Y-%m-%d %T') : localtime()
+  let suffix = 'query'
+  if !empty(a:opts.table)
+    let suffix = printf('%s-%s', a:opts.table, a:opts.label)
+  endif
+
+  let buffer_name = db_ui#utils#slug(printf('%s-%s', a:db.name, suffix))
+  let buffer_name = printf('%s-%s', buffer_name, time)
+  if type(g:Db_ui_buffer_name_generator) ==? type(function('tr'))
+    let buffer_name = printf('%s%s', a:db.name, call(g:Db_ui_buffer_name_generator, [a:opts]))
+  endif
 
   if !empty(self.drawer.dbui.tmp_location)
     let basename = printf('%s/db_ui', self.drawer.dbui.tmp_location)
-    return printf('%s.%s-%s', basename, buffer_name, time)
+    return printf('%s.%s', basename, buffer_name)
   endif
 
-  if !has_key(self.buffer_counter, buffer_basename)
-    let self.buffer_counter[buffer_basename] = 1
-  else
-    let buffer_name = buffer_basename.'-'.self.buffer_counter[buffer_basename]
-    let self.buffer_counter[buffer_basename] += 1
-  endif
-
-  let basename = tempname()
-  if !empty(self.drawer.dbui.tmp_location)
-    let basename = printf('%s/%s', self.drawer.dbui.tmp_location, time)
-  endif
-
-  return printf('%s.%s', basename, buffer_name)
+  let tmp_name = printf('%s.%s', tempname(), buffer_name)
+  call add(a:db.buffers.tmp, tmp_name)
+  return tmp_name
 endfunction
 
 function! s:query.focus_window() abort
@@ -157,9 +153,7 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   let b:dbui_schema_name = get(a:opts, 'schema', '')
   let b:db = a:db.conn
   let is_existing_buffer = get(a:opts, 'existing_buffer', 0)
-  if !exists('b:dbui_is_tmp') || has_key(a:opts, 'is_tmp')
-    let b:dbui_is_tmp = get(a:opts, 'is_tmp', 0)
-  endif
+  let is_tmp = self.drawer.dbui.is_tmp_location_buffer(a:db, a:buffer_name)
   let db_buffers = self.drawer.dbui.dbs[a:db.key_name].buffers
 
   if index(db_buffers.list, a:buffer_name) ==? -1
@@ -177,7 +171,7 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   nnoremap <silent><buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
   nnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :call <sid>method('execute_query')<CR>
   vnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :<C-u>call <sid>method('execute_query', 1)<CR>
-  if b:dbui_is_tmp && is_sql
+  if is_tmp && is_sql
     nnoremap <silent><buffer><silent><Plug>(DBUI_SaveQuery) :call <sid>method('save_query')<CR>
   endif
   augroup db_ui_query
@@ -208,7 +202,9 @@ endfunction
 function! s:query.remove_buffer(bufnr)
   let dbui_db_key_name = getbufvar(a:bufnr, 'dbui_db_key_name')
   let list = self.drawer.dbui.dbs[dbui_db_key_name].buffers.list
+  let tmp = self.drawer.dbui.dbs[dbui_db_key_name].buffers.tmp
   call filter(list, 'v:val !=? bufname(a:bufnr)')
+  call filter(tmp, 'v:val !=? bufname(a:bufnr)')
   return self.drawer.render()
 endfunction
 

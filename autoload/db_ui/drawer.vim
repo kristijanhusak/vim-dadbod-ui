@@ -111,15 +111,15 @@ function! s:drawer.rename_buffer(buffer, db_key_name, is_saved_query) abort
     return db_ui#notifications#error('Buffer not attached to any database')
   endif
 
-  let is_saved = a:is_saved_query || (bufnr > -1 && getbufvar(bufnr, 'dbui_is_tmp') ==? 0)
   let bufwin = bufwinnr(bufnr)
   let db = self.dbui.dbs[a:db_key_name]
   let db_slug = db_ui#utils#slug(db.name)
+  let is_saved = a:is_saved_query || !self.dbui.is_tmp_location_buffer(db, a:buffer)
 
   if is_saved
     let old_name = fnamemodify(a:buffer, ':t')
   else
-    let old_name = substitute(fnamemodify(a:buffer, ':e'), '^'.db_slug.'-', '', '')
+    let old_name = substitute(fnamemodify(a:buffer, ':e'), '^'.db_slug.'-\?', '', '')
   endif
 
   try
@@ -136,13 +136,14 @@ function! s:drawer.rename_buffer(buffer, db_key_name, is_saved_query) abort
     let new = printf('%s/%s', fnamemodify(a:buffer, ':p:h'), new_name)
   else
     let new = printf('%s.%s', fnamemodify(a:buffer, ':r'), db_slug.'-'.new_name)
+    call add(db.buffers.tmp, new)
   endif
 
   call rename(a:buffer, new)
   let new_bufnr = -1
 
   if bufwin > -1
-    call self.get_query().open_buffer(db, new, 'edit', { 'is_tmp': !is_saved })
+    call self.get_query().open_buffer(db, new, 'edit')
     let new_bufnr = bufnr('%')
   elseif bufnr > -1
     exe 'badd '.new
@@ -155,7 +156,6 @@ function! s:drawer.rename_buffer(buffer, db_key_name, is_saved_query) abort
   call filter(db.buffers.list, 'v:val !=? a:buffer')
 
   if new_bufnr > - 1
-    call setbufvar(new_bufnr, 'dbui_is_tmp', !is_saved)
     call setbufvar(new_bufnr, 'dbui_db_key_name', db.key_name)
     call setbufvar(new_bufnr, 'db', db.conn)
     call setbufvar(new_bufnr, 'dbui_db_table_name', getbufvar(a:buffer, 'dbui_db_table_name'))
@@ -349,11 +349,10 @@ function! s:drawer.add_db(db) abort
     call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', self.get_toggle_icon('buffers', a:db.buffers), a:db.key_name, 1)
     if a:db.buffers.expanded
       for buf in a:db.buffers.list
-        let buflabel = buf
-        if !self.dbui.is_tmp_location_buffer(buf) && (buf =~? '^'.a:db.save_path || empty(getbufvar(buf, 'dbui_is_tmp')))
+        if !self.dbui.is_tmp_location_buffer(a:db, buf)
           let buflabel = fnamemodify(buf, ':t')
         else
-          let buflabel = substitute(fnamemodify(buf, ':e'), '^'.db_ui#utils#slug(a:db.name).'-', '', '').' *'
+          let buflabel = substitute(fnamemodify(buf, ':e'), '^'.db_ui#utils#slug(a:db.name).'-\?', '', '').' *'
         endif
         call self.add(buflabel, 'open', 'buffer', g:db_ui_icons.buffers, a:db.key_name, 2, { 'file_path': buf })
       endfor
@@ -474,7 +473,7 @@ function! s:drawer.delete_line() abort
     call db_ui#notifications#info('Deleted.')
   endif
 
-  if self.dbui.is_tmp_location_buffer(item.file_path)
+  if self.dbui.is_tmp_location_buffer(db, item.file_path)
     let choice = confirm('Are you sure you want to delete query?', "&Yes\n&No")
     if choice !=? 1
       return

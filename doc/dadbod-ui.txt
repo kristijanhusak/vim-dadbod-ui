@@ -651,6 +651,32 @@ g:db_ui_force_echo_notifications
 
 		Default value: `0`
 
+					      *g:Db_ui_buffer_name_generator*
+g:Db_ui_buffer_name_generator
+		Custom function for generating buffer names from drawer.
+		Function accepts the option with three properties:
+		* label - label of the entry you selected.
+		  Example: "New Query", "List", "Indexes"
+		* table - table name if buffer was created from table helper,
+		  or empty string
+		* schema - schema name if buffer was created from table
+		  helper, or empty string
+		Note the uppercase `D`, which is required by vim for
+		functions.
+		Example:
+>
+		function s:buffer_name_generator(opts)
+		  if empty(a:opts.table)
+		    return 'myquery-'.localtime()
+		  endif
+		  return 'myquery-fortable-'.a:opts.table.'-'.localtime()
+		endfunction
+
+		let g:Db_ui_buffer_name_generator = function('s:buffer_name_generator')
+<
+
+		Default value: `0`
+
 					      *g:db_ui_default_query*
 g:db_ui_default_query (DEPRECATED)
 		This value was intially used as a default value for the table

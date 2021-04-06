@@ -27,7 +27,7 @@ function! s:suite.should_find_buffer_in_dbui_drawer() abort
   call s:expect(&filetype).to_equal('sql')
   wincmd p
   call s:expect(&filetype).to_equal('dbui')
-  call s:expect(getline('.')).to_equal('    '.g:db_ui_icons.buffers.' contacts-List *')
+  call s:expect(getline('.')).to_match('^    '.g:db_ui_icons.buffers.' contacts-List-.*$')
 endfunction
 
 function! s:suite.should_find_non_dbui_buffer_in_dbui_drawer() abort

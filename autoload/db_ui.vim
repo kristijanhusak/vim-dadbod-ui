@@ -51,8 +51,7 @@ function! db_ui#find_buffer() abort
   let db = b:dbui_db_key_name
   let bufname = bufname('%')
 
-  let is_tmp = get(b: ,'dbui_is_tmp', 0)
-  call s:dbui_instance.drawer.get_query().setup_buffer(s:dbui_instance.dbs[db], { 'is_tmp': is_tmp, 'existing_buffer': 1 }, bufname, 0)
+  call s:dbui_instance.drawer.get_query().setup_buffer(s:dbui_instance.dbs[db], { 'existing_buffer': 1 }, bufname, 0)
   if exists('*vim_dadbod_completion#fetch')
     call vim_dadbod_completion#fetch(bufnr(''))
   endif
@@ -253,7 +252,7 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
         \ 'schemas': {'expanded': 0, 'items': {}, 'list': [] },
         \ 'saved_queries': { 'expanded': 0, 'list': [] },
-        \ 'buffers': { 'expanded': 0, 'list': buffers },
+        \ 'buffers': { 'expanded': 0, 'list': buffers, 'tmp': [] },
         \ 'save_path': save_path,
         \ 'name': a:db.name,
         \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
@@ -366,7 +365,10 @@ function! s:dbui.add_if_not_exists(name, url, source) abort
         \ })
 endfunction
 
-function! s:dbui.is_tmp_location_buffer(buf) abort
+function! s:dbui.is_tmp_location_buffer(db, buf) abort
+  if index(a:db.buffers.tmp, a:buf) > -1
+    return 1
+  endif
   return !empty(self.tmp_location) && a:buf =~? '^'.self.tmp_location
 endfunction
 
