@@ -4,6 +4,8 @@ let s:bufnr = ''
 
 function! s:suite.before() abort
   call SetupTestDbs()
+  " Sleep 1 sec to avoid overlapping temp names
+  sleep 1
 endfunction
 
 function! s:suite.after() abort

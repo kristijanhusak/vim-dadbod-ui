@@ -45,3 +45,5 @@ function! UnsetOptionVariable(name) abort
   let g:db_ui_save_location = s:location_path
   runtime plugin/db_ui.vim
 endfunction
+
+" vim:ft=vim
