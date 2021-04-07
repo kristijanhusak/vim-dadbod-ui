@@ -36,7 +36,7 @@ function! s:query.open(item, edit_action) abort
     let schema = a:item.schema
   endif
 
-  let buffer_name = self.generate_buffer_name(db, { 'schema': schema, 'table': table, 'label': label })
+  let buffer_name = self.generate_buffer_name(db, { 'schema': schema, 'table': table, 'label': label, 'filetype': db.filetype })
   call self.open_buffer(db, buffer_name, a:edit_action, {'table': table, 'content': get(a:item, 'content'), 'schema': schema })
 endfunction
 
