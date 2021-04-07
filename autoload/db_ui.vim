@@ -234,7 +234,7 @@ function! s:dbui.generate_new_db_entry(db) abort
     let save_path = printf('%s/%s', self.save_path, a:db.name)
   endif
   let scheme_info = db_ui#schemas#get(scheme)
-  let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".a:db.name."-"')
+  let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".a:db.name."-" || fnamemodify(v:val, ":t") =~? "^".a:db.name."-"')
   let schema_support = !empty(get(scheme_info, 'schemes_query', 0))
   if schema_support && tolower(scheme) ==? 'mysql' && parsed_url.path !=? '/'
     let schema_support = 0

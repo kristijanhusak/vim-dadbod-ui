@@ -663,6 +663,8 @@ g:Db_ui_buffer_name_generator
 		  helper, or empty string
 		Note the uppercase `D`, which is required by vim for
 		functions.
+		Also, `make sure that name is always unique` to avoid any issues
+		with overlapping names.
 		Example:
 >
 		function s:buffer_name_generator(opts)

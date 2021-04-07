@@ -115,12 +115,7 @@ function! s:drawer.rename_buffer(buffer, db_key_name, is_saved_query) abort
   let db = self.dbui.dbs[a:db_key_name]
   let db_slug = db_ui#utils#slug(db.name)
   let is_saved = a:is_saved_query || !self.dbui.is_tmp_location_buffer(db, a:buffer)
-
-  if is_saved
-    let old_name = fnamemodify(a:buffer, ':t')
-  else
-    let old_name = substitute(fnamemodify(a:buffer, ':e'), '^'.db_slug.'-\?', '', '')
-  endif
+  let old_name = self.get_buffer_name(db, a:buffer)
 
   try
     let new_name = db_ui#utils#input('Enter new name: ', old_name)
@@ -135,7 +130,7 @@ function! s:drawer.rename_buffer(buffer, db_key_name, is_saved_query) abort
   if is_saved
     let new = printf('%s/%s', fnamemodify(a:buffer, ':p:h'), new_name)
   else
-    let new = printf('%s.%s', fnamemodify(a:buffer, ':r'), db_slug.'-'.new_name)
+    let new = printf('%s/%s', fnamemodify(a:buffer, ':p:h'), db_slug.'-'.new_name)
     call add(db.buffers.tmp, new)
   endif
 
@@ -349,10 +344,9 @@ function! s:drawer.add_db(db) abort
     call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', self.get_toggle_icon('buffers', a:db.buffers), a:db.key_name, 1)
     if a:db.buffers.expanded
       for buf in a:db.buffers.list
-        if !self.dbui.is_tmp_location_buffer(a:db, buf)
-          let buflabel = fnamemodify(buf, ':t')
-        else
-          let buflabel = substitute(fnamemodify(buf, ':e'), '^'.db_ui#utils#slug(a:db.name).'-\?', '', '').' *'
+        let buflabel = self.get_buffer_name(a:db, buf)
+        if self.dbui.is_tmp_location_buffer(a:db, buf)
+          let buflabel .= ' *'
         endif
         call self.add(buflabel, 'open', 'buffer', g:db_ui_icons.buffers, a:db.key_name, 2, { 'file_path': buf })
       endfor
@@ -621,6 +615,21 @@ function! s:drawer.get_nested(obj, val, ...) abort
   endfor
 
   return result
+endfunction
+
+function! s:drawer.get_buffer_name(db, buffer)
+  let name = fnamemodify(a:buffer, ':t')
+  let is_tmp = self.dbui.is_tmp_location_buffer(a:db, a:buffer)
+
+  if !is_tmp
+    return name
+  endif
+
+  if fnamemodify(name, ':r') ==? 'db_ui'
+    let name = fnamemodify(name, ':e')
+  endif
+
+  return substitute(name, '^'.db_ui#utils#slug(a:db.name).'-', '', '')
 endfunction
 
 function! s:sort_dbout(a1, a2)
