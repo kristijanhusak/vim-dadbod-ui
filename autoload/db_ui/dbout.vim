@@ -302,7 +302,7 @@ endfunction
 if exists('*nvim_open_win') || exists('*popup_create')
   augroup dbui_async_queries_dbout
     autocmd!
-    autocmd User DBQueryStart call s:progress_show()
-    autocmd User DBQueryFinished call s:progress_hide()
+    autocmd User DBQueryPre call s:progress_show()
+    autocmd User DBQueryPost call s:progress_hide()
   augroup END
 endif

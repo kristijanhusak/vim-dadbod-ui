@@ -16,8 +16,8 @@ function! s:query.new(drawer) abort
   let instance.last_query_time = 0
   augroup dbui_async_queries
     autocmd!
-    autocmd User DBQueryStart call s:query_instance.start_query()
-    autocmd User DBQueryFinished call s:query_instance.print_query_time()
+    autocmd User DBQueryPre call s:query_instance.start_query()
+    autocmd User DBQueryPost call s:query_instance.print_query_time()
   augroup END
   return instance
 endfunction
