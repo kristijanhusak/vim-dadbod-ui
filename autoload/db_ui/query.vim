@@ -410,8 +410,18 @@ function! s:query.get_last_query_info() abort
 endfunction
 
 function! s:query.get_saved_query_db_name() abort
-  let path = expand('%:p:h:h')
-  if path ==? self.drawer.dbui.save_path
+  let dbui = self.drawer.dbui
+  if !empty(dbui.tmp_location) && dbui.tmp_location ==? expand('%:p:h')
+    let filename = expand('%:t')
+    if fnamemodify(filename, ':r') ==? 'db_ui'
+      let filename = fnamemodify(filename, ':e')
+    endif
+    let db = get(filter(copy(dbui.dbs_list), 'filename =~? "^".v:val.name."-"'), 0, {})
+    if !empty(db)
+      return db.name
+    endif
+  endif
+  if expand('%:p:h:h') ==? dbui.save_path
     return expand('%:p:h:t')
   endif
 
