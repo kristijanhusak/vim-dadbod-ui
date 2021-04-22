@@ -346,10 +346,40 @@ ic
 		`Press ? for help`, see |g:db_ui_show_help|
 
 					      *<Plug>(DBUI_Quit)*
-
 <Plug>(DBUI_Quit)
 		Mapping for closing the drawer.
 		By default, mapped to `q`.
+
+					      *<Plug>(DBUI_GotoFirstSibling)*
+<Plug>(DBUI_GotoFirstSibling)
+		Go to first sibling in current context.
+		By default, mapped to `<C-k>`.
+
+					      *<Plug>(DBUI_GotoLastSibling)*
+<Plug>(DBUI_GotoLastSibling)
+		Go to last sibling in current context.
+		By default, mapped to `<C-j>`.
+
+					      *<Plug>(DBUI_GotoPrevSibling)*
+<Plug>(DBUI_GotoPrevSibling)
+		Go to previous sibling in current context.
+		By default, mapped to `K`.
+
+					      *<Plug>(DBUI_GotoNextSibling)*
+<Plug>(DBUI_GotoNextSibling)
+		Go to previous sibling in current context.
+		By default, mapped to `J`.
+
+					      *<Plug>(DBUI_GotoParentNode)*
+<Plug>(DBUI_GotoParentNode)
+		Go to parent node from current context.
+		By default, mapped to `<c-p>`.
+
+					      *<Plug>(DBUI_GotoChildNode)*
+<Plug>(DBUI_GotoChildNode)
+		Go to child node from current context. It works only on
+		entries that can be toggled (dbs, schemas, tables, ...)
+		By default, mapped to `<c-n>`.
 
 ==============================================================================
 6. Table helpers				*vim-dadbod-ui-table-helpers*
