@@ -3,9 +3,13 @@ let s:expect = themis#helper('expect')
 
 function! s:suite.before() abort
   call SetupTestDbs()
+  call SetOptionVariable('db_ui_table_helpers', {
+        \ 'sqlite': { 'List': 'SELECT * FROM {table}', 'Count': 'select count(*) from {table}', 'Explain': 'EXPLAIN ANALYZE {last_query}' }
+        \ })
 endfunction
 
 function! s:suite.after() abort
+  call SetOptionVariable('db_ui_table_helpers', {'sqlite': {'List': g:db_ui_default_query }})
   call Cleanup()
 endfunction
 
@@ -20,17 +24,17 @@ function! s:suite.should_jump_to_first_last_sibling() abort
   norm 2jojo
   call s:expect(line('.')).to_equal(5)
   exe "norm \<C-j>"
-  call s:expect(line('.')).to_equal(10)
+  call s:expect(line('.')).to_equal(12)
   exe "norm \<C-k>"
   call s:expect(line('.')).to_equal(5)
   norm j
   call s:expect(line('.')).to_equal(6)
   exe "norm \<C-j>"
-  call s:expect(line('.')).to_equal(9)
+  call s:expect(line('.')).to_equal(11)
   exe "norm \<C-k>"
   call s:expect(line('.')).to_equal(6)
   exe "norm \<C-j>"
-  call s:expect(line('.')).to_equal(9)
+  call s:expect(line('.')).to_equal(11)
 endfunction
 
 function! s:suite.should_jump_to_parent_child_node()
@@ -59,7 +63,7 @@ function! s:suite.should_jump_to_prev_next_sibling()
   norm k
   call s:expect(line('.')).to_equal(5)
   norm J
-  call s:expect(line('.')).to_equal(10)
+  call s:expect(line('.')).to_equal(12)
   norm K
   call s:expect(line('.')).to_equal(5)
 endfunction

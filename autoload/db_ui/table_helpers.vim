@@ -200,7 +200,7 @@ let s:scheme_map = {
       \ 'sqlite': 'sqlite3',
       \ }
 
-function db_ui#table_helpers#get(scheme) abort
+function! db_ui#table_helpers#get(scheme) abort
   let result = extend(get(s:all, a:scheme, { 'List': '' }), get(g:db_ui_table_helpers, a:scheme, {}))
   if has_key(s:scheme_map, a:scheme)
     let result = extend(result, get(g:db_ui_table_helpers, s:scheme_map[a:scheme], {}))
