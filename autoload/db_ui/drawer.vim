@@ -44,6 +44,14 @@ function! s:drawer.open(...) abort
   nnoremap <silent><buffer> <Plug>(DBUI_ToggleDetails) :call <sid>method('toggle_details')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_RenameLine) :call <sid>method('rename_line')<CR>
   nnoremap <silent><buffer> <Plug>(DBUI_Quit) :call <sid>method('quit')<CR>
+
+  nnoremap <silent><buffer> <Plug>(DBUI_GotoFirstSibling) :call <sid>method('goto_sibling', 'first')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_GotoNextSibling) :call <sid>method('goto_sibling', 'next')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_GotoPrevSibling) :call <sid>method('goto_sibling', 'prev')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_GotoLastSibling) :call <sid>method('goto_sibling', 'last')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_GotoParentNode) :call <sid>method('goto_node', 'parent')<CR>
+  nnoremap <silent><buffer> <Plug>(DBUI_GotoChildNode) :call <sid>method('goto_node', 'child')<CR>
+
   nnoremap <silent><buffer> ? :call <sid>method('toggle_help')<CR>
   augroup db_ui
     autocmd! * <buffer>
@@ -92,6 +100,87 @@ function! s:method(method_name, ...) abort
   endif
 
   return s:drawer_instance[a:method_name]()
+endfunction
+
+function! s:drawer.goto_sibling(direction)
+  let index = line('.') - 1
+  let last_index = len(self.content) - 1
+  let item = self.content[index]
+  let current_level = item.level
+  let is_up = a:direction ==? 'first' || a:direction ==? 'prev'
+  let is_down = !is_up
+  let is_edge = a:direction ==? 'first' || a:direction ==? 'last'
+  let is_prev_or_next = !is_edge
+  if is_edge && current_level ==? 0
+    let line = search('^\s*$', is_up ? 'bW' : 'W')
+    let dir = is_up ? 1 : -1
+    if line > 0
+      return cursor(line + dir, col('.'))
+    endif
+    if is_up
+      silent! exe 'norm!gg'
+    else
+      silent! exe 'norm!G'
+    endif
+    return
+  endif
+
+  let last_index_same_level = index
+
+  while ((is_up && index >= 0) || (is_down && index < last_index))
+    let adjacent_index = is_up ? index - 1 : index + 1
+    let adjacent_item = self.content[adjacent_index]
+    if adjacent_item.level ==? 0 && adjacent_item.label ==? ''
+      return
+    endif
+
+    if is_prev_or_next
+      if adjacent_item.level ==? current_level
+        return cursor(adjacent_index + 1, col('.'))
+      endif
+      if adjacent_item.level < current_level
+        return
+      endif
+    endif
+
+    if is_edge
+      if adjacent_item.level ==? current_level
+        let last_index_same_level = adjacent_index
+      endif
+      if adjacent_item.level < current_level
+        return cursor(last_index_same_level + 1, col('.'))
+      endif
+    endif
+    let index = adjacent_index
+  endwhile
+endfunction
+
+function! s:drawer.goto_node(direction)
+  let index = line('.') - 1
+  let item = self.content[index]
+  let last_index = len(self.content) - 1
+  let is_up = a:direction ==? 'parent'
+  let is_down = !is_up
+  let Is_correct_level = {adj-> a:direction ==? 'parent' ? adj.level ==? item.level - 1 : adj.level ==? item.level + 1}
+  if is_up
+    while index >= 0
+      let index = index - 1
+      let adjacent_item = self.content[index]
+      if adjacent_item.level < item.level
+        break
+      endif
+    endwhile
+    return cursor(index + 1, col('.'))
+  endif
+
+  if item.action !=? 'toggle'
+    return
+  endif
+
+  if !item.expanded
+    call self.toggle_line('')
+  endif
+  norm! j
 endfunction
 
 function s:drawer.get_current_item() abort
@@ -276,7 +365,7 @@ function! s:drawer.render(...) abort
         if !empty(self.dbui.dbout_list[entry])
           let content = printf(' (%s)', self.dbui.dbout_list[entry].content)
         endif
-        call self.add(fnamemodify(entry, ':t').content, 'open', 'dbout', g:db_ui_icons.tables, '', 0, { 'file_path': entry })
+        call self.add(fnamemodify(entry, ':t').content, 'open', 'dbout', g:db_ui_icons.tables, '', 1, { 'file_path': entry })
       endfor
     endif
   endif
@@ -309,6 +398,9 @@ function! s:drawer.render_help() abort
     call self.add('" H - Toggle database details', 'noaction', 'help', '', '', 0)
     call self.add('" r - Rename/Edit buffer/connection/saved query', 'noaction', 'help', '', '', 0)
     call self.add('" q - Close drawer', 'noaction', 'help', '', '', 0)
+    call self.add('" <C-j>/<C-k> - Go to last/first sibling', 'noaction', 'help', '', '', 0)
+    call self.add('" J/K - Go to prev/next sibling', 'noaction', 'help', '', '', 0)
+    call self.add('" <C-p>/<C-n> - Go to parent/child node', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>W - (sql) Save currently opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>E - (sql) Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>S - (sql) Execute query in visual or normal mode', 'noaction', 'help', '', '', 0)
@@ -334,14 +426,14 @@ function! s:drawer.add_db(db) abort
   if self.show_details
     let db_name .= ' ('.a:db.scheme.' - '.a:db.source.')'
   endif
-  call self.add(db_name, 'toggle', 'db', self.get_toggle_icon('db', a:db), a:db.key_name, 0)
+  call self.add(db_name, 'toggle', 'db', self.get_toggle_icon('db', a:db), a:db.key_name, 0, { 'expanded': a:db.expanded })
   if !a:db.expanded
     return a:db
   endif
 
   call self.add('New query', 'open', 'query', g:db_ui_icons.new_query, a:db.key_name, 1)
   if !empty(a:db.buffers.list)
-    call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', self.get_toggle_icon('buffers', a:db.buffers), a:db.key_name, 1)
+    call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', self.get_toggle_icon('buffers', a:db.buffers), a:db.key_name, 1, { 'expanded': a:db.buffers.expanded })
     if a:db.buffers.expanded
       for buf in a:db.buffers.list
         let buflabel = self.get_buffer_name(a:db, buf)
@@ -352,7 +444,7 @@ function! s:drawer.add_db(db) abort
       endfor
     endif
   endif
-  call self.add('Saved queries ('.len(a:db.saved_queries.list).')', 'toggle', 'saved_queries', self.get_toggle_icon('saved_queries', a:db.saved_queries), a:db.key_name, 1)
+  call self.add('Saved queries ('.len(a:db.saved_queries.list).')', 'toggle', 'saved_queries', self.get_toggle_icon('saved_queries', a:db.saved_queries), a:db.key_name, 1, { 'expanded': a:db.saved_queries.expanded })
   if a:db.saved_queries.expanded
     for saved_query in a:db.saved_queries.list
       call self.add(fnamemodify(saved_query, ':t'), 'open', 'buffer', g:db_ui_icons.saved_query, a:db.key_name, 2, { 'file_path': saved_query, 'saved': 1 })
@@ -360,19 +452,19 @@ function! s:drawer.add_db(db) abort
   endif
 
   if a:db.schema_support
-    call self.add('Schemas ('.len(a:db.schemas.items).')', 'toggle', 'schemas', self.get_toggle_icon('schemas', a:db.schemas), a:db.key_name, 1)
+    call self.add('Schemas ('.len(a:db.schemas.items).')', 'toggle', 'schemas', self.get_toggle_icon('schemas', a:db.schemas), a:db.key_name, 1, { 'expanded': a:db.schemas.expanded })
     if a:db.schemas.expanded
       for schema in a:db.schemas.list
         let schema_item = a:db.schemas.items[schema]
         let tables = schema_item.tables
-        call self.add(schema.' ('.len(tables.items).')', 'toggle', 'schemas->items->'.schema, self.get_toggle_icon('schema', schema_item), a:db.key_name, 2)
+        call self.add(schema.' ('.len(tables.items).')', 'toggle', 'schemas->items->'.schema, self.get_toggle_icon('schema', schema_item), a:db.key_name, 2, { 'expanded': schema_item.expanded })
         if schema_item.expanded
           call self.render_tables(tables, a:db,'schemas->items->'.schema.'->tables->items', 3, schema)
         endif
       endfor
     endif
   else
-    call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_toggle_icon('tables', a:db.tables), a:db.key_name, 1)
+    call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_toggle_icon('tables', a:db.tables), a:db.key_name, 1, { 'expanded': a:db.tables.expanded })
     call self.render_tables(a:db.tables, a:db, 'tables->items', 2, '')
   endif
 endfunction
@@ -382,7 +474,7 @@ function! s:drawer.render_tables(tables, db, path, level, schema) abort
     return
   endif
   for table in a:tables.list
-    call self.add(table, 'toggle', a:path.'->'.table, self.get_toggle_icon('table', a:tables.items[table]), a:db.key_name, a:level)
+    call self.add(table, 'toggle', a:path.'->'.table, self.get_toggle_icon('table', a:tables.items[table]), a:db.key_name, a:level, { 'expanded': a:tables.items[table].expanded })
     if a:tables.items[table].expanded
       for [helper_name, helper] in items(a:db.table_helpers)
         call self.add(helper_name, 'open', 'table', g:db_ui_icons.tables, a:db.key_name, a:level + 1, {'table': table, 'content': helper, 'schema': a:schema })
