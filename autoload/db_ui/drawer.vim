@@ -111,27 +111,14 @@ function! s:drawer.goto_sibling(direction)
   let is_down = !is_up
   let is_edge = a:direction ==? 'first' || a:direction ==? 'last'
   let is_prev_or_next = !is_edge
-  if is_edge && current_level ==? 0
-    let line = search('^\s*$', is_up ? 'bW' : 'W')
-    let dir = is_up ? 1 : -1
-    if line > 0
-      return cursor(line + dir, col('.'))
-    endif
-    if is_up
-      silent! exe 'norm!gg'
-    else
-      silent! exe 'norm!G'
-    endif
-    return
-  endif
-
   let last_index_same_level = index
 
   while ((is_up && index >= 0) || (is_down && index < last_index))
     let adjacent_index = is_up ? index - 1 : index + 1
+    let is_on_edge = (is_up && adjacent_index ==? 0) || (is_down && adjacent_index ==? last_index)
     let adjacent_item = self.content[adjacent_index]
     if adjacent_item.level ==? 0 && adjacent_item.label ==? ''
-      return
+      return cursor(index + 1, col('.'))
     endif
 
     if is_prev_or_next
@@ -147,7 +134,7 @@ function! s:drawer.goto_sibling(direction)
       if adjacent_item.level ==? current_level
         let last_index_same_level = adjacent_index
       endif
-      if adjacent_item.level < current_level
+      if adjacent_item.level < current_level || is_on_edge
         return cursor(last_index_same_level + 1, col('.'))
       endif
     endif

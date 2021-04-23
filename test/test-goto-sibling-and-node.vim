@@ -67,3 +67,17 @@ function! s:suite.should_jump_to_prev_next_sibling()
   norm K
   call s:expect(line('.')).to_equal(5)
 endfunction
+
+function! s:suite.should_jump_to_last_line()
+  norm! gg
+  norm J
+  call s:expect(line('.')).to_equal(13)
+  norm oj
+  call s:expect(line('.')).to_equal(14)
+  exe "norm \<C-j>"
+  call s:expect(line('.')).to_equal(16)
+  exe "norm \<C-k>"
+  call s:expect(line('.')).to_equal(14)
+  exe "norm \<C-j>"
+  call s:expect(line('.')).to_equal(16)
+endfunction
