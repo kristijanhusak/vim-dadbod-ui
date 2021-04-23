@@ -213,89 +213,115 @@ function! s:get_cell_line_number(scheme) abort
 endfunction
 
 let s:progress_icons = ['/', '—', '\', '|']
+let s:progress_buffers = {}
 let s:progress = {
       \ 'win': -1,
+      \ 'outwin': -1,
       \ 'buf': -1,
       \ 'timer': -1,
       \ 'counter': 0,
       \ 'icon_counter': 0,
       \ }
 
-function s:progress_tick(timer) abort
-  let s:progress.counter += 100
-  if s:progress.icon_counter > 3
-    let s:progress.icon_counter = 0
+function! s:progress_tick(progress, timer) abort
+  let a:progress.counter += 100
+  if a:progress.icon_counter > 3
+    let a:progress.icon_counter = 0
   endif
-  let secs = string(s:progress.counter * 0.001).'s'
-  let content = ' '.s:progress_icons[s:progress.icon_counter].' Execute query - '.secs
+  let secs = string(a:progress.counter * 0.001).'s'
+  let content = ' '.s:progress_icons[a:progress.icon_counter].' Execute query - '.secs
   if has('nvim')
-    call nvim_buf_set_lines(s:progress.buf, 0, -1, v:false, [content])
+    call nvim_buf_set_lines(a:progress.buf, 0, -1, v:false, [content])
   else
-    call popup_settext(s:progress.win, content)
+    call popup_settext(a:progress.win, content)
   endif
-  let s:progress.icon_counter += 1
+  let a:progress.icon_counter += 1
+endfunction
+
+function! s:progress_winpos(win)
+  let pos = win_screenpos(a:win)
+  return [
+        \ pos[0] + (winheight(a:win) / 2),
+        \ pos[1] + (winwidth(a:win) / 2) - 12,
+        \ ]
 endfunction
 
 function! s:progress_hide() abort
-  if has('nvim')
-    silent! call nvim_win_close(s:progress.win, v:true)
-  else
-    silent! call popup_close(s:progress.win)
+  let bufname = bufname()
+  let progress = get(s:progress_buffers, bufname, {})
+  if empty(progress)
+    return
   endif
-  silent! call timer_stop(s:progress.timer)
-  let s:progress.counter = 0
-  let s:progress.icon_counter = 0
-  let s:progress.win = -1
-  let s:progress.buf = -1
-  let s:progress.timer = -1
+  if has('nvim')
+    silent! call nvim_win_close(progress.win, v:true)
+  else
+    silent! call popup_close(progress.win)
+  endif
+  silent! call timer_stop(progress.timer)
+  unlet! s:progress_buffers[bufname]
+  call s:progress_reset_positions()
 endfunction
 
-function! s:get_out_win()
+function! s:progress_reset_positions()
+  for bprogress in values(s:progress_buffers)
+    let win = bprogress.win
+    let [row, col] = s:progress_winpos(bprogress.outwin)
+    if has('nvim')
+      call nvim_win_set_config(win, { 'relative': 'editor', 'row': row - 1, 'col': col })
+    else
+      call popup_move(win, { 'line': row, 'col': col })
+    endif
+  endfor
 endfunction
 
-function! s:progress_show_neovim(outwin) abort
-  let outwin = win_getid(a:outwin)
-  let s:progress.buf = nvim_create_buf(v:false, v:true)
-  call nvim_buf_set_lines(s:progress.buf, 0, -1, v:false, ['| Execute query - 0.0s'])
+function! s:progress_show_neovim() abort
+  let bufname =  bufname()
+  let outwin = win_getid()
+  let progress = copy(s:progress)
+  let progress.outwin = outwin
+  let progress.buf = nvim_create_buf(v:false, v:true)
+  call nvim_buf_set_lines(progress.buf, 0, -1, v:false, ['| Execute query - 0.0s'])
+  let [row, col] = s:progress_winpos(outwin)
   let opts = {
-        \ 'relative': 'win',
-        \ 'win': outwin,
+        \ 'relative': 'editor',
         \ 'width': 24,
         \ 'height': 1,
-        \ 'row': winheight(outwin) / 2,
-        \ 'col': winwidth(outwin) / 2 - 12,
+        \ 'row': row - 1,
+        \ 'col': col,
         \ 'focusable': v:false,
         \ 'style': 'minimal'
         \ }
-  let s:progress.win = nvim_open_win(s:progress.buf, v:false, opts)
-  let s:progress.timer = timer_start(100, function('s:progress_tick'), { 'repeat': -1 })
+  let progress.win = nvim_open_win(progress.buf, v:false, opts)
+  let progress.timer = timer_start(100, function('s:progress_tick', [progress]), { 'repeat': -1 })
+  let s:progress_buffers[bufname] = progress
 endfunction
 
-function! s:progress_show_vim(outwin)
-  let pos = win_screenpos(a:outwin)
-  let s:progress.win = popup_create('| Execute query - 0.0s', {
-        \ 'line': pos[0] + (winheight(a:outwin) / 2),
-        \ 'col': pos[1] + (winwidth(a:outwin) / 2) - 12,
+function! s:progress_show_vim()
+  let outwin = winnr()
+  let bufname = bufname()
+  let pos = win_screenpos(outwin)
+  let progress = copy(s:progress)
+  let progress.outwin = outwin
+  let [row, col] = s:progress_winpos(outwin)
+  let progress.win = popup_create('| Execute query - 0.0s', {
+        \ 'line': row,
+        \ 'col': col,
         \ 'minwidth': 24,
         \ 'maxwidth': 24,
         \ 'minheight': 1,
         \ 'maxheight': 1,
         \ })
-  let s:progress.timer = timer_start(100, function('s:progress_tick'), { 'repeat': -1 })
+  let progress.timer = timer_start(100, function('s:progress_tick', [progress]), { 'repeat': -1 })
+  let s:progress_buffers[bufname] = progress
 endfunction
 
 function! s:progress_show()
-  call s:progress_hide()
-  let outwin = get(filter(range(1, winnr('$')), 'getwinvar(v:val, "&filetype") ==? "dbout"'), -1, -1)
-  if outwin < 0
-    return
-  endif
-
   if has('nvim')
-    return s:progress_show_neovim(outwin)
+    call s:progress_show_neovim()
+  else
+    call s:progress_show_vim()
   endif
-
-  return s:progress_show_vim(outwin)
+  call s:progress_reset_positions()
 endfunction
 
 
