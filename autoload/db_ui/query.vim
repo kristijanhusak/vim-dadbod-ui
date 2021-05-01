@@ -222,7 +222,7 @@ function! s:query.execute_query(...) abort
     let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
     call self.execute_lines(db, lines, is_visual_mode)
   endif
-  let has_async = exists('*db#job#run')
+  let has_async = exists('*db#cancel')
   if has_async
     call db_ui#notifications#info('Executing query...')
   endif
