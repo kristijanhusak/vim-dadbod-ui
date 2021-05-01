@@ -105,7 +105,7 @@ function! db_ui#query(query) abort
     throw 'Unsupported scheme '.parsed.scheme
   endif
 
-  let result = db_ui#schemas#query(b:db, scheme, printf(scheme.args, a:query))
+  let result = db_ui#schemas#query(b:db, scheme, a:query)
 
   return scheme.parse_results(result, 0)
 endfunction

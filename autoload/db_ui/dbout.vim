@@ -1,5 +1,6 @@
 function! db_ui#dbout#jump_to_foreign_table() abort
-  let parsed = db#url#parse(db#resolve(b:db))
+  let db_url = db#resolve(b:db)
+  let parsed = db#url#parse(db_url)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
     return db_ui#notifications#error(parsed.scheme.' scheme not supported for foreign key jump.')
@@ -15,7 +16,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
 
   let foreign_key_query = substitute(scheme.foreign_key_query, '{col_name}', field_name, '')
   let Parser = get(scheme, 'parse_virtual_results', scheme.parse_results)
-  let result = Parser(db_ui#schemas#query(b:db, scheme, foreign_key_query), 3)
+  let result = Parser(db_ui#schemas#query(db_url, scheme, foreign_key_query), 3)
 
   if empty(result)
     return db_ui#notifications#error('No valid foreign key found.')
