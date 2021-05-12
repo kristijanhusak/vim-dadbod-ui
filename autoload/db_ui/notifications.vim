@@ -99,10 +99,10 @@ function! s:notification_nvim(msg, opts) abort
 
   call s:nvim_close()
   let buf = nvim_create_buf(v:false, v:true)
-  silent! exe 'autocmd BufEnter <buffer='.buf.'> :bw!'
   call nvim_buf_set_lines(buf, 0, -1, v:false, msg)
 
   let s:win = nvim_open_win(buf, v:false, opts)
+  silent! exe 'autocmd BufEnter <buffer='.buf.'> :bw!'
   call nvim_win_set_option(s:win, 'wrap', v:true)
   call nvim_win_set_option(s:win, 'signcolumn', 'yes') "simulate left padding
   call nvim_win_set_option(s:win, 'winhl', 'Normal:'.s:hl_by_type[type])
