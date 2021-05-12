@@ -8,7 +8,7 @@ It allows simple navigation through databases and allows saving queries for late
 With nerd fonts:
 ![with-nerd-fonts](https://i.imgur.com/aXI5BTG.png)
 
-Tested on Linux, Mac and Windows, Vim 8+ and Neovim.
+Tested on Linux, Mac and Windows, Vim 8.1+ and Neovim.
 
 Features:
 * Navigate through multiple databases and it's tables and schemas
