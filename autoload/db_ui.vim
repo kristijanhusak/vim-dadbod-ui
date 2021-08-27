@@ -229,6 +229,7 @@ function! s:dbui.generate_new_db_entry(db) abort
     return parsed_url
   endif
   let scheme = get(parsed_url, 'scheme', '')
+  let db_name = trim(get(parsed_url, 'path', ''), '/', 1)
   let save_path = ''
   if !empty(self.save_path)
     let save_path = printf('%s/%s', self.save_path, a:db.name)
@@ -254,6 +255,7 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'saved_queries': { 'expanded': 0, 'list': [] },
         \ 'buffers': { 'expanded': 0, 'list': buffers, 'tmp': [] },
         \ 'save_path': save_path,
+        \ 'db_name': !empty(db_name) ? db_name : a:db.name,
         \ 'name': a:db.name,
         \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
         \ 'schema_support': schema_support,

@@ -131,7 +131,7 @@ function s:query.open_buffer(db, buffer_name, edit_action, ...)
   let content = substitute(default_content, '{table}', table, 'g')
   let content = substitute(content, '{optional_schema}', optional_schema, 'g')
   let content = substitute(content, '{schema}', schema, 'g')
-  let db_name = !empty(schema) ? schema : a:db.name
+  let db_name = !empty(schema) ? schema : a:db.db_name
   let content = substitute(content, '{dbname}', db_name, 'g')
   let content = substitute(content, '{last_query}', join(self.last_query, "\n"), 'g')
   silent 1,$delete _
