@@ -15,7 +15,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
 
   let foreign_key_query = substitute(scheme.foreign_key_query, '{col_name}', field_name, '')
   let Parser = get(scheme, 'parse_virtual_results', scheme.parse_results)
-  let result = Parser(db_ui#schemas#query(b:db, scheme, foreign_key_query), 3)
+  let result = Parser(db_ui#schemas#query(db#resolve(b:db), scheme, foreign_key_query), 3)
 
   if empty(result)
     return db_ui#notifications#error('No valid foreign key found.')
