@@ -5,6 +5,9 @@ function db_ui#drawer#new(dbui)
   let s:drawer_instance = s:drawer.new(a:dbui)
   return s:drawer_instance
 endfunction
+function db_ui#drawer#get()
+  return s:drawer_instance
+endfunction
 
 function! s:drawer.new(dbui) abort
   let instance = copy(self)
