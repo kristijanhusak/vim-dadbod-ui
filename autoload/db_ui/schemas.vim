@@ -119,7 +119,12 @@ let s:oracle_foreign_key_query = "
       \ AND RFRING.column_name = '{col_name}'"
 let s:oracle_schemes_tables_query = "
       \SELECT T.owner, T.table_name
-      \ FROM all_tables T
+      \ FROM (
+      \ SELECT owner, table_name
+      \ FROM all_tables
+      \ UNION SELECT owner, view_name AS \"table_name\"
+      \ FROM all_views
+      \ ) T
       \ JOIN all_users U ON T.owner = U.username
       \ WHERE U.common = 'NO'
       \ ORDER BY T.table_name"
