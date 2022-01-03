@@ -37,7 +37,7 @@ function! s:connections.delete(db) abort
   endif
 
   let file = self.read()
-  call filter(file, {i, conn -> !(conn.name ==? a:db.name && conn.url ==? a:db.url )})
+  call filter(file, {i, conn -> !(conn.name ==? a:db.name && db#resolve(conn.url) ==? db#resolve(a:db.url) )})
   return self.write(file)
 endfunction
 
