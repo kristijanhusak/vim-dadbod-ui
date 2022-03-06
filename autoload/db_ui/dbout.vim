@@ -1,5 +1,6 @@
 function! db_ui#dbout#jump_to_foreign_table() abort
-  let parsed = db#url#parse(db#resolve(b:db))
+  let db_url = db#resolve(b:db)
+  let parsed = db#url#parse(db_url)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
     return db_ui#notifications#error(parsed.scheme.' scheme not supported for foreign key jump.')
@@ -15,7 +16,7 @@ function! db_ui#dbout#jump_to_foreign_table() abort
 
   let foreign_key_query = substitute(scheme.foreign_key_query, '{col_name}', field_name, '')
   let Parser = get(scheme, 'parse_virtual_results', scheme.parse_results)
-  let result = Parser(db_ui#schemas#query(db#resolve(b:db), scheme, foreign_key_query), 3)
+  let result = Parser(db_ui#schemas#query(db_url, scheme, foreign_key_query), 3)
 
   if empty(result)
     return db_ui#notifications#error('No valid foreign key found.')
@@ -267,7 +268,7 @@ function! s:progress_reset_positions()
     let win = bprogress.win
     let [row, col] = s:progress_winpos(bprogress.outwin)
     if has('nvim')
-      call nvim_win_set_config(win, { 'relative': 'editor', 'row': row - 1, 'col': col })
+      call nvim_win_set_config(win, { 'relative': 'editor', 'row': row - 2, 'col': col })
     else
       call popup_move(win, { 'line': row, 'col': col })
     endif
@@ -286,11 +287,15 @@ function! s:progress_show_neovim() abort
         \ 'relative': 'editor',
         \ 'width': 24,
         \ 'height': 1,
-        \ 'row': row - 1,
+        \ 'row': row - 2,
         \ 'col': col,
         \ 'focusable': v:false,
         \ 'style': 'minimal'
         \ }
+
+  if has('nvim-0.5')
+    let opts.border = 'rounded'
+  endif
   let progress.win = nvim_open_win(progress.buf, v:false, opts)
   let progress.timer = timer_start(100, function('s:progress_tick', [progress]), { 'repeat': -1 })
   let s:progress_buffers[bufname] = progress
@@ -310,6 +315,7 @@ function! s:progress_show_vim()
         \ 'maxwidth': 24,
         \ 'minheight': 1,
         \ 'maxheight': 1,
+        \ 'border': [],
         \ })
   let progress.timer = timer_start(100, function('s:progress_tick', [progress]), { 'repeat': -1 })
   let s:progress_buffers[bufname] = progress

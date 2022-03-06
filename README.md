@@ -19,7 +19,7 @@ Features:
 * Autocompletion with [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
 * Jump to foreign keys from the dadbod output (see `:help <Plug>(DBUI_JumpToForeignKey)`)
 * Support for nerd fonts (see `:help g:db_ui_use_nerd_fonts`)
-* Async query exection (requires using [fork branch](https://github.com/kristijanhusak/vim-dadbod/tree/async-query) for now, see [#46 (comment)](https://github.com/kristijanhusak/vim-dadbod-ui/issues/46#issuecomment-649370760))
+* Async query execution
 
 ## Installation
 
