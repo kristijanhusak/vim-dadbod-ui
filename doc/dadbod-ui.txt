@@ -681,6 +681,17 @@ g:db_ui_force_echo_notifications
 
 		Default value: `0`
 
+					      *g:db_ui_hide_schemas*
+g:db_ui_hide_schemas
+		Hide specific schemas from the drawer. Useful for `postgres`
+		connections to hide `pg_temp` tables. Each items is checked
+		with |match()| function.
+		Example:
+>
+		let g:db_ui_hide_schemas = ['pg_catalog', 'pg_toast_temp.*']
+<
+		Default value: `[]`
+
 					      *g:Db_ui_buffer_name_generator*
 g:Db_ui_buffer_name_generator
 		Custom function for generating buffer names from drawer.

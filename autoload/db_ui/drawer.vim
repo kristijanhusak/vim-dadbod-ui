@@ -648,8 +648,12 @@ function! s:drawer.populate_schemas(db) abort
   let scheme = db_ui#schemas#get(a:db.scheme)
   let schemas = scheme.parse_results(db_ui#schemas#query(a:db, scheme, scheme.schemes_query), 1)
   let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme, scheme.schemes_tables_query), 2)
+  let schemas = filter(schemas, {i, v -> !self._is_schema_ignored(v)})
   let tables_by_schema = {}
   for [scheme_name, table] in tables
+    if self._is_schema_ignored(scheme_name)
+      continue
+    endif
     if !has_key(tables_by_schema, scheme_name)
       let tables_by_schema[scheme_name] = []
     endif
@@ -712,6 +716,15 @@ function! s:drawer.get_buffer_name(db, buffer)
   endif
 
   return substitute(name, '^'.db_ui#utils#slug(a:db.name).'-', '', '')
+endfunction
+
+function! s:drawer._is_schema_ignored(schema_name)
+  for ignored_schema in g:db_ui_hide_schemas
+    if match(a:schema_name, ignored_schema) > -1
+      return 1
+    endif
+  endfor
+  return 0
 endfunction
 
 function! s:sort_dbout(a1, a2)
