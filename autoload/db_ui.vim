@@ -384,9 +384,7 @@ function! s:dbui.connect(db) abort
     call db_ui#notifications#info('Connecting to db '.a:db.name.'...', { 'echo': 1 })
     let a:db.conn = db#connect(a:db.url)
     let a:db.conn_error = ''
-    if v:shell_error ==? 0
-      call db_ui#notifications#info('Connected to db '.a:db.name.' after '.split(reltimestr(reltime(query_time)))[0].' sec.')
-    endif
+    call db_ui#notifications#info('Connected to db '.a:db.name.' after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   catch /.*/
     let a:db.conn_error = v:exception
     let a:db.conn = ''

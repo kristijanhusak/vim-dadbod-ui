@@ -608,9 +608,6 @@ function! s:drawer.populate_tables(db) abort
   endif
 
   let tables = db#adapter#call(a:db.conn, 'tables', [a:db.conn], [])
-  if v:shell_error !=? 0
-    return db_ui#notifications#error(printf('Error loading tables. Reason: %s', get(tables, 0, 'Unknown')), 1)
-  endif
 
   let a:db.tables.list = tables
   " Fix issue with sqlite tables listing as strings with spaces
