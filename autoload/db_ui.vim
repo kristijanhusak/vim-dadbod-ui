@@ -190,9 +190,7 @@ function! s:dbui.save_dbout(file) abort
   if has_key(self.dbout_list, a:file) && !empty(self.dbout_list[a:file])
     return
   endif
-  if exists('*getbufvar')
-    let db_input = getbufvar(a:file, 'db_input')
-  endif
+  let db_input = get(getbufvar(a:file, 'db'), 'input')
   if !empty(db_input) && filereadable(db_input)
     let content = get(readfile(db_input, 1), 0)
     if len(content) > 30

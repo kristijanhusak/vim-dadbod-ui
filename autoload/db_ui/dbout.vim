@@ -84,7 +84,7 @@ function! db_ui#dbout#toggle_layout() abort
   if !has_key(scheme, 'layout_flag')
     return db_ui#notifications#error('Toggling layout not supported for '.parsed.scheme.' scheme.')
   endif
-  let content = join(readfile(b:db_input), "\n")
+  let content = join(readfile(b:db.input), "\n")
   let expanded_layout = get(b:, 'db_ui_expanded_layout', 0)
 
   if expanded_layout
@@ -96,10 +96,10 @@ function! db_ui#dbout#toggle_layout() abort
   let content = substitute(content, ';\?$', ' '.scheme.layout_flag, '')
   let tmp = tempname()
   call writefile(split(content, "\n"), tmp)
-  let old_db_input = b:db_input
-  let b:db_input = tmp
+  let old_db_input = b:db.input
+  let b:db.input = tmp
   norm R
-  let b:db_input = old_db_input
+  let b:db.input = old_db_input
   let b:db_ui_expanded_layout = !expanded_layout
 endfunction
 
