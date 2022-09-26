@@ -5,6 +5,7 @@ exemptLabels:
   - help wanted
   - pinned
   - security
+  - bug
 staleLabel: stalled
 markComment: >
   This issue has been automatically marked as stale because it has not had
