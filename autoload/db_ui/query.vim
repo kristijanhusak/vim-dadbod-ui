@@ -41,7 +41,7 @@ function! s:query.open(item, edit_action) abort
 endfunction
 
 function! s:query.generate_buffer_name(db, opts) abort
-  let time = exists('*strftime') ? strftime('%Y-%m-%d %H∶%M∶%S') : localtime()
+  let time = exists('*strftime') ? strftime('%Y-%m-%d-%H-%M-%S') : localtime()
   let suffix = 'query'
   if !empty(a:opts.table)
     let suffix = printf('%s-%s', a:opts.table, a:opts.label)
