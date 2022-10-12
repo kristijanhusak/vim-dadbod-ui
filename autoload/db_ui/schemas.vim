@@ -65,8 +65,8 @@ let s:sqlserver_foreign_keys_query = "
 let s:sqlserver = {
       \   'args': ['-h-1', '-W', '-s', '|', '-Q'],
       \   'foreign_key_query': trim(s:sqlserver_foreign_keys_query),
-      \   'schemes_query': 'SELECT schema_name FROM information_schema.schemata',
-      \   'schemes_tables_query': 'SELECT table_schema, table_name FROM information_schema.tables',
+      \   'schemes_query': 'SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA',
+      \   'schemes_tables_query': 'SELECT table_schema, table_name FROM INFORMATION_SCHEMA.TABLES',
       \   'select_foreign_key_query': 'select * from %s.%s where %s = %s',
       \   'cell_line_number': 2,
       \   'cell_line_pattern': '^-\+.-\+',
