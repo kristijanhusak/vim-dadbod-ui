@@ -247,8 +247,8 @@ function! s:progress_winpos(win)
         \ ]
 endfunction
 
-function! s:progress_hide() abort
-  let bufname = bufname()
+function! s:progress_hide(...) abort
+  let bufname = a:0 > 0 ? a:1 : bufname()
   let progress = get(s:progress_buffers, bufname, {})
   if empty(progress)
     return
@@ -275,9 +275,9 @@ function! s:progress_reset_positions()
   endfor
 endfunction
 
-function! s:progress_show_neovim() abort
-  let bufname =  bufname()
-  let outwin = win_getid()
+function! s:progress_show_neovim(path) abort
+  let bufname =  !empty(a:path) ? a:path : bufname()
+  let outwin = win_getid(bufwinnr(bufname))
   let progress = copy(s:progress)
   let progress.outwin = outwin
   let progress.buf = nvim_create_buf(v:false, v:true)
@@ -301,9 +301,9 @@ function! s:progress_show_neovim() abort
   let s:progress_buffers[bufname] = progress
 endfunction
 
-function! s:progress_show_vim()
-  let outwin = winnr()
-  let bufname = bufname()
+function! s:progress_show_vim(path)
+  let bufname = !empty(a:path) ? a:path : bufname()
+  let outwin = bufwinnr(bufname)
   let pos = win_screenpos(outwin)
   let progress = copy(s:progress)
   let progress.outwin = outwin
@@ -321,11 +321,11 @@ function! s:progress_show_vim()
   let s:progress_buffers[bufname] = progress
 endfunction
 
-function! s:progress_show()
+function! s:progress_show(...)
   if has('nvim')
-    call s:progress_show_neovim()
+    call s:progress_show_neovim(get(a:, 1, ''))
   else
-    call s:progress_show_vim()
+    call s:progress_show_vim(get(a:, 1, ''))
   endif
   call s:progress_reset_positions()
 endfunction
@@ -336,5 +336,7 @@ if exists('*nvim_open_win') || exists('*popup_create')
     autocmd!
     autocmd User DBQueryPre call s:progress_show()
     autocmd User DBQueryPost call s:progress_hide()
+    autocmd User *DBExecutePre call s:progress_show(expand('<amatch>:h'))
+    autocmd User *DBExecutePost call s:progress_hide(expand('<amatch>:h'))
   augroup END
 endif
