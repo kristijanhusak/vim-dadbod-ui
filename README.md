@@ -216,7 +216,7 @@ let g:db_ui_save_location = '~/Dropbox/db_ui_queries'
 ## Mappings
 These are the default mappings for `dbui` drawer:
 
-* o / <CR> - Open/Toggle Drawer options (`<Plug>(DBUI_SelectLine)`)
+* o / \<CR> - Open/Toggle Drawer options (`<Plug>(DBUI_SelectLine)`)
 * S - Open in vertical split (`<Plug>(DBUI_SelectLineVsplit)`)
 * d - Delete buffer or saved sql (`<Plug>(DBUI_DeleteLine)`)
 * R - Redraw (`<Plug>(DBUI_Redraw)`)
@@ -225,8 +225,8 @@ These are the default mappings for `dbui` drawer:
 
 For queries, filetype is automatically set to `sql`. Also, two mappings is added for the `sql` filetype:
 
-* <Leader>W - Permanently save query for later use (`<Plug>(DBUI_SaveQuery)`)
-* <Leader>E - Edit bind parameters (`<Plug>(DBUI_EditBindParameters)`)
+* \<Leader>W - Permanently save query for later use (`<Plug>(DBUI_SaveQuery)`)
+* \<Leader>E - Edit bind parameters (`<Plug>(DBUI_EditBindParameters)`)
 
 Any of these mappings can be overridden:
 ```vimL
