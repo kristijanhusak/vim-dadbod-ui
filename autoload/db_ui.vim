@@ -11,6 +11,11 @@ function! db_ui#toggle() abort
   return s:dbui_instance.drawer.toggle()
 endfunction
 
+function! db_ui#close() abort
+  call s:init()
+  return s:dbui_instance.drawer.quit()
+endfunction
+
 function! db_ui#save_dbout(file) abort
   call s:init()
   return s:dbui_instance.save_dbout(a:file)

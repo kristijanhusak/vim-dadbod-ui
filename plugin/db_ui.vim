@@ -115,6 +115,7 @@ augroup END
 
 command! DBUI call db_ui#open('<mods>')
 command! DBUIToggle call db_ui#toggle()
+command! DBUIClose call db_ui#close()
 command! DBUIAddConnection call db_ui#connections#add()
 command! DBUIFindBuffer call db_ui#find_buffer()
 command! DBUIRenameBuffer call db_ui#rename_buffer()
