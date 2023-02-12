@@ -11,7 +11,7 @@ function! db_ui#toggle() abort
   return s:dbui_instance.drawer.toggle()
 endfunction
 
-function! db_ui#quit() abort
+function! db_ui#close() abort
   call s:init()
   return s:dbui_instance.drawer.quit()
 endfunction
