@@ -150,12 +150,35 @@ if get(g:, 'dbext_default_ORA_bin') == 'sql'
   let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-4]), ',', min_len)}
 endif
 
+if !exists('g:db_adapter_bigquery_region')
+  let g:db_adapter_bigquery_region = 'region-us'
+endif
+
+let s:bigquery_schemas_query = "SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA" 
+
+let s:bigquery_schema_tables_query = printf("
+      \ SELECT table_schema, table_name
+      \ FROM `%s`.INFORMATION_SCHEMA.TABLES
+      \ ", g:db_adapter_bigquery_region)
+
+let s:bigquery = {
+      \ 'callable': 'filter',
+      \ 'args': ['--format=csv'],
+      \ 'schemes_query': s:bigquery_schemas_query,
+      \ 'schemes_tables_query': s:bigquery_schema_tables_query,
+      \ 'parse_results': {results, min_len -> s:results_parser(results[1:], ',', min_len)},
+      \ 'layout_flag': '\\x',
+      \ 'requires_stdin': v:true,
+      \ }
+
+
 let s:schemas = {
       \ 'postgres': s:postgresql,
       \ 'postgresql': s:postgresql,
       \ 'sqlserver': s:sqlserver,
       \ 'mysql': s:mysql,
       \ 'oracle': s:oracle,
+      \ 'bigquery': s:bigquery,
       \ }
 
 if !exists('g:db_adapter_postgres')
@@ -172,7 +195,8 @@ endfunction
 
 function! s:format_query(db, scheme, query) abort
   let conn = type(a:db) == v:t_string ? a:db : a:db.conn
-  let cmd = db#adapter#dispatch(conn, 'interactive') + get(a:scheme, 'args', [])
+  let callable = get(a:scheme, 'callable', 'interactive')
+  let cmd = db#adapter#dispatch(conn, callable) + get(a:scheme, 'args', [])
   if get(a:scheme, 'requires_stdin')
     return [cmd, a:query]
   endif
