@@ -141,21 +141,13 @@ let s:oracle = {
       \   'filetype': 'plsql',
       \ }
 
-let s:bigquery_list_schema_query = "SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA;"
-
-let s:bigquery_tables_and_views = "SELECT table_schema, table_name FROM `region-us`.INFORMATION_SCHEMA.SCHEMATA;"
-
 let s:bigquery = {
-      \ 'args': ['-A', '-c'],
-      \ 'schemes_query': s:bigquery_list_schema_query,
-      \ 'schemes_tables_query': s:bigquery_tables_and_views,
-      \ 'cell_line_number': 2,
-      \ 'cell_line_pattern': '^-\++-\+',
+      \ 'args': ['--format=csv'],
+      \ 'schemes_query': "SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA",
+      \ 'schemes_tables_query': "SELECT table_schema, table_name FROM `region-us`.INFORMATION_SCHEMA.TABLES",
       \ 'parse_results': {results, min_len -> s:results_parser(results[1:], ',', min_len)},
-      \ 'default_scheme': 'public',
       \ 'layout_flag': '\\x',
-      \ 'quote': 1,
-      \ 'requires_stdin': v:true,
+      \ 'requires_stdin': v:false,
       \ }
 
 

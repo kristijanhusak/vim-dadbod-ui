@@ -9,6 +9,12 @@ let s:basic_constraint_query = "
       \     JOIN information_schema.constraint_column_usage AS ccu\n
       \       ON ccu.constraint_name = tc.constraint_name\n"
 
+let s:bigquery = {
+      \ 'List': 'select * from {optional_schema}{table} LIMIT 200',
+      \ 'Columns': "select * from {schema}.INFORMATION_SCHEMA.COLUMNS where table_name='{table}'",
+      \ }
+
+
 let s:postgres = {
       \ 'List': 'select * from {optional_schema}"{table}" LIMIT 200',
       \ 'Columns': "select * from information_schema.columns where table_name='{table}' and table_schema='{schema}'",
@@ -176,6 +182,7 @@ let s:sqlserver = {
 \   }
 
 let s:helpers = {
+      \ 'bigquery': s:bigquery,
       \ 'postgresql': s:postgres,
       \ 'mysql': s:mysql,
       \ 'oracle': s:oracle,
