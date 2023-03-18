@@ -5,7 +5,7 @@
 
 " Default options, overrideable via second argument to functions
 let s:delay = 7000                        "Hide after this number of milliseconds
-let s:width = 40                          "Default notification width
+let s:width = g:db_ui_notification_width  "Default notification width
 let s:pos = 'bot'.g:db_ui_win_position     "Default position for notification
 let s:title = '[DBUI]'                    "Title of notification
 let s:last_msg = ''

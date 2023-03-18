@@ -3,6 +3,7 @@ if exists('g:loaded_dbui')
 endif
 let g:loaded_dbui = 1
 
+let g:db_ui_notification_width = get(g:, 'db_ui_notification_width', 40)
 let g:db_ui_winwidth = get(g:, 'db_ui_winwidth', 40)
 let g:db_ui_win_position = get(g:, 'db_ui_win_position', 'left')
 let g:db_ui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')

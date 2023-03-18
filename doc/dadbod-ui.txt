@@ -538,11 +538,17 @@ g:db_ui_dotenv_variable_prefix
 
 		Default value: `DB_UI_`
 
+					      *g:db_ui_notification_width*
+g:db_ui_notification_width
+		Number of columns used for default notification width.
+
+		Default value: `40`
+
 					      *g:db_ui_winwidth*
 g:db_ui_winwidth
 		Number of columns used for default DBUI drawer width.
 
-		Default value: `30`
+		Default value: `40`
 
 					      *g:db_ui_win_position*
 g:db_ui_win_position
