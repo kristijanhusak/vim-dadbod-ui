@@ -199,12 +199,14 @@ the connection you want to delete.
 <Plug>(DBUI_SelectLine)
 		This mapping is used for toggling and opening everything in
 		the DBUI drawer.
-		By default, mapped to `o`, `Enter` and `Double click`.
+
+		By default, mapped to `o`, `Enter` and `Double click` .
 
 					      *<Plug>(DBUI_SelectLineVsplit)*
 <Plug>(DBUI_SelectLineVsplit)
 		This mapping is used for opening all non-toggle items from
 		DBUI drawer in a vertical split.
+
 		By default, mapped to `S`.
 
 					      *<Plug>(DBUI_DeleteLine)*
@@ -215,6 +217,7 @@ the connection you want to delete.
 		2. Saved queries
 		3. Connections added via |DBUIAddConnection|
 		Confirm prompt is opened before deleting to avoid accidents.
+
 		By default, mapped to `d`.
 
 					      *<Plug>(DBUI_JumpToForeignKey)*
@@ -275,12 +278,13 @@ ic
 		To visually select it, do `vic`. Also supports custom
 		registers.
 
-		Mapped to `ic`
+		Mapped to `ic`.
 
 					      *<Plug>(DBUI_AddConnection)*
 <Plug>(DBUI_AddConnection)
 		This mapping is used adding a new connection. It is same as
 		executing |DBUIAddConnection| command.
+
 		By default, mapped to `A`.
 
 					      *<Plug>(DBUI_ToggleDetails)*
@@ -294,6 +298,7 @@ ic
 		    > dev (g:dbs)
 		    > production (file)
 <
+		By default, mapped to `H`.
 
 					      *<Plug>(DBUI_Redraw)*
 <Plug>(DBUI_Redraw)
@@ -301,7 +306,8 @@ ic
 		refresh the tables on all connections that were opened. This
 		is usually not needed, only when tables are
 		added/edited/deleted via query.
-		By default, mapped to `R`
+
+		By default, mapped to `R`.
 
 					      *<Plug>(DBUI_RenameLine)*
 <Plug>(DBUI_RenameLine)
@@ -309,7 +315,8 @@ ic
 		connection added via |DBUIAddConnection|. If it's a buffer,
 		it must be written (executed) at least once. Alternative is to
 		use |DBUIRenameBuffer| from the buffer.
-		By default, mapped to `r`
+
+		By default, mapped to `r`.
 
 					      *<Plug>(DBUI_SaveQuery)*
 <Plug>(DBUI_SaveQuery)
@@ -318,26 +325,29 @@ ic
 		written to temp folder by default. Once saved, it will be
 		available in the connection tree under `Saved queries` .
 
+		By default, mapped to `<Leader>W`.
+
 					      *<Plug>(DBUI_ExecuteQuery)*
 <Plug>(DBUI_ExecuteQuery)
 		Execute query in sql buffer. Supports normal and visual mode.
 		Normal mode executes all content in a file, where visual mode
 		executes only the selected content.
 
-		By default, mapped to `<Leader>S`
+		By default, mapped to `<Leader>S`.
 
 					      *<Plug>(DBUI_ToggleResultLayout)*
 <Plug>(DBUI_ToggleResultLayout)
 		Toggle expanded view in the results buffer (column and value
 		per line). Currently supported only for MySQL and PostgreSQL.
 
-		By default, mapped to `<Leader>R`
+		By default, mapped to `<Leader>R`.
 
 					      *<Plug>(DBUI_EditBindParameters)*
 <Plug>(DBUI_EditBindParameters)
 		This mapping is used in `sql` files to edit bind parameters if
 		there are any. See |vim-dadbod-ui-bind-parameters|.
-		By default, mapped to `<Leader>E`
+
+		By default, mapped to `<Leader>E`.
 
 					      *?*
 ?
@@ -348,38 +358,45 @@ ic
 					      *<Plug>(DBUI_Quit)*
 <Plug>(DBUI_Quit)
 		Mapping for closing the drawer.
+
 		By default, mapped to `q`.
 
 					      *<Plug>(DBUI_GotoFirstSibling)*
 <Plug>(DBUI_GotoFirstSibling)
 		Go to first sibling in current context.
+
 		By default, mapped to `<C-k>`.
 
 					      *<Plug>(DBUI_GotoLastSibling)*
 <Plug>(DBUI_GotoLastSibling)
 		Go to last sibling in current context.
+
 		By default, mapped to `<C-j>`.
 
 					      *<Plug>(DBUI_GotoPrevSibling)*
 <Plug>(DBUI_GotoPrevSibling)
 		Go to previous sibling in current context.
+
 		By default, mapped to `K`.
 
 					      *<Plug>(DBUI_GotoNextSibling)*
 <Plug>(DBUI_GotoNextSibling)
 		Go to previous sibling in current context.
+
 		By default, mapped to `J`.
 
 					      *<Plug>(DBUI_GotoParentNode)*
 <Plug>(DBUI_GotoParentNode)
 		Go to parent node from current context.
-		By default, mapped to `<c-p>`.
+
+		By default, mapped to `<C-p>`.
 
 					      *<Plug>(DBUI_GotoChildNode)*
 <Plug>(DBUI_GotoChildNode)
 		Go to child node from current context. It works only on
 		entries that can be toggled (dbs, schemas, tables, ...)
-		By default, mapped to `<c-n>`.
+
+		By default, mapped to `<C-n>`.
 
 ==============================================================================
 6. Table helpers				*vim-dadbod-ui-table-helpers*
