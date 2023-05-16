@@ -240,5 +240,4 @@ let g:db_ui_disable_mappings = 1
 
 ## TODO
 
-* [ ] Test on Windows
 * [ ] Test with more db types
