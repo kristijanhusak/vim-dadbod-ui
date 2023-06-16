@@ -119,7 +119,7 @@ let s:oracle_foreign_key_query = "
       \ AND U.common = 'NO'
       \ AND RFRING.column_name = '{col_name}'"
 let s:oracle_schemes_tables_query = "
-      \SELECT T.owner, T.table_name
+      \SELECT /*csv*/ T.owner, T.table_name
       \ FROM (
       \ SELECT owner, table_name
       \ FROM all_tables
