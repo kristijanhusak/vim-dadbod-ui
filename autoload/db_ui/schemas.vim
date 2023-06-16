@@ -1,5 +1,5 @@
 function! s:strip_quotes(results) abort 
-return split(substitute(join(a:results),'"','','g'))
+  return split(substitute(join(a:results),'"','','g'))
 endfunction
 
 function! s:results_parser(results, delimiter, min_len) abort
@@ -119,7 +119,7 @@ let s:oracle_foreign_key_query = "
       \ AND U.common = 'NO'
       \ AND RFRING.column_name = '{col_name}'"
 let s:oracle_schemes_tables_query = "
-      \SELECT /*csv*/ T.owner, T.table_name
+      \SELECT T.owner, T.table_name
       \ FROM (
       \ SELECT owner, table_name
       \ FROM all_tables
@@ -146,8 +146,8 @@ let s:oracle = {
       \ }
 
 if g:dbext_default_ORA_bin == 'sql'
-      let s:oracle.parse_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-5]), ',', min_len)}
-      let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-4]), ',', min_len)}
+  let s:oracle.parse_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-5]), ',', min_len)}
+  let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-4]), ',', min_len)}
 endif
 
 let s:schemas = {
