@@ -1,3 +1,7 @@
+function! s:strip_quotes(results) abort 
+  return split(substitute(join(a:results),'"','','g'))
+endfunction
+
 function! s:results_parser(results, delimiter, min_len) abort
   if a:min_len ==? 1
     return filter(a:results, '!empty(trim(v:val))')
@@ -106,7 +110,7 @@ let s:oracle_args = join(
       \    ";\n"
       \ ).';'
 let s:oracle_foreign_key_query = "
-      \SELECT DISTINCT RFRD.table_name, RFRD.column_name, RFRD.owner
+      \SELECT /*csv*/ DISTINCT RFRD.table_name, RFRD.column_name, RFRD.owner
       \ FROM all_cons_columns RFRD
       \ JOIN all_constraints CON ON RFRD.constraint_name = CON.r_constraint_name
       \ JOIN all_cons_columns RFRING ON CON.constraint_name = RFRING.constraint_name
@@ -115,7 +119,7 @@ let s:oracle_foreign_key_query = "
       \ AND U.common = 'NO'
       \ AND RFRING.column_name = '{col_name}'"
 let s:oracle_schemes_tables_query = "
-      \SELECT T.owner, T.table_name
+      \SELECT /*csv*/ T.owner, T.table_name
       \ FROM (
       \ SELECT owner, table_name
       \ FROM all_tables
@@ -135,11 +139,16 @@ let s:oracle = {
       \   'parse_virtual_results': {results, min_len -> s:results_parser(results[15:-4], '\s\s\+', min_len)},
       \   'requires_stdin': v:true,
       \   'quote': v:true,
-      \   'schemes_query': printf(s:oracle_args, "SELECT username FROM all_users WHERE common = 'NO' ORDER BY username"),
+      \   'schemes_query': printf(s:oracle_args, "SELECT /*csv*/ username FROM all_users WHERE common = 'NO' ORDER BY username"),
       \   'schemes_tables_query': printf(s:oracle_args, s:oracle_schemes_tables_query),
-      \   'select_foreign_key_query': printf(s:oracle_args, 'SELECT * FROM "%s"."%s" WHERE "%s" = %s'),
+      \   'select_foreign_key_query': printf(s:oracle_args, 'SELECT /*csv*/ * FROM "%s"."%s" WHERE "%s" = %s'),
       \   'filetype': 'plsql',
       \ }
+
+if g:dbext_default_ORA_bin == 'sql'
+  let s:oracle.parse_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-5]), ',', min_len)}
+  let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-4]), ',', min_len)}
+endif
 
 let s:schemas = {
       \ 'postgres': s:postgresql,
