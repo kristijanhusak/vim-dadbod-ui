@@ -1,4 +1,4 @@
-function! s:strip_quotes(results) abort 
+function! s:strip_quotes(results) abort
   return split(substitute(join(a:results),'"','','g'))
 endfunction
 
@@ -145,7 +145,7 @@ let s:oracle = {
       \   'filetype': 'plsql',
       \ }
 
-if g:dbext_default_ORA_bin == 'sql'
+if get(g:, 'dbext_default_ORA_bin') == 'sql'
   let s:oracle.parse_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-5]), ',', min_len)}
   let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-4]), ',', min_len)}
 endif
