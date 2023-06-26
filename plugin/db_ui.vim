@@ -5,6 +5,7 @@ let g:loaded_dbui = 1
 
 let g:db_ui_notification_width = get(g:, 'db_ui_notification_width', 40)
 let g:db_ui_winwidth = get(g:, 'db_ui_winwidth', 40)
+let g:db_ui_dbout_winheight = get(g:, 'db_ui_dbout_winheight', 20)
 let g:db_ui_win_position = get(g:, 'db_ui_win_position', 'left')
 let g:db_ui_default_query = get(g:, 'db_ui_default_query', 'SELECT * from "{table}" LIMIT 200;')
 let g:db_ui_save_location = get(g:, 'db_ui_save_location', '~/.local/share/db_ui')
@@ -112,6 +113,7 @@ augroup dbui
   autocmd BufReadPost *.dbout nested call db_ui#save_dbout(expand('<afile>'))
   autocmd FileType dbout setlocal foldmethod=expr foldexpr=db_ui#dbout#foldexpr(v:lnum) | normal!zo
   autocmd FileType dbout,dbui autocmd BufEnter,WinEnter <buffer> stopinsert
+  autocmd FileType dbout execute ':horizontal resize ' . g:db_ui_dbout_winheight
 augroup END
 
 command! DBUI call db_ui#open('<mods>')

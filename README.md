@@ -190,6 +190,14 @@ What should be the drawer width when opened. Default is `40`.
 let g:db_ui_winwidth = 30
 ```
 
+### Output height
+
+What should be the db output window height. Default is `20`.
+
+```vimL
+let g:db_ui_dbout_winheight = 40
+```
+
 ### Default query
 
 **DEPRECATED**: Use [Table helpers](#table-helpers) instead.
