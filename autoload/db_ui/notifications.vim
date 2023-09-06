@@ -166,32 +166,23 @@ function! s:setup_colors() abort
   let normal_bg = ''
   let warning_bg = synIDattr(hlID('WarningMsg'), 'bg')
   let warning_fg = synIDattr(hlID('WarningMsg'), 'fg')
-  if empty(warning_bg)
-    let warning_bg = warning_fg
-    let warning_fg = '#FFFFFF'
   endif
 
   let error_bg = synIDattr(hlID('Error'), 'bg')
   let error_fg = synIDattr(hlID('Error'), 'fg')
-  if empty(error_bg)
-    let error_bg = error_fg
-    let error_fg = '#FFFFFF'
   endif
 
   let normal_bg = synIDattr(hlID('Normal'), 'bg')
   let normal_fg = synIDattr(hlID('Normal'), 'fg')
-  if empty(normal_bg)
-    let normal_bg = normal_fg
-    let normal_fg = '#FFFFFF'
   endif
 
-  call s:set_hl('NotificationInfo', normal_bg, normal_fg)
+  call s:set_hl('NotificationInfo', normal_fg, normal_bg)
   call s:set_hl('NotificationError', error_fg, error_bg)
   call s:set_hl('NotificationWarning', warning_fg, warning_bg)
 
   call s:set_hl('EchoNotificationInfo', normal_fg, 'NONE')
-  call s:set_hl('EchoNotificationError', error_bg, 'NONE')
-  call s:set_hl('EchoNotificationWarning', warning_bg, 'NONE')
+  call s:set_hl('EchoNotificationError', error_fg, 'NONE')
+  call s:set_hl('EchoNotificationWarning', warning_fg, 'NONE')
 endfunction
 
 function! s:get_pos(pos, width) abort
