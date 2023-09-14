@@ -14,9 +14,7 @@ jobs:
         versions:
           - version: nightly
             neovim: false
-          - version: v8.2.0235
-            neovim: false
-          - version: v8.1.2424
+          - version: stable
             neovim: false
           - version: nightly
             neovim: true
