@@ -28,7 +28,7 @@ function! s:suite.should_show_help_text() abort
   call s:expect(getline(9)).to_equal('" r - Rename/Edit buffer/connection/saved query')
   call s:expect(getline(10)).to_equal('" q - Close drawer')
   call s:expect(getline(11)).to_equal('" <C-j>/<C-k> - Go to last/first sibling', 'noaction', 'help', '', '', 0)
-  call s:expect(getline(12)).to_equal('" J/K - Go to prev/next sibling', 'noaction', 'help', '', '', 0)
+  call s:expect(getline(12)).to_equal('" K/J - Go to prev/next sibling', 'noaction', 'help', '', '', 0)
   call s:expect(getline(13)).to_equal('" <C-p>/<C-n> - Go to parent/child node', 'noaction', 'help', '', '', 0)
   call s:expect(getline(14)).to_equal('" <Leader>W - (sql) Save currently opened query')
   call s:expect(getline(15)).to_equal('" <Leader>E - (sql) Edit bind parameters in opened query')
