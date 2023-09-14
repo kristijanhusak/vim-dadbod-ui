@@ -20,6 +20,7 @@ vim-dadbod-ui			    *vim-dadbod-ui*
 8. Settings				    |vim-dadbod-ui-settings|
 9. Functions				    |vim-dadbod-ui-functions|
 10. Autocommands 			    |vim-dadbod-ui-autocommands|
+11. Highlights 			            |vim-dadbod-ui-highlights|
 
 ==============================================================================
 1. Introduction					*vim-dadbod-ui-introduction*
@@ -827,7 +828,6 @@ db_ui#connections_list()
 		* is_connected - Is DBUI connected to this database
 
 ==============================================================================
-
 10. Autocommands				*vim-dadbod-ui-autocommands*
 
 					      *DBUIOpened*
@@ -838,5 +838,21 @@ DBUIOpened
 		do have something like this in your vimrc to load them:
 
 		`autocmd User DBUIOpened let b:dotenv = DotenvRead('.envrc') | norm R`
+
+==============================================================================
+11. Highlights					*vim-dadbod-ui-highlights*
+
+To customize the colors of the notifications, add these custom hl groups:
+* `NotificationInfo`
+* `NotificationWarning`
+* `NotificationError`
+
+For example, to use white text on blue(info) / yellow(warning) / red(error) background,
+add this to your vimrc/init.vim:
+>
+    hi NotificationInfo guifg=#FFFFFF guibg=#0000FF
+    hi NotificationWarning guifg=#FFFFFF guibg=#FFFF00
+    hi NotificationError guifg=#FFFFFF guibg=#FF0000
+<
 
 vim:tw=78:ts=8:ft=help:norl:noet:fen:noet:

@@ -10,6 +10,8 @@ let s:pos = 'bot'.g:db_ui_win_position     "Default position for notification
 let s:title = '[DBUI]'                    "Title of notification
 let s:last_msg = ''
 
+let s:colors_set = 0
+
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                  Public API, adapt names to your needs                      "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -44,6 +46,12 @@ function! s:notification(msg, opts) abort
   if empty(a:msg)
     return
   endif
+
+  if !s:colors_set
+    call s:setup_colors()
+    let s:colors_set = 1
+  endif
+
   let use_echo = get(a:opts, 'echo', 0)
   if !use_echo
     let use_echo = g:db_ui_force_echo_notifications
@@ -240,8 +248,6 @@ function! s:set_hl(name, fg, bg) abort
     silent! exe 'hi '.a:name.' guifg='.a:fg.' guibg='.a:bg
   endif
 endfunction
-
-call s:setup_colors()
 
 function! s:hide_notifications() abort
   if has('nvim')
