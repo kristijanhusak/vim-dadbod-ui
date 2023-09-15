@@ -9,8 +9,13 @@ let s:width = g:db_ui_notification_width  "Default notification width
 let s:pos = 'bot'.g:db_ui_win_position     "Default position for notification
 let s:title = '[DBUI]'                    "Title of notification
 let s:last_msg = ''
+let s:use_nvim_notify = g:db_ui_use_nvim_notify
 
 let s:colors_set = 0
+
+if s:use_nvim_notify && !has('nvim')
+  echoerr "Option db_ui_use_nvim_notify is supported only in neovim"
+endif
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "                  Public API, adapt names to your needs                      "
@@ -47,14 +52,18 @@ function! s:notification(msg, opts) abort
     return
   endif
 
-  if !s:colors_set
-    call s:setup_colors()
-    let s:colors_set = 1
-  endif
-
   let use_echo = get(a:opts, 'echo', 0)
   if !use_echo
     let use_echo = g:db_ui_force_echo_notifications
+  endif
+
+  if s:use_nvim_notify && !use_echo
+    return s:notification_nvim_notify(a:msg, a:opts)
+  endif
+
+  if !s:colors_set
+    call s:setup_colors()
+    let s:colors_set = 1
   endif
 
   if s:neovim_float && !use_echo
@@ -77,6 +86,16 @@ let s:hl_by_type = {
 function! s:nvim_close() abort
   silent! call nvim_win_close(s:win, v:true)
   silent! call timer_stop(s:timer)
+endfunction
+
+function! s:notification_nvim_notify(msg, opts) abort
+  let type = get(a:opts, 'type', 'info')
+  let title = get(a:opts, 'title', s:title)
+  let opts = { 'title': title }
+  if get(a:opts, 'delay')
+    let opts.timeout = { 'timeout': a:opts.delay }
+  endif
+  return luaeval('vim.notify(_A[1], _A[2], _A[3])', [a:msg, type, opts])
 endfunction
 
 function! s:notification_nvim(msg, opts) abort

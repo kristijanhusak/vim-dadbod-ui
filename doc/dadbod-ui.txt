@@ -109,6 +109,7 @@ DBUILastQueryInfo
 					      *DBUIHideNotifications*
 DBUIHideNotifications
 		Hide all floating notifications that are currently shown.
+		Does not work with `vim.notify` and `echo` mode
 
 		`:DBUIHideNotifications`
 
@@ -702,6 +703,12 @@ g:db_ui_debug
 g:db_ui_force_echo_notifications
 		Notifications are shown via popups when supported. To force
 		echoing messages to command line set this value to 1.
+
+		Default value: `0`
+
+					      *g:db_ui_use_nvim_notify*
+g:db_ui_use_nvim_notify
+		Use Neovim's `vim.notify` API for notifications.
 
 		Default value: `0`
 

@@ -237,7 +237,7 @@ function! s:query.print_query_time() abort
     return
   endif
   let self.last_query_time = split(reltimestr(reltime(self.last_query_start_time)))[0]
-  call db_ui#notifications#info('Executing query...Done after '.self.last_query_time.' sec.')
+  call db_ui#notifications#info('Done after '.self.last_query_time.' sec.')
 endfunction
 
 function! s:query.execute_lines(db, lines, is_visual_mode) abort

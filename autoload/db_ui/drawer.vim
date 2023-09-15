@@ -311,15 +311,15 @@ function! s:drawer.render(...) abort
 
   if get(opts, 'dbs', 0)
     let query_time = reltime()
-    call db_ui#notifications#info('Refreshing all databases...', { 'echo': 1 })
+    call db_ui#notifications#info('Refreshing all databases...')
     call self.dbui.populate_dbs()
     call db_ui#notifications#info('Refreshed all databases after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   endif
 
   if !empty(get(opts, 'db_key_name', ''))
-    let query_time = reltime()
     let db = self.dbui.dbs[opts.db_key_name]
-    call db_ui#notifications#info('Refreshing database '.db.name.'...', {'echo': 1 })
+    call db_ui#notifications#info('Refreshing database '.db.name.'...')
+    let query_time = reltime()
     let self.dbui.dbs[opts.db_key_name] = self.populate(db)
     call db_ui#notifications#info('Refreshed database '.db.name.' after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   endif
