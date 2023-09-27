@@ -43,20 +43,20 @@ endfunction
 
 function! s:connections.add_full_url() abort
   let url = ''
+  let url_resolved = ''
 
   try
-    let url = db#resolve(db_ui#utils#input('Enter connection url: ', url))
-    call db#url#parse(url)
+    let url = db_ui#utils#input('Enter connection url: ', url)
+    let url_resolved = db#resolve(url)
+    call db#url#parse(url_resolved)
   catch /.*/
     return db_ui#notifications#error(v:exception)
   endtry
-
   try
-    let name = self.enter_db_name(url)
+    let name = self.enter_db_name(url_resolved)
   catch /.*/
     return db_ui#notifications#error(v:exception)
   endtry
-
   return self.save(name, url)
 endfunction
 
@@ -78,8 +78,9 @@ function! s:connections.rename(db) abort
 
   let url = entry.url
   try
-    let url = db#resolve(db_ui#utils#input('Edit connection url for "'.entry.name.'": ', url))
-    call db#url#parse(url)
+    let url_new = db_ui#utils#input('Edit connection url for "'.entry.name.'": ', url)
+    let url_resolved = db#resolve(url_new)
+    call db#url#parse(url_new)
   catch /.*/
     return db_ui#notifications#error(v:exception)
   endtry
@@ -96,7 +97,7 @@ function! s:connections.rename(db) abort
   endtry
 
   call remove(connections, idx)
-  let connections = insert(connections, {'name': name, 'url': url }, idx)
+  let connections = insert(connections, {'name': name, 'url': url_new }, idx)
   return self.write(connections)
 endfunction
 

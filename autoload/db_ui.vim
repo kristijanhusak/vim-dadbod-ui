@@ -366,7 +366,7 @@ function! s:dbui.add_if_not_exists(name, url, source) abort
     return db_ui#notifications#warning(printf('Warning: Duplicate connection name "%s" in "%s" source. First one added has precedence.', a:name, a:source))
   endif
   return add(self.dbs_list, {
-        \ 'name': a:name, 'url': db#resolve(a:url), 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
+        \ 'name': a:name, 'url': a:url, 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
         \ })
 endfunction
 
