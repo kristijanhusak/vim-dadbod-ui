@@ -395,7 +395,6 @@ function! s:dbui.connect(db) abort
   endtry
 
   redraw!
-  echo ''
   let a:db.conn_tried = 1
   return a:db
 endfunction
