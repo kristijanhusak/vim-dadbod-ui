@@ -325,7 +325,6 @@ function! s:drawer.render(...) abort
   endif
 
   redraw!
-  echo ''
   let view = winsaveview()
   let self.content = []
 
