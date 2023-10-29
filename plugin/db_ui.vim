@@ -17,6 +17,7 @@ let g:db_ui_table_helpers = get(g:, 'db_ui_table_helpers', {})
 let g:db_ui_auto_execute_table_helpers = get(g:, 'db_ui_auto_execute_table_helpers', 0)
 let g:db_ui_show_help = get(g:, 'db_ui_show_help', 1)
 let g:db_ui_use_nerd_fonts = get(g:, 'db_ui_use_nerd_fonts', 0)
+let g:db_ui_expand_query_results = get(g:, 'db_ui_expand_query_results', 0)
 let g:db_ui_execute_on_save = get(g:, 'db_ui_execute_on_save', 1)
 let g:db_ui_force_echo_notifications = get(g:, 'db_ui_force_echo_notifications', 0)
 let g:db_ui_use_nvim_notify = get(g:, 'db_ui_use_nvim_notify', 0)
@@ -111,7 +112,9 @@ augroup dbui
   autocmd!
   autocmd BufRead,BufNewFile *.dbout set filetype=dbout
   autocmd BufReadPost *.dbout nested call db_ui#save_dbout(expand('<afile>'))
-  autocmd FileType dbout setlocal foldmethod=expr foldexpr=db_ui#dbout#foldexpr(v:lnum) | normal!zo
+  if !g:db_ui_expand_query_results
+    autocmd FileType dbout setlocal foldmethod=expr foldexpr=db_ui#dbout#foldexpr(v:lnum) | normal!zo
+  endif
   autocmd FileType dbout,dbui autocmd BufEnter,WinEnter <buffer> stopinsert
 augroup END
 

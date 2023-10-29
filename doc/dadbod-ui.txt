@@ -684,6 +684,13 @@ g:db_ui_use_nerd_fonts
 
 		Default value: `0`
 
+					      *g:db_ui_expand_query_results*
+g:db_ui_expand_query_results
+		Set this to `1` to automatically expand query results in the
+		dbout buffer.
+
+		Default value: `0`
+
 					      *g:db_ui_show_help*
 g:db_ui_show_help
 		When set to `0`, hides `Press ? for help` from the DBUI
