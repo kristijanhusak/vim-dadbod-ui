@@ -107,7 +107,6 @@ let s:cassandra = {
       \ 'parse_results': {results, min_len -> s:results_parser(results[3:-2], '|', min_len)},
       \ 'default_scheme': '',
       \ 'quote': 0,
-      \ 'filetype': 'cql',
       \ }
 
 let s:oracle_args = join(
