@@ -164,7 +164,7 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   endif
 
   if &filetype !=? a:db.filetype || !is_existing_buffer
-    silent! exe 'setlocal filetype='.a:db.filetype.' nolist noswapfile nowrap cursorline nospell modifiable'
+    silent! exe 'setlocal filetype='.a:db.filetype.' nolist noswapfile nowrap nospell modifiable'
   endif
   let is_sql = &filetype ==? a:db.filetype
   nnoremap <silent><buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
