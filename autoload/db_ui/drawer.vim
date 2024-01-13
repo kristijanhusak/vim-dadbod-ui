@@ -35,7 +35,7 @@ function! s:drawer.open(...) abort
     silent! exe 'vertical '.win_pos.' new dbui'
     silent! exe 'vertical '.win_pos.' resize '.g:db_ui_winwidth
   endif
-  setlocal filetype=dbui buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap cursorline nospell nomodifiable winfixwidth nonumber norelativenumber signcolumn=no
+  setlocal filetype=dbui buftype=nofile bufhidden=wipe nobuflisted nolist noswapfile nowrap nospell nomodifiable winfixwidth nonumber norelativenumber signcolumn=no
 
   call self.render()
   nnoremap <silent><buffer> <Plug>(DBUI_SelectLine) :call <sid>method('toggle_line', 'edit')<CR>
