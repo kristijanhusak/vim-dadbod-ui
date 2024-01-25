@@ -231,27 +231,21 @@ function! s:dbui.generate_new_db_entry(db) abort
   if empty(parsed_url)
     return parsed_url
   endif
-  let scheme = get(parsed_url, 'scheme', '')
   let db_name = substitute(get(parsed_url, 'path', ''), '^\/', '', '')
   let save_path = ''
   if !empty(self.save_path)
     let save_path = printf('%s/%s', self.save_path, a:db.name)
   endif
-  let scheme_info = db_ui#schemas#get(scheme)
   let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".a:db.name."-" || fnamemodify(v:val, ":t") =~? "^".a:db.name."-"')
-  let schema_support = !empty(get(scheme_info, 'schemes_query', 0))
-  if schema_support && tolower(scheme) ==? 'mysql' && parsed_url.path !=? '/'
-    let schema_support = 0
-  endif
-  let filetype = get(scheme_info, 'filetype', 'sql')
-  return {
+
+  let db = {
         \ 'url': a:db.url,
         \ 'conn': '',
         \ 'conn_error': '',
         \ 'conn_tried': 0,
         \ 'source': a:db.source,
-        \ 'scheme': scheme,
-        \ 'table_helpers': db_ui#table_helpers#get(scheme),
+        \ 'scheme': '',
+        \ 'table_helpers': {},
         \ 'expanded': 0,
         \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
         \ 'schemas': {'expanded': 0, 'items': {}, 'list': [] },
@@ -261,11 +255,14 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'db_name': !empty(db_name) ? db_name : a:db.name,
         \ 'name': a:db.name,
         \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
-        \ 'schema_support': schema_support,
-        \ 'quote': get(scheme_info, 'quote', 0),
-        \ 'default_scheme': get(scheme_info, 'default_scheme', ''),
-        \ 'filetype': filetype
+        \ 'schema_support': 0,
+        \ 'quote': 0,
+        \ 'default_scheme': '',
+        \ 'filetype': 'sql',
         \ }
+
+  call self.populate_schema_info(db)
+  return db
 endfunction
 
 function! s:dbui.populate_from_global_variable() abort
@@ -387,6 +384,7 @@ function! s:dbui.connect(db) abort
     call db_ui#notifications#info('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
     let a:db.conn_error = ''
+    call self.populate_schema_info(a:db)
     call db_ui#notifications#info('Connected to db '.a:db.name.' after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   catch /.*/
     let a:db.conn_error = v:exception
@@ -397,6 +395,24 @@ function! s:dbui.connect(db) abort
   redraw!
   let a:db.conn_tried = 1
   return a:db
+endfunction
+
+function! s:dbui.populate_schema_info(db) abort
+  let url = !empty(a:db.conn) ? a:db.conn : a:db.url
+  let parsed_url = self.parse_url(url)
+  let scheme = get(parsed_url, 'scheme', '')
+  let scheme_info = db_ui#schemas#get(scheme)
+  let schema_support = !empty(get(scheme_info, 'schemes_query', 0))
+  if schema_support && tolower(scheme) ==? 'mysql' && parsed_url.path !=? '/'
+    let schema_support = 0
+  endif
+
+  let a:db.scheme = scheme
+  let a:db.table_helpers = db_ui#table_helpers#get(scheme)
+  let a:db.schema_support = schema_support
+  let a:db.quote = get(scheme_info, 'quote', 0)
+  let a:db.default_scheme = get(scheme_info, 'default_scheme', '')
+  let a:db.filetype = get(scheme_info, 'filetype', 'sql')
 endfunction
 
 function! db_ui#reset_state() abort
