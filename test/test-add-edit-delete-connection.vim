@@ -46,8 +46,8 @@ function! s:suite.should_allow_renaming_connection() abort
   call s:expect(getline(1, '$')).to_equal(['▸ edited-name', '▸ connection-second-db'])
   let file = db_ui#utils#readfile(s:connections_file)
   call s:expect(file).to_equal([
-        \ {'url': db#resolve('sqlite:test/dadbod_ui_test_new.db'), 'name': 'edited-name'},
-        \ {'url': db#resolve('sqlite:test/dadbod_ui_test.db'), 'name': 'connection-second-db'}
+        \ {'url': db_ui#resolve('sqlite:test/dadbod_ui_test_new.db'), 'name': 'edited-name'},
+        \ {'url': db_ui#resolve('sqlite:test/dadbod_ui_test.db'), 'name': 'connection-second-db'}
         \ ])
 endfunction
 

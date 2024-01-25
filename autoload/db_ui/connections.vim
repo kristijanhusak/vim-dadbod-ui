@@ -37,7 +37,7 @@ function! s:connections.delete(db) abort
   endif
 
   let file = self.read()
-  call filter(file, {i, conn -> !(conn.name ==? a:db.name && db#resolve(conn.url) ==? db#resolve(a:db.url) )})
+  call filter(file, {i, conn -> !(conn.name ==? a:db.name && db_ui#resolve(conn.url) ==? db_ui#resolve(a:db.url) )})
   return self.write(file)
 endfunction
 
@@ -45,7 +45,7 @@ function! s:connections.add_full_url() abort
   let url = ''
 
   try
-    let url = db#resolve(db_ui#utils#input('Enter connection url: ', url))
+    let url = db_ui#resolve(db_ui#utils#input('Enter connection url: ', url))
     call db#url#parse(url)
   catch /.*/
     return db_ui#notifications#error(v:exception)
@@ -69,7 +69,7 @@ function! s:connections.rename(db) abort
   let idx = 0
   let entry = {}
   for conn in connections
-    if conn.name ==? a:db.name && db#resolve(conn.url) ==? a:db.url
+    if conn.name ==? a:db.name && db_ui#resolve(conn.url) ==? a:db.url
       let entry = conn
       break
     endif
@@ -78,7 +78,7 @@ function! s:connections.rename(db) abort
 
   let url = entry.url
   try
-    let url = db#resolve(db_ui#utils#input('Edit connection url for "'.entry.name.'": ', url))
+    let url = db_ui#resolve(db_ui#utils#input('Edit connection url for "'.entry.name.'": ', url))
     call db#url#parse(url)
   catch /.*/
     return db_ui#notifications#error(v:exception)

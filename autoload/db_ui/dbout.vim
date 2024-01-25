@@ -1,5 +1,5 @@
 function! db_ui#dbout#jump_to_foreign_table() abort
-  let db_url = db#resolve(b:db)
+  let db_url = db_ui#resolve(b:db)
   let parsed = db#url#parse(db_url)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
@@ -53,7 +53,7 @@ function! db_ui#dbout#foldexpr(lnum) abort
 endfunction
 
 function! db_ui#dbout#get_cell_value() abort
-  let parsed = db#url#parse(db#resolve(b:db))
+  let parsed = db#url#parse(db_ui#resolve(b:db))
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
     return db_ui#notifications#error('Yanking cell value not supported for '.parsed.scheme.' scheme.')
@@ -79,7 +79,7 @@ function! db_ui#dbout#get_cell_value() abort
 endfunction
 
 function! db_ui#dbout#toggle_layout() abort
-  let parsed = db#url#parse(db#resolve(b:db))
+  let parsed = db#url#parse(db_ui#resolve(b:db))
   let scheme = db_ui#schemas#get(parsed.scheme)
   if !has_key(scheme, 'layout_flag')
     return db_ui#notifications#error('Toggling layout not supported for '.parsed.scheme.' scheme.')
@@ -104,7 +104,7 @@ function! db_ui#dbout#toggle_layout() abort
 endfunction
 
 function! db_ui#dbout#yank_header() abort
-  let parsed = db#url#parse(db#resolve(b:db))
+  let parsed = db#url#parse(db_ui#resolve(b:db))
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
     return db_ui#notifications#error('Yanking headers not supported for '.parsed.scheme.' scheme.')

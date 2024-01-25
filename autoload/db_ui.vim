@@ -363,7 +363,7 @@ function! s:dbui.add_if_not_exists(name, url, source) abort
     return db_ui#notifications#warning(printf('Warning: Duplicate connection name "%s" in "%s" source. First one added has precedence.', a:name, a:source))
   endif
   return add(self.dbs_list, {
-        \ 'name': a:name, 'url': db#resolve(a:url), 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
+        \ 'name': a:name, 'url': db_ui#resolve(a:url), 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
         \ })
 endfunction
 
@@ -413,6 +413,21 @@ function! s:dbui.populate_schema_info(db) abort
   let a:db.quote = get(scheme_info, 'quote', 0)
   let a:db.default_scheme = get(scheme_info, 'default_scheme', '')
   let a:db.filetype = get(scheme_info, 'filetype', 'sql')
+endfunction
+
+" This function is used to skip resolving the url
+" added for ssh connections (https://github.com/pbogut/vim-dadbod-ssh)
+" Because resolving those url gets the underlying connection, which
+" we don't want to do.
+function db_ui#resolve(url) abort
+  let parsed_url = db#url#parse(a:url)
+  let ignored_resolve_schemes = ['ssh']
+
+  if index(ignored_resolve_schemes, get(parsed_url, 'scheme', '')) > -1
+    return a:url
+  endif
+
+  return db#resolve(a:url)
 endfunction
 
 function! db_ui#reset_state() abort
