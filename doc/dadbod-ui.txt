@@ -582,6 +582,14 @@ g:db_ui_disable_mappings
 
 		Default value: `0`
 
+					      *g:db_ui_bind_param_pattern*
+g:db_ui_bind_param_pattern
+		Change the regex pattern used to match bind params.
+		By default, it matches format `:variable_name`.
+		To use `$1`,`$2` format, you would set it to: `\$\d\+`
+
+		Default value: `:\w\+`
+
   					      *g:db_ui_show_database_icon*
 g:db_ui_show_database_icon
 		If this is set to 1, will add an icon on database name. Notice
