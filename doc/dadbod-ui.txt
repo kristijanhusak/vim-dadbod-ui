@@ -273,7 +273,7 @@ the connection you want to delete.
 
 		`:DB select * from Users where id = 1`
 
-					      *ic*
+					      *vim-dadbod-ic*
 ic
 		Operator pending mapping that works on cell value in results
 		buffer.  For example, to yank cell value under cursor, do `yic`.
