@@ -26,6 +26,7 @@ let s:postgres = {
 
 let s:sqlite = {
       \ 'List': g:db_ui_default_query,
+      \ 'Columns': "SELECT * FROM pragma_table_info('{table}')",
       \ 'Indexes': "SELECT * FROM pragma_index_list('{table}')",
       \ 'Foreign Keys': "SELECT * FROM pragma_foreign_key_list('{table}')",
       \ 'Primary Keys': "SELECT * FROM pragma_index_list('{table}') WHERE origin = 'pk'"
