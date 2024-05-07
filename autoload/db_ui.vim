@@ -135,7 +135,8 @@ function! db_ui#statusline(...)
     return ''
   end
   if &filetype ==? 'dbout'
-    let last_query_time = s:dbui_instance.drawer.get_query().last_query_time
+    let last_query_info = s:dbui_instance.drawer.get_query().get_last_query_info()
+    let last_query_time = last_query_info.last_query_time
     if !empty(last_query_time)
       return 'Last query time: '.last_query_time.' sec.'
     endif
