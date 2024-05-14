@@ -416,19 +416,16 @@ function! s:dbui.populate_schema_info(db) abort
   let a:db.filetype = get(scheme_info, 'filetype', 'sql')
 endfunction
 
-" This function is used to skip resolving the url
-" added for ssh connections (https://github.com/pbogut/vim-dadbod-ssh)
-" Because resolving those url gets the underlying connection, which
-" we don't want to do.
+" Resolve only urls for DBs that are files
 function db_ui#resolve(url) abort
   let parsed_url = db#url#parse(a:url)
-  let ignored_resolve_schemes = ['ssh']
+  let resolve_schemes = ['sqlite', 'jq', 'duckdb', 'osquery']
 
-  if index(ignored_resolve_schemes, get(parsed_url, 'scheme', '')) > -1
-    return a:url
+  if index(resolve_schemes, get(parsed_url, 'scheme', '')) > -1
+    return db#resolve(a:url)
   endif
 
-  return db#resolve(a:url)
+  return a:url
 endfunction
 
 function! db_ui#reset_state() abort
