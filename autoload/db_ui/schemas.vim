@@ -154,7 +154,9 @@ if !exists('g:db_adapter_bigquery_region')
   let g:db_adapter_bigquery_region = 'region-us'
 endif
 
-let s:bigquery_schemas_query = "SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA" 
+let s:bigquery_schemas_query = printf("
+      \ SELECT schema_name FROM `%s`.INFORMATION_SCHEMA.SCHEMATA
+      \ ", g:db_adapter_bigquery_region) 
 
 let s:bigquery_schema_tables_query = printf("
       \ SELECT table_schema, table_name
