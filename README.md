@@ -5,8 +5,14 @@ It allows simple navigation through databases and allows saving queries for late
 
 ![screenshot](https://i.imgur.com/fhGqC9U.png)
 
+
 With nerd fonts:
 ![with-nerd-fonts](https://i.imgur.com/aXI5BTG.png)
+
+
+Video presentation by TJ:
+
+[![Video presentation by TJ](https://i.ytimg.com/vi/ALGBuFLzDSA/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDmOFtUnDmQx5U_PKBqV819YujOBw)](https://www.youtube.com/watch?v=ALGBuFLzDSA)
 
 Tested on Linux, Mac and Windows, Vim 8.1+ and Neovim.
 
