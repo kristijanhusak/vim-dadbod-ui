@@ -145,7 +145,7 @@ let s:oracle = {
       \   'filetype': 'plsql',
       \ }
 
-if get(g:, 'dbext_default_ORA_bin') == 'sql'
+if get(g:, 'dbext_default_ORA_bin', '') == 'sql'
   let s:oracle.parse_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-5]), ',', min_len)}
   let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-4]), ',', min_len)}
 endif
@@ -156,7 +156,7 @@ endif
 
 let s:bigquery_schemas_query = printf("
       \ SELECT schema_name FROM `%s`.INFORMATION_SCHEMA.SCHEMATA
-      \ ", g:db_adapter_bigquery_region) 
+      \ ", g:db_adapter_bigquery_region)
 
 let s:bigquery_schema_tables_query = printf("
       \ SELECT table_schema, table_name
@@ -199,7 +199,7 @@ function! s:format_query(db, scheme, query) abort
   let conn = type(a:db) == v:t_string ? a:db : a:db.conn
   let callable = get(a:scheme, 'callable', 'interactive')
   let cmd = db#adapter#dispatch(conn, callable) + get(a:scheme, 'args', [])
-  if get(a:scheme, 'requires_stdin')
+  if get(a:scheme, 'requires_stdin', v:false)
     return [cmd, a:query]
   endif
   return [cmd + [a:query], '']
