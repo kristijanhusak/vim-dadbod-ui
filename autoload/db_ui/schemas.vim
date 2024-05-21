@@ -136,8 +136,8 @@ let s:oracle = {
       \   'default_scheme': '',
       \   'foreign_key_query': printf(s:oracle_args, s:oracle_foreign_key_query),
       \   'has_virtual_results': v:true,
-      \   'parse_results': {results, min_len -> s:results_parser(results[15:-5], '\s\s\+', min_len)},
-      \   'parse_virtual_results': {results, min_len -> s:results_parser(results[15:-4], '\s\s\+', min_len)},
+      \   'parse_results': {results, min_len -> s:results_parser(results[3:], '\s\s\+', min_len)},
+      \   'parse_virtual_results': {results, min_len -> s:results_parser(results[3:], '\s\s\+', min_len)},
       \   'requires_stdin': v:true,
       \   'quote': v:true,
       \   'schemes_query': printf(s:oracle_args, "SELECT /*csv*/ username FROM all_users WHERE common = 'NO' ORDER BY username"),
@@ -147,8 +147,8 @@ let s:oracle = {
       \ }
 
 if get(g:, 'dbext_default_ORA_bin', '') == 'sql'
-  let s:oracle.parse_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-5]), ',', min_len)}
-  let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[13:-4]), ',', min_len)}
+  let s:oracle.parse_results = {results, min_len -> s:results_parser(s:strip_quotes(results[3:]), ',', min_len)}
+  let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[3:]), ',', min_len)}
 endif
 
 if !exists('g:db_adapter_bigquery_region')
