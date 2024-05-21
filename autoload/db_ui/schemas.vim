@@ -136,7 +136,7 @@ let s:oracle = {
       \   'default_scheme': '',
       \   'foreign_key_query': printf(s:oracle_args, s:oracle_foreign_key_query),
       \   'has_virtual_results': v:true,
-      \   'parse_results': {results, min_len -> s:results_parser(results[15:-5], '\s\s\+', min_len)},
+      \   'parse_results': {results, min_len -> s:results_parser(results[3:], '\s\s\+', min_len)},
       \   'parse_virtual_results': {results, min_len -> s:results_parser(results[15:-4], '\s\s\+', min_len)},
       \   'requires_stdin': v:true,
       \   'quote': v:true,
