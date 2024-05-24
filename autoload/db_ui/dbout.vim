@@ -86,6 +86,20 @@ function! db_ui#dbout#toggle_layout() abort
   endif
   let content = join(readfile(b:db.input), "\n")
   let expanded_layout = get(b:, 'db_ui_expanded_layout', 0)
+  let layout_query = ''
+  let filetype = get(scheme, 'filetype', '')
+
+  if filetype == 'plsql'
+    let layout_query = get(scheme, 'layout_query')
+    " Extract SELECT statement from content (it gets only the first one)
+    let content = matchstr(content, '\vSELECT.{-};')
+    let content = substitute(content, ';\?$', ' '.scheme.layout_flag, '')
+    let content = substitute(content, '\n', ' ', 'g')
+    let content = substitute(content, "'", "''", "g")
+    let content = layout_query . "exec print_cols_as_rows('".content."');\nset feedback off;\ndrop procedure print_cols_as_rows;\n"
+  else
+    let content = substitute(content, ';\?$', ' '.scheme.layout_flag, '')
+  endif
 
   if expanded_layout
     let b:db_ui_expanded_layout = !expanded_layout
@@ -93,7 +107,6 @@ function! db_ui#dbout#toggle_layout() abort
     return
   endif
 
-  let content = substitute(content, ';\?$', ' '.scheme.layout_flag, '')
   let tmp = tempname()
   call writefile(split(content, "\n"), tmp)
   let old_db_input = b:db.input

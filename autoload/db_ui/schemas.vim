@@ -118,6 +118,51 @@ let s:oracle_foreign_key_query = "
       \ WHERE CON.constraint_type = 'R'
       \ AND U.common = 'NO'
       \ AND RFRING.column_name = '{col_name}'"
+let s:oracle_toggle_layout_query = "
+      \ set feedback off \n
+      \ create or replace procedure print_cols_as_rows( p_query in varchar2 )\n
+      \ AUTHID CURRENT_USER is\n
+      \   l_descriptionTable    dbms_sql.desc_tab;\n
+      \   l_execStatus          integer;\n
+      \   l_columnCount         integer;\n
+      \   l_rowCount            integer;\n
+      \   l_currentColumnLength integer;\n
+      \   l_maxColumnLength     integer := 0;\n
+      \   l_theCursor           integer default dbms_sql.open_cursor;\n
+      \   l_columnValue         varchar2(4000);\n
+      \   dash_line             varchar2(30) := rpad('-', 30, '-');
+      \ begin \n
+      \   dbms_sql.parse(l_theCursor, p_query, dbms_sql.native);\n
+      \   dbms_sql.describe_columns(l_theCursor, l_columnCount, l_descriptionTable);\n
+      \
+      \   for i in 1 .. l_columnCount loop\n
+      \     dbms_sql.define_column(l_theCursor, i, l_columnValue, 4000);\n
+      \     l_currentColumnLength := LENGTH(l_descriptionTable(i).col_name);\n
+      \     if l_currentColumnLength > l_maxColumnLength then\n
+      \        l_maxColumnLength := l_currentColumnLength;\n
+      \     end if;\n
+      \   end loop;\n
+      \
+      \   l_execStatus := dbms_sql.execute(l_theCursor);\n
+      \   l_rowCount := 0;\n
+      \   while ( dbms_sql.fetch_rows(l_theCursor) > 0 ) loop\n
+      \     l_rowCount := l_rowCount + 1;\n
+      \     dbms_output.put_line( dash_line || ' ' || l_rowCount || '. row ' || dash_line);\n
+      \     for i in 1 .. l_columnCount loop\n
+      \       dbms_sql.column_value(l_theCursor, i, l_columnValue );\n
+      \       dbms_output.put_line(rpad(l_descriptionTable(i).col_name,
+      \                                 l_maxColumnLength + 1)
+      \                            || ': ' || l_columnValue );\n
+      \     end loop;\n
+      \   end loop;\n
+      \   if l_rowCount = 0 then\n
+      \     dbms_output.put_line('no rows found');\n
+      \   end if;\n
+      \ end;\n
+      \ /\n
+      \
+      \ set feedback on \n
+      \ set serveroutput on \n"
 let s:oracle_schemes_tables_query = "
       \SELECT /*csv*/ T.owner, T.table_name
       \ FROM (
@@ -136,6 +181,8 @@ let s:oracle = {
       \   'default_scheme': '',
       \   'foreign_key_query': printf(s:oracle_args, s:oracle_foreign_key_query),
       \   'has_virtual_results': v:true,
+      \   'layout_flag': '',
+      \   'layout_query': s:oracle_toggle_layout_query,
       \   'parse_results': {results, min_len -> s:results_parser(results[3:], '\s\s\+', min_len)},
       \   'parse_virtual_results': {results, min_len -> s:results_parser(results[3:], '\s\s\+', min_len)},
       \   'requires_stdin': v:true,
