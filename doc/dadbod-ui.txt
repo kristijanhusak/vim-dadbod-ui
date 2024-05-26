@@ -714,6 +714,13 @@ g:db_ui_force_echo_notifications
 
 		Default value: `0`
 
+					     *g:db_ui_use_postgres_views*
+g:db_ui_use_postgres_views
+    Toggle showing postgres views in the drawer.
+    This option must be disabled (set to 0) for Redshift.
+
+    Default value: 1
+
 					      *g:db_ui_use_nvim_notify*
 g:db_ui_use_nvim_notify
 		Use Neovim's `vim.notify` API for notifications.
