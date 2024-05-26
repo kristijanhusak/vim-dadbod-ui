@@ -714,8 +714,7 @@ g:db_ui_force_echo_notifications
 
 		Default value: `0`
 
-					     g:db_ui_use_postgres_views
-
+					     *g:db_ui_use_postgres_views*
 g:db_ui_use_postgres_views
     Postgres database shows tables within schemas nicely. To show
     tables nicely within Redshift set this value to 0.
