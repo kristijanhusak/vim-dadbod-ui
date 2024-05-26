@@ -15,14 +15,26 @@ let s:bigquery = {
       \ }
 
 
-let s:postgres = {
-      \ 'List': 'select * from {optional_schema}"{table}" LIMIT 200',
-      \ 'Columns': "select * from information_schema.columns where table_name='{table}' and table_schema='{schema}'",
-      \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}' and schemaname='{schema}'",
-      \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
-      \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'\nand tc.table_schema = '{schema}'",
-      \ 'Primary Keys': s:basic_constraint_query."WHERE constraint_type = 'PRIMARY KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
-      \ }
+if !empty(g:db_ui_use_redshift)
+  let postgres = {
+        \ 'List': 'select * from {optional_schema}"{table}" LIMIT 200',
+        \ 'Columns': "SELECT column_name from information_schema.columns WHERE table_name='{table}' AND table_schema='{schema}'",
+        \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}' and schemaname='{schema}'",
+        \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
+        \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'\nand tc.table_schema = '{schema}'",
+        \ 'Primary Keys': s:basic_constraint_query."WHERE constraint_type = 'PRIMARY KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
+        \ }
+else
+  let postgres = {
+        \ 'List': 'select * from {optional_schema}"{table}" LIMIT 200',
+        \ 'Columns': "select * from information_schema.columns where table_name='{table}' and table_schema='{schema}'",
+        \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}' and schemaname='{schema}'",
+        \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
+        \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'\nand tc.table_schema = '{schema}'",
+        \ 'Primary Keys': s:basic_constraint_query."WHERE constraint_type = 'PRIMARY KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
+        \ }
+endif
+let s:postgres = postgres
 
 let s:sqlite = {
       \ 'List': g:db_ui_default_query,
