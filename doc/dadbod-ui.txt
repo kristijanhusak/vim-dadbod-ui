@@ -716,8 +716,8 @@ g:db_ui_force_echo_notifications
 
 					     *g:db_ui_use_postgres_views*
 g:db_ui_use_postgres_views
-    Postgres database shows tables within schemas nicely. To show
-    tables nicely within Redshift set this value to 0.
+    Toggle showing postgres views in the drawer.
+    This option must be disabled (set to 0) for Redshift.
 
     Default value: 1
 
