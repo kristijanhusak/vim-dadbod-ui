@@ -15,7 +15,7 @@ let s:bigquery = {
       \ }
 
 
-let postgres = {
+let s:postgres = {
       \ 'List': 'select * from {optional_schema}"{table}" LIMIT 200',
       \ 'Columns': "select * from information_schema.columns where table_name='{table}' and table_schema='{schema}'",
       \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}' and schemaname='{schema}'",
