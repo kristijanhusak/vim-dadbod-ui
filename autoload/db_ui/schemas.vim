@@ -34,7 +34,7 @@ let s:postgres_list_schema_query = "
     \   and pg_catalog.has_schema_privilege(current_user, nspname, 'USAGE')
     \ order by nspname"
 
-if !empty(g:db_ui_use_redshift)
+if empty(g:db_ui_use_postgres_views)
   let postgres_tables_and_views = "
         \ SELECT table_schema, table_name FROM information_schema.tables ;"
 else
