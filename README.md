@@ -265,12 +265,12 @@ If you don't want any mappings to be added, add this to vimrc:
 let g:db_ui_disable_mappings = 1
 ```
 
-## Use redshift database
+## View tables with redshift instead of postgres
 Amazon Redshift is a modified version of postgres.
 They both work with vim-dadbod-ui in a very similar way but there are subtle differences.
 If you need to use redshift, add this to vimrc:
 ```vimL
-let g:db_ui_use_redshift = 1
+let g:db_ui_use_postgres_views = 0
 ```
 
 ## TODO
