@@ -3,6 +3,7 @@ if exists('g:loaded_dbui')
 endif
 let g:loaded_dbui = 1
 
+let g:db_ui_query_execute_full_minutes_and_seconds = get(g:, 'db_ui_query_execute_full_minutes_and_seconds', 0)
 let g:db_ui_use_postgres_views = get(g:, 'db_ui_use_postgres_views', 1)
 let g:db_ui_notification_width = get(g:, 'db_ui_notification_width', 40)
 let g:db_ui_winwidth = get(g:, 'db_ui_winwidth', 40)
