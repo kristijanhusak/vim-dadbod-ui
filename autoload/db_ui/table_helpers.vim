@@ -14,6 +14,7 @@ let s:bigquery = {
       \ 'Columns': "select * from {schema}.INFORMATION_SCHEMA.COLUMNS where table_name='{table}'",
       \ }
 
+
 let postgres = {
       \ 'List': 'select * from {optional_schema}"{table}" LIMIT 200',
       \ 'Columns': "select * from information_schema.columns where table_name='{table}' and table_schema='{schema}'",
