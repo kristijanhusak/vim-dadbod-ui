@@ -721,6 +721,13 @@ g:db_ui_use_postgres_views
 
     Default value: 1
 
+					     *g:db_ui_query_execute_full_minutes_and_seconds*
+g:db_ui_query_execute_full_minutes_and_seconds
+    By default query run time is shown in seconds only.
+    To show full minutes and seconds on query execute set this value to 1.
+
+    Default value: 0
+
 					      *g:db_ui_use_nvim_notify*
 g:db_ui_use_nvim_notify
 		Use Neovim's `vim.notify` API for notifications.
