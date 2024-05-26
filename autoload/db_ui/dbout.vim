@@ -1,5 +1,5 @@
 function! db_ui#dbout#jump_to_foreign_table() abort
-  let db_url = db_ui#resolve(b:db)
+  let db_url = b:db.db_url
   let parsed = db#url#parse(db_url)
   let scheme = db_ui#schemas#get(parsed.scheme)
   if empty(scheme)
