@@ -229,36 +229,8 @@ function! s:progress_tick(progress, timer) abort
   if a:progress.icon_counter > 3
     let a:progress.icon_counter = 0
   endif
-  if !empty(g:db_ui_use_full_minutes_and_seconds)
-    let secs = a:progress.counter * 0.001
-    let minutes = string(floor(secs / 60))
-    let formattedminutes = substitute(minutes, '\.0$', '', '')
-    let seconds = string(((fmod(secs / 60, 1) * 60) / 100) * 100)
-    if formattedminutes > 0
-      if formattedminutes < 2
-        if seconds < 10
-          let content = ' '.s:progress_icons[a:progress.icon_counter].' Execute query ---- '.formattedminutes.' minute '.seconds.' seconds '
-        else
-          let content = ' '.s:progress_icons[a:progress.icon_counter].' Execute query --- '.formattedminutes.' minute '.seconds.' seconds '
-        endif
-      else
-        if seconds < 10
-          let content = ' '.s:progress_icons[a:progress.icon_counter].' Execute query --- '.formattedminutes.' minutes '.seconds.' seconds '
-        else
-          let content = ' '.s:progress_icons[a:progress.icon_counter].' Execute query -- '.formattedminutes.' minutes '.seconds.' seconds '
-        endif
-      endif
-    else
-      if seconds < 10
-        let content = ' '.s:progress_icons[a:progress.icon_counter].' Execute query ------------- '.seconds.' seconds'
-      else
-        let content = ' '.s:progress_icons[a:progress.icon_counter].' Execute query ------------ '.seconds.' seconds'
-      endif
-    endif
-  else
-    let secs = string(a:progress.counter * 0.001).'s'
-    let content = ' '.s:progress_icons[a:progress.icon_counter].' Execute query - '.secs
-  endif
+  let secs = string(a:progress.counter * 0.001).'s'
+  let content = ' '.s:progress_icons[a:progress.icon_counter].' Execute query - '.secs
   if has('nvim')
     call nvim_buf_set_lines(a:progress.buf, 0, -1, v:false, [content])
   else
@@ -269,17 +241,10 @@ endfunction
 
 function! s:progress_winpos(win)
   let pos = win_screenpos(a:win)
-  if !empty(g:db_ui_use_full_minutes_and_seconds)
-    return [
-          \ pos[0] + (winheight(a:win) / 2),
-          \ pos[1] + (winwidth(a:win) / 2) - (winwidth(a:win) / 5),
-          \ ]
-  else
-    return [
-          \ pos[0] + (winheight(a:win) / 2),
-          \ pos[1] + (winwidth(a:win) / 2) - 12,
-          \ ]
-  endif
+  return [
+        \ pos[0] + (winheight(a:win) / 2),
+        \ pos[1] + (winwidth(a:win) / 2) - 12,
+        \ ]
 endfunction
 
 function! s:progress_hide(...) abort
@@ -316,33 +281,17 @@ function! s:progress_show_neovim(path) abort
   let progress = copy(s:progress)
   let progress.outwin = outwin
   let progress.buf = nvim_create_buf(v:false, v:true)
-  if !empty(g:db_ui_use_full_minutes_and_seconds)
-    call nvim_buf_set_lines(progress.buf, 0, -1, v:false, ['| Execute query --- 0 minutes 0 seconds'])
-  else
-    call nvim_buf_set_lines(progress.buf, 0, -1, v:false, ['| Execute query - 0.0s'])
-  endif
+  call nvim_buf_set_lines(progress.buf, 0, -1, v:false, ['| Execute query - 0.0s'])
   let [row, col] = s:progress_winpos(outwin)
-  if !empty(g:db_ui_use_full_minutes_and_seconds)
-    let opts = {
-          \ 'relative': 'editor',
-          \ 'width': 43,
-          \ 'height': 1,
-          \ 'row': row - 2,
-          \ 'col': col,
-          \ 'focusable': v:false,
-          \ 'style': 'minimal'
-          \ }
-  else
-    let opts = {
-          \ 'relative': 'editor',
-          \ 'width': 24,
-          \ 'height': 1,
-          \ 'row': row - 2,
-          \ 'col': col,
-          \ 'focusable': v:false,
-          \ 'style': 'minimal'
-          \ }
-  endif
+  let opts = {
+        \ 'relative': 'editor',
+        \ 'width': 24,
+        \ 'height': 1,
+        \ 'row': row - 2,
+        \ 'col': col,
+        \ 'focusable': v:false,
+        \ 'style': 'minimal'
+        \ }
   if has('nvim-0.5')
     let opts.border = 'rounded'
   endif
@@ -382,11 +331,13 @@ endfunction
 
 
 if exists('*nvim_open_win') || exists('*popup_create')
-  augroup dbui_async_queries_dbout
-    autocmd!
-    autocmd User DBQueryPre call s:progress_show()
-    autocmd User DBQueryPost call s:progress_hide()
-    autocmd User *DBExecutePre call s:progress_show(expand('<amatch>:h'))
-    autocmd User *DBExecutePost call s:progress_hide(expand('<amatch>:h'))
-  augroup END
+  if empty(g:db_ui_disable_progress_bar)
+    augroup dbui_async_queries_dbout
+      autocmd!
+      autocmd User DBQueryPre call s:progress_show()
+      autocmd User DBQueryPost call s:progress_hide()
+      autocmd User *DBExecutePre call s:progress_show(expand('<amatch>:h'))
+      autocmd User *DBExecutePost call s:progress_hide(expand('<amatch>:h'))
+    augroup END
+  endif
 endif

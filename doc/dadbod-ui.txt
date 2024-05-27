@@ -721,10 +721,11 @@ g:db_ui_use_postgres_views
 
     Default value: 1
 
-					     *g:db_ui_query_execute_full_minutes_and_seconds*
-g:db_ui_query_execute_full_minutes_and_seconds
-    By default query run time is shown in seconds only.
-    To show full minutes and seconds on query execute set this value to 1.
+					     *g:db_ui_disable_progress_bar*
+g:db_ui_disable_progress_bar
+    Toggle query execution progress bar.
+    This option is available to prevent conflict with a custom progress bar
+    or if you want to disable the progress entirely set to 1.
 
     Default value: 0
 
