@@ -273,6 +273,14 @@ This option must be disabled (set to 0) for Redshift.
 let g:db_ui_use_postgres_views = 0
 ```
 
+## Disable builtin progress bar
+If you want to utilize *DBExecutePre or *DBExecutePost to make your own progress bar
+or if you want to disable the progress entirely set to 1.
+
+```vimL
+let g:db_ui_disable_progress_bar = 1
+```
+
 ## TODO
 
 * [ ] Test with more db types

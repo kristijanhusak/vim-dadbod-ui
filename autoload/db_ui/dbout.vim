@@ -332,11 +332,13 @@ endfunction
 
 
 if exists('*nvim_open_win') || exists('*popup_create')
-  augroup dbui_async_queries_dbout
-    autocmd!
-    autocmd User DBQueryPre call s:progress_show()
-    autocmd User DBQueryPost call s:progress_hide()
-    autocmd User *DBExecutePre call s:progress_show(expand('<amatch>:h'))
-    autocmd User *DBExecutePost call s:progress_hide(expand('<amatch>:h'))
-  augroup END
+  if empty(g:db_ui_disable_progress_bar)
+    augroup dbui_async_queries_dbout
+      autocmd!
+      autocmd User DBQueryPre call s:progress_show()
+      autocmd User DBQueryPost call s:progress_hide()
+      autocmd User *DBExecutePre call s:progress_show(expand('<amatch>:h'))
+      autocmd User *DBExecutePost call s:progress_hide(expand('<amatch>:h'))
+    augroup END
+  endif
 endif
