@@ -273,11 +273,12 @@ This option must be disabled (set to 0) for Redshift.
 let g:db_ui_use_postgres_views = 0
 ```
 
-## Show full minutes and seconds when query executes
-If you want to see full minutes and seconds for query run time, add this to vimrc:
+## Disable builtin progress bar
+If you want to utilize *DBExecutePre or *DBExecutePost to make your own progress bar
+or if you want to disable the progress entirely set to 1.
 
 ```vimL
-let g:db_ui_query_execute_full_minutes_and_seconds = 1
+let g:db_ui_disable_progress_bar = 1
 ```
 
 ## TODO
