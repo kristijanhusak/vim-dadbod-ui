@@ -292,6 +292,7 @@ function! s:progress_show_neovim(path) abort
         \ 'focusable': v:false,
         \ 'style': 'minimal'
         \ }
+
   if has('nvim-0.5')
     let opts.border = 'rounded'
   endif
