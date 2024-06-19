@@ -187,6 +187,7 @@ let s:schemas = {
       \ 'postgresql': s:postgresql,
       \ 'sqlserver': s:sqlserver,
       \ 'mysql': s:mysql,
+      \ 'mariadb': s:mysql,
       \ 'oracle': s:oracle,
       \ 'bigquery': s:bigquery,
       \ }
