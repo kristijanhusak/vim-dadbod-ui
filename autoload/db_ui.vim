@@ -403,14 +403,9 @@ function! s:dbui.populate_schema_info(db) abort
   let parsed_url = self.parse_url(url)
   let scheme = get(parsed_url, 'scheme', '')
   let scheme_info = db_ui#schemas#get(scheme)
-  let schema_support = !empty(get(scheme_info, 'schemes_query', 0))
-  if schema_support && tolower(scheme) ==? 'mysql' && parsed_url.path !=? '/'
-    let schema_support = 0
-  endif
-
   let a:db.scheme = scheme
   let a:db.table_helpers = db_ui#table_helpers#get(scheme)
-  let a:db.schema_support = schema_support
+  let a:db.schema_support = db_ui#schemas#supports_schemes(scheme_info, parsed_url)
   let a:db.quote = get(scheme_info, 'quote', 0)
   let a:db.default_scheme = get(scheme_info, 'default_scheme', '')
   let a:db.filetype = get(scheme_info, 'filetype', 'sql')

@@ -218,3 +218,18 @@ function! db_ui#schemas#query(db, scheme, query) abort
   let result = call('db#systemlist', s:format_query(a:db, a:scheme, a:query))
   return map(result, {_, val -> substitute(val, "\r$", "", "")})
 endfunction
+
+function db_ui#schemas#supports_schemes(scheme, parsed_url)
+  let schema_support = !empty(get(a:scheme, 'schemes_query', 0))
+  if empty(schema_support)
+    return 0
+  endif
+  let scheme_name = tolower(get(a:parsed_url, 'scheme', ''))
+  " Mysql and MariaDB should not show schemas if the path (database name) is
+  " defined
+  if (scheme_name ==? 'mysql' || scheme_name ==? 'mariadb') && a:parsed_url.path !=? '/'
+    return 0
+  endif
+
+  return 1
+endfunction

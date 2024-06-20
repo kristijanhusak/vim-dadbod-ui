@@ -186,6 +186,7 @@ let s:helpers = {
       \ 'bigquery': s:bigquery,
       \ 'postgresql': s:postgres,
       \ 'mysql': s:mysql,
+      \ 'mariadb': s:mysql,
       \ 'oracle': s:oracle,
       \ 'sqlite': s:sqlite,
       \ 'sqlserver': s:sqlserver,
