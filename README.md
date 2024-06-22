@@ -67,7 +67,7 @@ return {
 ```
 
 After installation, run `:DBUI`, which should open up a drawer with all databases provided.
-When you finish writing your query, just write the file (`:w`) and it will automatically execute the query for that database and it will automatically execute the query for selected database.
+When you finish writing your query, just write the file (`:w`) and it will automatically execute the query for that database.
 
 ## Databases
 There are 3 ways to provide database connections to UI:
