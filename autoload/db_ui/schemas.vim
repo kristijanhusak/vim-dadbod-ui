@@ -116,16 +116,37 @@ let s:oracle_args = join(
       \    ],
       \    ";\n"
       \ ).';'
-let s:oracle_foreign_key_query = "
+
+function! s:get_oracle_queries()
+  let common_condition = ""
+  let legacy = 0
+
+  if exists('g:is_oracle_legacy')
+    let legacy = g:is_oracle_legacy
+  endif
+
+  if !legacy
+    let common_condition = "AND U.common = 'NO'"
+  endif
+
+  let foreign_key_query = "
       \SELECT /*csv*/ DISTINCT RFRD.table_name, RFRD.column_name, RFRD.owner
       \ FROM all_cons_columns RFRD
       \ JOIN all_constraints CON ON RFRD.constraint_name = CON.r_constraint_name
       \ JOIN all_cons_columns RFRING ON CON.constraint_name = RFRING.constraint_name
       \ JOIN all_users U ON CON.owner = U.username
       \ WHERE CON.constraint_type = 'R'
-      \ AND U.common = 'NO'
+      \ " . common_condition . "
       \ AND RFRING.column_name = '{col_name}'"
-let s:oracle_schemes_tables_query = "
+
+  let schemes_query = "
+      \SELECT /*csv*/ username
+      \ FROM all_users U
+      \ WHERE 1 = 1 
+      \ " . common_condition . "
+      \ ORDER BY username"
+
+  let schemes_tables_query = "
       \SELECT /*csv*/ T.owner, T.table_name
       \ FROM (
       \ SELECT owner, table_name
@@ -134,21 +155,32 @@ let s:oracle_schemes_tables_query = "
       \ FROM all_views
       \ ) T
       \ JOIN all_users U ON T.owner = U.username
-      \ WHERE U.common = 'NO'
+      \ WHERE 1 = 1
+      \ " . common_condition . "
       \ ORDER BY T.table_name"
+
+  return {
+      \ 'foreign_key_query': printf(s:oracle_args, foreign_key_query),
+      \ 'schemes_query': printf(s:oracle_args, schemes_query),
+      \ 'schemes_tables_query': printf(s:oracle_args, schemes_tables_query),
+      \ }
+endfunction
+
+let oracle_queries = s:get_oracle_queries()
+
 let s:oracle = {
       \   'callable': 'filter',
       \   'cell_line_number': 1,
       \   'cell_line_pattern': '^-\+\( \+-\+\)*',
       \   'default_scheme': '',
-      \   'foreign_key_query': printf(s:oracle_args, s:oracle_foreign_key_query),
+      \   'foreign_key_query': oracle_queries.foreign_key_query,
       \   'has_virtual_results': v:true,
       \   'parse_results': {results, min_len -> s:results_parser(results[3:], '\s\s\+', min_len)},
       \   'parse_virtual_results': {results, min_len -> s:results_parser(results[3:], '\s\s\+', min_len)},
       \   'requires_stdin': v:true,
       \   'quote': v:true,
-      \   'schemes_query': printf(s:oracle_args, "SELECT /*csv*/ username FROM all_users WHERE common = 'NO' ORDER BY username"),
-      \   'schemes_tables_query': printf(s:oracle_args, s:oracle_schemes_tables_query),
+      \   'schemes_query': oracle_queries.schemes_query,
+      \   'schemes_tables_query': oracle_queries.schemes_tables_query,
       \   'select_foreign_key_query': printf(s:oracle_args, 'SELECT /*csv*/ * FROM "%s"."%s" WHERE "%s" = %s'),
       \   'filetype': 'plsql',
       \ }
