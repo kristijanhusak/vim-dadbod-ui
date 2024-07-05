@@ -569,6 +569,14 @@ g:db_ui_winwidth
 
 		Default value: `40`
 
+					      *g:db_ui_show_size*
+g:db_ui_show_size
+		Displays table total relation size in the drawer.
+		Currently is supported by postgres and mssql.
+
+		Default value: `0`
+
+
 					      *g:db_ui_win_position*
 g:db_ui_win_position
 		On which side of the screen should DBUI drawer open.
