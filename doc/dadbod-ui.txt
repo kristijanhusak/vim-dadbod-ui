@@ -571,8 +571,8 @@ g:db_ui_winwidth
 
 					      *g:db_ui_show_size*
 g:db_ui_show_size
-		Displays table total relation size in the drawer.
-		Currently is supported by postgres and mssql.
+		Toggle display of total table relation size in the drawer.
+		Currently supports postgres and mssql.
 
 		Default value: `0`
 
