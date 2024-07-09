@@ -135,6 +135,26 @@ let g:dbs = [
 \ { 'name': 'production', 'url': function('s:resolve_production_url') },
 \ ]
 ```
+
+In case you use Neovim, here's an example with Lua:
+
+```lua
+  vim.g.dbs = {
+    {
+      { name = 'dev', url = 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
+      { name = 'staging', url = 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
+      { name = 'wp', url = 'mysql://root@localhost/wp_awesome' },
+      {
+        name = 'production',
+        url = function()
+          return vim.fn.system('get-prod-url')
+        end
+      },
+    }
+  }
+```
+
+
 Just make sure to **NOT COMMIT** these. I suggest using project local vim config (`:help exrc`)
 
 #### Via :DBUIAddConnection command

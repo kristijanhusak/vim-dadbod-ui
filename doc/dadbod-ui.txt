@@ -191,10 +191,10 @@ If you use Neovim, you can also use lua to define the connections:
       { name = 'staging', url = 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
       { name = 'wp', url = 'mysql://root@localhost/wp_awesome' },
       {
-	name = 'production',
-	url = function()
-	  return vim.fn.system('get-prod-url')
-	end
+        name = 'production',
+        url = function()
+          return vim.fn.system('get-prod-url')
+        end
       },
     }
   }
