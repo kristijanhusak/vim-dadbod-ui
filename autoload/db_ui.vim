@@ -266,10 +266,29 @@ function! s:dbui.generate_new_db_entry(db) abort
   return db
 endfunction
 
+function! s:dbui.resolve_url_global_variable(Value) abort
+  if type(a:Value) ==? type('')
+    return a:Value
+  endif
+
+  if type(a:Value) ==? type(function('tr'))
+    return call(a:Value, [])
+  endif
+
+  " if type(a:Value) ==? type(v:t_func)
+  " endif
+  "
+  " echom string(type(a:Value))
+  " echom string(a:Value)
+  "
+  throw 'Invalid type global variable database url:'..type(a:Value)
+endfunction
+
 function! s:dbui.populate_from_global_variable() abort
   if exists('g:db') && !empty(g:db)
-    let gdb_name = split(g:db, '/')[-1]
-    call self.add_if_not_exists(gdb_name, g:db, 'g:dbs')
+    let url = self.resolve_url_global_variable(g:db)
+    let gdb_name = split(url, '/')[-1]
+    call self.add_if_not_exists(gdb_name, url, 'g:dbs')
   endif
 
   if !exists('g:dbs') || empty(g:dbs)
@@ -277,14 +296,14 @@ function! s:dbui.populate_from_global_variable() abort
   endif
 
   if type(g:dbs) ==? type({})
-    for [db_name, db_url] in items(g:dbs)
-      call self.add_if_not_exists(db_name, db_url, 'g:dbs')
+    for [db_name, Db_url] in items(g:dbs)
+      call self.add_if_not_exists(db_name, self.resolve_url_global_variable(Db_url), 'g:dbs')
     endfor
     return self
   endif
 
   for db in g:dbs
-    call self.add_if_not_exists(db.name, db.url, 'g:dbs')
+    call self.add_if_not_exists(db.name, self.resolve_url_global_variable(db.url), 'g:dbs')
   endfor
 
   return self

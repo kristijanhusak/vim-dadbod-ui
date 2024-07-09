@@ -162,10 +162,15 @@ vim-dadbod `g:db` variable is read first.
 
 Object example:
 >
+  function s:resolve_production_url()
+    return system('get-prod-url')
+  end
+
   let g:dbs = {
   \ 'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db',
   \ 'staging': 'postgres://postgres:mypassword@localhost:5432/my-staging-db',
   \ 'wp': 'mysql://root@localhost/wp_awesome',
+  \ 'production': function('s:resolve_production_url')
   \ }
 <
 Array of objects example:
@@ -174,8 +179,28 @@ Array of objects example:
   \ { 'name': 'dev', 'url': 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
   \ { 'name': 'staging', 'url': 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
   \ { 'name': 'wp', 'url': 'mysql://root@localhost/wp_awesome' },
+  \ { 'name': 'production', 'url': function('s:resolve_production_url') },
   \ ]
 <
+
+If you use Neovim, you can also use lua to define the connections:
+>
+  vim.g.dbs = {
+    {
+      { name = 'dev', url = 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
+      { name = 'staging', url = 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
+      { name = 'wp', url = 'mysql://root@localhost/wp_awesome' },
+      {
+	name = 'production',
+	url = function()
+	  return vim.fn.system('get-prod-url')
+	end
+      },
+    }
+  }
+<
+
+
 Currently, only difference between these two methods is that array ensures
 order, while order of connections with g:dbs as object has arbitrary order.
 
@@ -183,6 +208,7 @@ If you use this method, make sure to `keep it out of version control` .
 One way to ensure it's not commited is to use `exrc` option, which allows
 creating project level vimrc to hold this configuration. After that, add that
 file to your global gitignore file, and you're safe.
+Other solution is to have it as a function that resolves a value dynamically.
 
 ==============================================================================
 4.3 Using `DBUIAddConnection` command	*vim-dadbod-ui-connections-add*

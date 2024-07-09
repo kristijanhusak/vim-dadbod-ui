@@ -107,20 +107,32 @@ let g:db_ui_dotenv_variable_prefix = 'MYPREFIX_'
 Provide list with all databases that you want to use through `g:dbs` variable as an array of objects or an object:
 
 ```vimL
+function s:resolve_production_url()
+  let url = system('get-prod-url')
+  return url
+end
+
 let g:dbs = {
 \ 'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db',
 \ 'staging': 'postgres://postgres:mypassword@localhost:5432/my-staging-db',
 \ 'wp': 'mysql://root@localhost/wp_awesome',
+\ 'production': function('s:resolve_production_url')
 \ }
 ```
 
 Or if you want them to be sorted in the order you define them, this way is also available:
 
 ```vimL
+function s:resolve_production_url()
+  let url = system('get-prod-url')
+  return url
+end
+
 let g:dbs = [
 \ { 'name': 'dev', 'url': 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
 \ { 'name': 'staging', 'url': 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
 \ { 'name': 'wp', 'url': 'mysql://root@localhost/wp_awesome' },
+\ { 'name': 'production', 'url': function('s:resolve_production_url') },
 \ ]
 ```
 Just make sure to **NOT COMMIT** these. I suggest using project local vim config (`:help exrc`)
