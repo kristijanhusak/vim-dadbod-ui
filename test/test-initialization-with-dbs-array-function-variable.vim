@@ -2,7 +2,7 @@ let s:suite = themis#suite('Initialization with g:dbs variable as functions in a
 let s:expect = themis#helper('expect')
 
 function! s:db_conn() abort
-  return 'sqlite:tests/dadbod_ui_test.db'
+  return 'sqlite:test/dadbod_ui_test.db'
 endfunction
 
 function! s:suite.before() abort
