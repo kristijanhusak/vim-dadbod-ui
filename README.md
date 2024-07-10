@@ -139,19 +139,17 @@ let g:dbs = [
 In case you use Neovim, here's an example with Lua:
 
 ```lua
-  vim.g.dbs = {
+vim.g.dbs = {
+    { name = 'dev', url = 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
+    { name = 'staging', url = 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
+    { name = 'wp', url = 'mysql://root@localhost/wp_awesome' },
     {
-      { name = 'dev', url = 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
-      { name = 'staging', url = 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
-      { name = 'wp', url = 'mysql://root@localhost/wp_awesome' },
-      {
-        name = 'production',
-        url = function()
-          return vim.fn.system('get-prod-url')
-        end
-      },
-    }
-  }
+      name = 'production',
+      url = function()
+        return vim.fn.system('get-prod-url')
+      end
+    },
+}
 ```
 
 
