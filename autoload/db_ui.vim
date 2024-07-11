@@ -259,7 +259,7 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'schema_support': 0,
         \ 'quote': 0,
         \ 'default_scheme': '',
-        \ 'filetype': 'sql',
+        \ 'filetype': ''
         \ }
 
   call self.populate_schema_info(db)
@@ -427,7 +427,7 @@ function! s:dbui.populate_schema_info(db) abort
   let a:db.schema_support = db_ui#schemas#supports_schemes(scheme_info, parsed_url)
   let a:db.quote = get(scheme_info, 'quote', 0)
   let a:db.default_scheme = get(scheme_info, 'default_scheme', '')
-  let a:db.filetype = get(scheme_info, 'filetype', 'sql')
+  let a:db.filetype = get(scheme_info, 'filetype', db#adapter#call(url, 'input_extension', [], 'sql'))
 endfunction
 
 " Resolve only urls for DBs that are files
