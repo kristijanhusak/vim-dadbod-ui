@@ -1,6 +1,12 @@
 name: tests
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
@@ -22,7 +28,7 @@ jobs:
             neovim: true
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Setup Ubuntu System
         if: matrix.os == 'ubuntu-latest'
         run: |

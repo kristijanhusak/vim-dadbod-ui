@@ -1,6 +1,11 @@
 let s:query_instance = {}
 let s:query = {}
-let s:bind_param_rgx = '\(^\|[[:blank:]]\|[^:]\)\(:\w\+\)'
+let s:bind_param_rgx = '\(^\|[[:blank:]]\|[^:]\)\('.g:db_ui_bind_param_pattern.'\)'
+
+let s:query_info = {
+      \ 'last_query_start_time': 0,
+      \ 'last_query_time': 0
+      \ }
 
 function! db_ui#query#new(drawer) abort
   let s:query_instance = s:query.new(a:drawer)
@@ -12,12 +17,10 @@ function! s:query.new(drawer) abort
   let instance.drawer = a:drawer
   let instance.buffer_counter = {}
   let instance.last_query = []
-  let instance.last_query_start_time = 0
-  let instance.last_query_time = 0
   augroup dbui_async_queries
     autocmd!
-    autocmd User *DBExecutePre call s:query_instance.start_query()
-    autocmd User *DBExecutePost call s:query_instance.print_query_time()
+    autocmd User *DBExecutePre call s:start_query()
+    autocmd User *DBExecutePost call s:print_query_time()
   augroup END
   return instance
 endfunction
@@ -164,7 +167,7 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   endif
 
   if &filetype !=? a:db.filetype || !is_existing_buffer
-    silent! exe 'setlocal filetype='.a:db.filetype.' nolist noswapfile nowrap cursorline nospell modifiable'
+    silent! exe 'setlocal filetype='.a:db.filetype.' nolist noswapfile nowrap nospell modifiable'
   endif
   let is_sql = &filetype ==? a:db.filetype
   nnoremap <silent><buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
@@ -207,14 +210,10 @@ function! s:query.remove_buffer(bufnr)
   return self.drawer.render()
 endfunction
 
-function! s:query.start_query() abort
-  let self.last_query_start_time = reltime()
-endfunction
-
 function! s:query.execute_query(...) abort
   let is_visual_mode = get(a:, 1, 0)
   let lines = self.get_lines(is_visual_mode)
-  call self.start_query()
+  call s:start_query()
   if !is_visual_mode && search(s:bind_param_rgx, 'n') <= 0
     call db_ui#utils#print_debug({ 'message': 'Executing whole buffer', 'command': '%DB' })
     silent! exe '%DB'
@@ -227,17 +226,9 @@ function! s:query.execute_query(...) abort
     call db_ui#notifications#info('Executing query...')
   endif
   if !has_async
-    call self.print_query_time()
+    call s:print_query_time()
   endif
   let self.last_query = lines
-endfunction
-
-function! s:query.print_query_time() abort
-  if empty(self.last_query_start_time)
-    return
-  endif
-  let self.last_query_time = split(reltimestr(reltime(self.last_query_start_time)))[0]
-  call db_ui#notifications#info('Done after '.self.last_query_time.' sec.')
 endfunction
 
 function! s:query.execute_lines(db, lines, is_visual_mode) abort
@@ -405,7 +396,7 @@ endfunction
 function! s:query.get_last_query_info() abort
   return {
         \ 'last_query': self.last_query,
-        \ 'last_query_time': self.last_query_time
+        \ 'last_query_time': s:query_info.last_query_time
         \ }
 endfunction
 
@@ -426,4 +417,16 @@ function! s:query.get_saved_query_db_name() abort
   endif
 
   return ''
+endfunction
+
+function s:start_query() abort
+  let s:query_info.last_query_start_time = reltime()
+endfunction
+
+function s:print_query_time() abort
+  if empty(s:query_info.last_query_start_time)
+    return
+  endif
+  let s:query_info.last_query_time = split(reltimestr(reltime(s:query_info.last_query_start_time)))[0]
+  call db_ui#notifications#info('Done after '.s:query_info.last_query_time.' sec.')
 endfunction

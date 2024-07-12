@@ -5,8 +5,14 @@ It allows simple navigation through databases and allows saving queries for late
 
 ![screenshot](https://i.imgur.com/fhGqC9U.png)
 
+
 With nerd fonts:
 ![with-nerd-fonts](https://i.imgur.com/aXI5BTG.png)
+
+
+Video presentation by TJ:
+
+[![Video presentation by TJ](https://i.ytimg.com/vi/ALGBuFLzDSA/hqdefault.jpg?sqp=-oaymwEcCNACELwBSFXyq4qpAw4IARUAAIhCGAFwAcABBg==&rs=AOn4CLDmOFtUnDmQx5U_PKBqV819YujOBw)](https://www.youtube.com/watch?v=ALGBuFLzDSA)
 
 Tested on Linux, Mac and Windows, Vim 8.1+ and Neovim.
 
@@ -61,7 +67,7 @@ return {
 ```
 
 After installation, run `:DBUI`, which should open up a drawer with all databases provided.
-When you finish writing your query, just write the file (`:w`) and it will automatically execute the query for that database and it will automatically execute the query for selected database.
+When you finish writing your query, just write the file (`:w`) and it will automatically execute the query for that database.
 
 ## Databases
 There are 3 ways to provide database connections to UI:
@@ -101,22 +107,52 @@ let g:db_ui_dotenv_variable_prefix = 'MYPREFIX_'
 Provide list with all databases that you want to use through `g:dbs` variable as an array of objects or an object:
 
 ```vimL
+function s:resolve_production_url()
+  let url = system('get-prod-url')
+  return url
+end
+
 let g:dbs = {
 \ 'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db',
 \ 'staging': 'postgres://postgres:mypassword@localhost:5432/my-staging-db',
 \ 'wp': 'mysql://root@localhost/wp_awesome',
+\ 'production': function('s:resolve_production_url')
 \ }
 ```
 
 Or if you want them to be sorted in the order you define them, this way is also available:
 
 ```vimL
+function s:resolve_production_url()
+  let url = system('get-prod-url')
+  return url
+end
+
 let g:dbs = [
 \ { 'name': 'dev', 'url': 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
 \ { 'name': 'staging', 'url': 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
 \ { 'name': 'wp', 'url': 'mysql://root@localhost/wp_awesome' },
+\ { 'name': 'production', 'url': function('s:resolve_production_url') },
 \ ]
 ```
+
+In case you use Neovim, here's an example with Lua:
+
+```lua
+vim.g.dbs = {
+    { name = 'dev', url = 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
+    { name = 'staging', url = 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
+    { name = 'wp', url = 'mysql://root@localhost/wp_awesome' },
+    {
+      name = 'production',
+      url = function()
+        return vim.fn.system('get-prod-url')
+      end
+    },
+}
+```
+
+
 Just make sure to **NOT COMMIT** these. I suggest using project local vim config (`:help exrc`)
 
 #### Via :DBUIAddConnection command
@@ -257,6 +293,22 @@ autocmd FileType dbui nmap <buffer> v <Plug>(DBUI_SelectLineVsplit)
 If you don't want any mappings to be added, add this to vimrc:
 ```vimL
 let g:db_ui_disable_mappings = 1
+```
+
+## Toggle showing postgres views in the drawer
+If you don't want to see any views in the drawer, add this to vimrc:
+This option must be disabled (set to 0) for Redshift.
+
+```vimL
+let g:db_ui_use_postgres_views = 0
+```
+
+## Disable builtin progress bar
+If you want to utilize *DBExecutePre or *DBExecutePost to make your own progress bar
+or if you want to disable the progress entirely set to 1.
+
+```vimL
+let g:db_ui_disable_progress_bar = 1
 ```
 
 ## TODO

@@ -162,10 +162,15 @@ vim-dadbod `g:db` variable is read first.
 
 Object example:
 >
+  function s:resolve_production_url()
+    return system('get-prod-url')
+  end
+
   let g:dbs = {
   \ 'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db',
   \ 'staging': 'postgres://postgres:mypassword@localhost:5432/my-staging-db',
   \ 'wp': 'mysql://root@localhost/wp_awesome',
+  \ 'production': function('s:resolve_production_url')
   \ }
 <
 Array of objects example:
@@ -174,8 +179,28 @@ Array of objects example:
   \ { 'name': 'dev', 'url': 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
   \ { 'name': 'staging', 'url': 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
   \ { 'name': 'wp', 'url': 'mysql://root@localhost/wp_awesome' },
+  \ { 'name': 'production', 'url': function('s:resolve_production_url') },
   \ ]
 <
+
+If you use Neovim, you can also use lua to define the connections:
+>
+  vim.g.dbs = {
+    {
+      { name = 'dev', url = 'postgres://postgres:mypassword@localhost:5432/my-dev-db' }
+      { name = 'staging', url = 'postgres://postgres:mypassword@localhost:5432/my-staging-db' },
+      { name = 'wp', url = 'mysql://root@localhost/wp_awesome' },
+      {
+        name = 'production',
+        url = function()
+          return vim.fn.system('get-prod-url')
+        end
+      },
+    }
+  }
+<
+
+
 Currently, only difference between these two methods is that array ensures
 order, while order of connections with g:dbs as object has arbitrary order.
 
@@ -183,6 +208,7 @@ If you use this method, make sure to `keep it out of version control` .
 One way to ensure it's not commited is to use `exrc` option, which allows
 creating project level vimrc to hold this configuration. After that, add that
 file to your global gitignore file, and you're safe.
+Other solution is to have it as a function that resolves a value dynamically.
 
 ==============================================================================
 4.3 Using `DBUIAddConnection` command	*vim-dadbod-ui-connections-add*
@@ -273,7 +299,7 @@ the connection you want to delete.
 
 		`:DB select * from Users where id = 1`
 
-					      *ic*
+					      *vim-dadbod-ic*
 ic
 		Operator pending mapping that works on cell value in results
 		buffer.  For example, to yank cell value under cursor, do `yic`.
@@ -582,6 +608,14 @@ g:db_ui_disable_mappings
 
 		Default value: `0`
 
+					      *g:db_ui_bind_param_pattern*
+g:db_ui_bind_param_pattern
+		Change the regex pattern used to match bind params.
+		By default, it matches format `:variable_name`.
+		To use `$1`,`$2` format, you would set it to: `\$\d\+`
+
+		Default value: `:\w\+`
+
   					      *g:db_ui_show_database_icon*
 g:db_ui_show_database_icon
 		If this is set to 1, will add an icon on database name. Notice
@@ -705,6 +739,21 @@ g:db_ui_force_echo_notifications
 		echoing messages to command line set this value to 1.
 
 		Default value: `0`
+
+					     *g:db_ui_use_postgres_views*
+g:db_ui_use_postgres_views
+    Toggle showing postgres views in the drawer.
+    This option must be disabled (set to 0) for Redshift.
+
+    Default value: 1
+
+					     *g:db_ui_disable_progress_bar*
+g:db_ui_disable_progress_bar
+    Toggle query execution progress bar.
+    This option is available to prevent conflict with a custom progress bar
+    or if you want to disable the progress entirely set to 1.
+
+    Default value: 0
 
 					      *g:db_ui_use_nvim_notify*
 g:db_ui_use_nvim_notify

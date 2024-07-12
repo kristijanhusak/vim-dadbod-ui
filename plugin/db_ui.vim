@@ -3,6 +3,8 @@ if exists('g:loaded_dbui')
 endif
 let g:loaded_dbui = 1
 
+let g:db_ui_disable_progress_bar = get(g:, 'db_ui_disable_progress_bar', 0)
+let g:db_ui_use_postgres_views = get(g:, 'db_ui_use_postgres_views', 1)
 let g:db_ui_notification_width = get(g:, 'db_ui_notification_width', 40)
 let g:db_ui_winwidth = get(g:, 'db_ui_winwidth', 40)
 let g:db_ui_win_position = get(g:, 'db_ui_win_position', 'left')
@@ -23,6 +25,8 @@ let g:db_ui_use_nvim_notify = get(g:, 'db_ui_use_nvim_notify', 0)
 let g:Db_ui_buffer_name_generator = get(g:, 'Db_ui_buffer_name_generator', 0)
 let g:db_ui_debug = get(g:, 'db_ui_debug', 0)
 let g:db_ui_hide_schemas = get(g:, 'db_ui_hide_schemas', [])
+let g:db_ui_bind_param_pattern = get(g: , 'db_ui_bind_param_pattern', ':\w\+')
+let g:db_ui_is_oracle_legacy = get(g:, 'db_ui_is_oracle_legacy', 0)
 let s:dbui_icons = get(g:, 'db_ui_icons', {})
 let s:expanded_icon = get(s:dbui_icons, 'expanded', '▾')
 let s:collapsed_icon = get(s:dbui_icons, 'collapsed', '▸')

@@ -135,7 +135,8 @@ function! db_ui#statusline(...)
     return ''
   end
   if &filetype ==? 'dbout'
-    let last_query_time = s:dbui_instance.drawer.get_query().last_query_time
+    let last_query_info = s:dbui_instance.drawer.get_query().get_last_query_info()
+    let last_query_time = last_query_info.last_query_time
     if !empty(last_query_time)
       return 'Last query time: '.last_query_time.' sec.'
     endif
@@ -231,13 +232,11 @@ function! s:dbui.generate_new_db_entry(db) abort
   if empty(parsed_url)
     return parsed_url
   endif
-  let scheme = get(parsed_url, 'scheme', '')
   let db_name = substitute(get(parsed_url, 'path', ''), '^\/', '', '')
   let save_path = ''
   if !empty(self.save_path)
     let save_path = printf('%s/%s', self.save_path, a:db.name)
   endif
-  let scheme_info = db_ui#schemas#get(scheme)
   let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".a:db.name."-" || fnamemodify(v:val, ":t") =~? "^".a:db.name."-"')
   let schema_support = !empty(get(scheme_info, 'schemes_query', 0))
   if schema_support && (tolower(scheme) ==? 'mysql' || tolower(scheme) ==? 'cassandra') && parsed_url.path !=? '/'
@@ -245,13 +244,15 @@ function! s:dbui.generate_new_db_entry(db) abort
   endif
   let filetype = get(scheme_info, 'filetype', 'sql')
   return {
+
+  let db = {
         \ 'url': a:db.url,
         \ 'conn': '',
         \ 'conn_error': '',
         \ 'conn_tried': 0,
         \ 'source': a:db.source,
-        \ 'scheme': scheme,
-        \ 'table_helpers': db_ui#table_helpers#get(scheme),
+        \ 'scheme': '',
+        \ 'table_helpers': {},
         \ 'expanded': 0,
         \ 'tables': {'expanded': 0 , 'items': {}, 'list': [] },
         \ 'schemas': {'expanded': 0, 'items': {}, 'list': [] },
@@ -261,17 +262,39 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'db_name': !empty(db_name) ? db_name : a:db.name,
         \ 'name': a:db.name,
         \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
-        \ 'schema_support': schema_support,
-        \ 'quote': get(scheme_info, 'quote', 0),
-        \ 'default_scheme': get(scheme_info, 'default_scheme', ''),
-        \ 'filetype': filetype
+        \ 'schema_support': 0,
+        \ 'quote': 0,
+        \ 'default_scheme': '',
+        \ 'filetype': ''
         \ }
+
+  call self.populate_schema_info(db)
+  return db
+endfunction
+
+function! s:dbui.resolve_url_global_variable(Value) abort
+  if type(a:Value) ==? type('')
+    return a:Value
+  endif
+
+  if type(a:Value) ==? type(function('tr'))
+    return call(a:Value, [])
+  endif
+
+  " if type(a:Value) ==? type(v:t_func)
+  " endif
+  "
+  " echom string(type(a:Value))
+  " echom string(a:Value)
+  "
+  throw 'Invalid type global variable database url:'..type(a:Value)
 endfunction
 
 function! s:dbui.populate_from_global_variable() abort
   if exists('g:db') && !empty(g:db)
-    let gdb_name = split(g:db, '/')[-1]
-    call self.add_if_not_exists(gdb_name, g:db, 'g:dbs')
+    let url = self.resolve_url_global_variable(g:db)
+    let gdb_name = split(url, '/')[-1]
+    call self.add_if_not_exists(gdb_name, url, 'g:dbs')
   endif
 
   if !exists('g:dbs') || empty(g:dbs)
@@ -279,14 +302,14 @@ function! s:dbui.populate_from_global_variable() abort
   endif
 
   if type(g:dbs) ==? type({})
-    for [db_name, db_url] in items(g:dbs)
-      call self.add_if_not_exists(db_name, db_url, 'g:dbs')
+    for [db_name, Db_url] in items(g:dbs)
+      call self.add_if_not_exists(db_name, self.resolve_url_global_variable(Db_url), 'g:dbs')
     endfor
     return self
   endif
 
   for db in g:dbs
-    call self.add_if_not_exists(db.name, db.url, 'g:dbs')
+    call self.add_if_not_exists(db.name, self.resolve_url_global_variable(db.url), 'g:dbs')
   endfor
 
   return self
@@ -366,7 +389,7 @@ function! s:dbui.add_if_not_exists(name, url, source) abort
     return db_ui#notifications#warning(printf('Warning: Duplicate connection name "%s" in "%s" source. First one added has precedence.', a:name, a:source))
   endif
   return add(self.dbs_list, {
-        \ 'name': a:name, 'url': db#resolve(a:url), 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
+        \ 'name': a:name, 'url': db_ui#resolve(a:url), 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
         \ })
 endfunction
 
@@ -387,6 +410,7 @@ function! s:dbui.connect(db) abort
     call db_ui#notifications#info('Connecting to db '.a:db.name.'...')
     let a:db.conn = db#connect(a:db.url)
     let a:db.conn_error = ''
+    call self.populate_schema_info(a:db)
     call db_ui#notifications#info('Connected to db '.a:db.name.' after '.split(reltimestr(reltime(query_time)))[0].' sec.')
   catch /.*/
     let a:db.conn_error = v:exception
@@ -397,6 +421,31 @@ function! s:dbui.connect(db) abort
   redraw!
   let a:db.conn_tried = 1
   return a:db
+endfunction
+
+function! s:dbui.populate_schema_info(db) abort
+  let url = !empty(a:db.conn) ? a:db.conn : a:db.url
+  let parsed_url = self.parse_url(url)
+  let scheme = get(parsed_url, 'scheme', '')
+  let scheme_info = db_ui#schemas#get(scheme)
+  let a:db.scheme = scheme
+  let a:db.table_helpers = db_ui#table_helpers#get(scheme)
+  let a:db.schema_support = db_ui#schemas#supports_schemes(scheme_info, parsed_url)
+  let a:db.quote = get(scheme_info, 'quote', 0)
+  let a:db.default_scheme = get(scheme_info, 'default_scheme', '')
+  let a:db.filetype = get(scheme_info, 'filetype', db#adapter#call(url, 'input_extension', [], 'sql'))
+endfunction
+
+" Resolve only urls for DBs that are files
+function db_ui#resolve(url) abort
+  let parsed_url = db#url#parse(a:url)
+  let resolve_schemes = ['sqlite', 'jq', 'duckdb', 'osquery']
+
+  if index(resolve_schemes, get(parsed_url, 'scheme', '')) > -1
+    return db#resolve(a:url)
+  endif
+
+  return a:url
 endfunction
 
 function! db_ui#reset_state() abort
