@@ -167,6 +167,9 @@ To view from which source the database is, press `H` in drawer.
 If there are duplicate connection names from same source, warning will be shown and first one added will be preserved.
 
 ## Settings
+
+An overview of all settings and their default values can be found at `:help vim-dadbod-ui`. 
+
 ### Table helpers
 Table helper is a predefined query that is available for each table in the list.
 Currently, default helper that each scheme has for it's tables is `List`, which for most schemes defaults to `g:db_ui_default_query`.
