@@ -29,29 +29,13 @@ Features:
 
 ## Installation
 
-Use your favorite package manager. If you don't have one, I suggest [vim-packager](https://github.com/kristijanhusak/vim-packager)
-```vimL
-function! PackagerInit() abort
-  packadd vim-packager
-  call packager#init()
-  call packager#add('kristijanhusak/vim-packager', { 'type': 'opt' })
-  call packager#add('tpope/vim-dadbod')
-  call packager#add('kristijanhusak/vim-dadbod-ui')
-endfunction
-
-" This is just an example. Keep this out of version control. Check for more examples below.
-let g:dbs = {
-\  'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db'
-\ }
-```
-
 Configuration with [lazy.nvim](https://github.com/folke/lazy.nvim)
 ```lua
 return {
   'kristijanhusak/vim-dadbod-ui',
   dependencies = {
     { 'tpope/vim-dadbod', lazy = true },
-    { 'kristijanhusak/vim-dadbod-completion', ft = { 'sql', 'mysql', 'plsql' }, lazy = true },
+    { 'kristijanhusak/vim-dadbod-completion', ft = { 'sql', 'mysql', 'plsql' }, lazy = true }, -- Optional
   },
   cmd = {
     'DBUI',
@@ -64,6 +48,13 @@ return {
     vim.g.db_ui_use_nerd_fonts = 1
   end,
 }
+```
+
+Or [vim-plug](https://github.com/junegunn/vim-plug)
+```vim
+Plug 'tpope/vim-dadbod'
+Plug 'kristijanhusak/vim-dadbod-ui'
+Plug 'kristijanhusak/vim-dadbod-completion' "Optional
 ```
 
 After installation, run `:DBUI`, which should open up a drawer with all databases provided.
