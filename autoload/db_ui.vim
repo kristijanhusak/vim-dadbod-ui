@@ -232,19 +232,19 @@ function! s:dbui.generate_new_db_entry(db) abort
   if empty(parsed_url)
     return parsed_url
   endif
+  let scheme = get(parsed_url, 'scheme', '')
   let db_name = substitute(get(parsed_url, 'path', ''), '^\/', '', '')
   let save_path = ''
   if !empty(self.save_path)
     let save_path = printf('%s/%s', self.save_path, a:db.name)
   endif
+  let scheme_info = db_ui#schemas#get(scheme)
   let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".a:db.name."-" || fnamemodify(v:val, ":t") =~? "^".a:db.name."-"')
   let schema_support = !empty(get(scheme_info, 'schemes_query', 0))
   if schema_support && (tolower(scheme) ==? 'mysql' || tolower(scheme) ==? 'cassandra') && parsed_url.path !=? '/'
     let schema_support = 0
   endif
   let filetype = get(scheme_info, 'filetype', 'sql')
-  return {
-
   let db = {
         \ 'url': a:db.url,
         \ 'conn': '',
