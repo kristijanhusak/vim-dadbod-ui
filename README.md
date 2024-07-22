@@ -284,9 +284,12 @@ Any of these mappings can be overridden:
 autocmd FileType dbui nmap <buffer> v <Plug>(DBUI_SelectLineVsplit)
 ```
 
-If you don't want any mappings to be added, add this to vimrc:
+If you don't want mappings to be added, add this to vimrc:
 ```vimL
-let g:db_ui_disable_mappings = 1
+let g:db_ui_disable_mappings = 1       " Disable all mappings
+let g:db_ui_disable_mappings_dbui = 1  " Disable mappings in DBUI drawer
+let g:db_ui_disable_mappings_dbout = 1 " Disable mappings in DB output
+let g:db_ui_disable_mappings_sql = 1   " Disable mappings in SQL buffers
 ```
 
 ## Toggle showing postgres views in the drawer

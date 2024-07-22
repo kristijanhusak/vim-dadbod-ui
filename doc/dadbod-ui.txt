@@ -626,6 +626,27 @@ g:db_ui_disable_mappings
 
 		Default value: `0`
 
+					      *g:db_ui_disable_mappings_dbui*
+g:db_ui_disable_mappings_dbui
+		If this is set to `1`, no default mappings for DBUI drawer
+		are defined.
+
+		Default value: `0`
+
+					      *g:db_ui_disable_mappings_dbout*
+g:db_ui_disable_mappings_dbout
+		If this is set to `1`, no default mappings for dbout buffers
+		are defined.
+
+		Default value: `0`
+
+					      *g:db_ui_disable_mappings_sql*
+g:db_ui_disable_mappings_sql
+		If this is set to `1`, no default mappings for SQL buffers
+		are defined.
+
+		Default value: `0`
+
 					      *g:db_ui_bind_param_pattern*
 g:db_ui_bind_param_pattern
 		Change the regex pattern used to match bind params.
