@@ -21,7 +21,7 @@ let s:postgres = {
       \ 'Indexes': "SELECT * FROM pg_indexes where tablename='{table}' and schemaname='{schema}'",
       \ 'Foreign Keys': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
       \ 'References': s:basic_constraint_query."WHERE constraint_type = 'FOREIGN KEY'\nand ccu.table_name = '{table}'\nand tc.table_schema = '{schema}'",
-      \ 'Primary Keys': s:basic_constraint_query."WHERE constraint_type = 'PRIMARY KEY'\nand tc.table_name = '{table}'\nand tc.table_schema = '{schema}'",
+      \ 'Primary Keys': "SELECT * FROM information_schema.table_constraints WHERE constraint_type = 'PRIMARY KEY' AND table_schema = '{schema}' AND table_name = '{table}'",
       \ }
 
 let s:sqlite = {
