@@ -182,6 +182,13 @@ let s:sqlserver = {
       \ 'Describe': 'exec sp_help ''{schema}.{table}''',
 \   }
 
+let s:mongodb = {
+      \ 'List': 'use("{schema}"); db["{table}"].find()',
+      \ 'FindOne': 'use("{schema}"); db["{table}"].findOne()',
+      \ 'FindOneByObjectId': 'use("{schema}"); db["{table}"].findOne({_id: ObjectId("") })',
+      \ 'FindOneByStringId': 'use("{schema}"); db["{table}"].findOne({_id: "" })',
+\   }
+
 let s:helpers = {
       \ 'bigquery': s:bigquery,
       \ 'postgresql': s:postgres,
@@ -190,7 +197,7 @@ let s:helpers = {
       \ 'oracle': s:oracle,
       \ 'sqlite': s:sqlite,
       \ 'sqlserver': s:sqlserver,
-      \ 'mongodb': { 'List': '{table}.find()'},
+      \ 'mongodb': s:mongodb, 
       \  }
 
 let s:all = {}
@@ -201,12 +208,15 @@ endfor
 
 let s:all.postgres = s:all.postgresql
 let s:all.sqlite3 = s:all.sqlite
+let s:all['mongodb+srv'] = s:all.mongodb
 
 let s:scheme_map = {
       \ 'postgres': 'postgresql',
       \ 'postgresql': 'postgres',
       \ 'sqlite3': 'sqlite',
       \ 'sqlite': 'sqlite3',
+      \ 'mongodb+srv': 'mongodb',
+      \ 'mongodb': 'mongodb+srv',
       \ }
 
 function! db_ui#table_helpers#get(scheme) abort

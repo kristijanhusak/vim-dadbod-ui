@@ -208,6 +208,16 @@ let s:bigquery = {
       \ 'requires_stdin': v:true,
       \ }
 
+let s:mongodb_dbs_query = '"\n" + db.adminCommand("listDatabases").databases.map(x => x.name).join("\n")'
+let s:mongodb_tables_query = 'db.adminCommand("listDatabases").databases.flatMap(d => {use(d.name); return db.getCollectionNames().map(c => [d.name, c].join(","))}).join("\n")'
+let s:mongodb = {
+      \ 'callable': 'filter',
+      \ 'args': ['--quiet'],
+      \ 'schemes_query': s:mongodb_dbs_query,
+      \ 'schemes_tables_query': s:mongodb_tables_query,
+      \ 'parse_results': {results, min_len -> s:results_parser(results[1:-2], '\,', min_len)},
+      \ 'requires_stdin': v:true,
+      \ }
 
 let s:schemas = {
       \ 'postgres': s:postgresql,
@@ -217,6 +227,8 @@ let s:schemas = {
       \ 'mariadb': s:mysql,
       \ 'oracle': s:oracle,
       \ 'bigquery': s:bigquery,
+      \ 'mongodb': s:mongodb,
+      \ 'mongodb+srv': s:mongodb,
       \ }
 
 if !exists('g:db_adapter_postgres')
