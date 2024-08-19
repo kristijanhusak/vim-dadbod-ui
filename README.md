@@ -29,29 +29,13 @@ Features:
 
 ## Installation
 
-Use your favorite package manager. If you don't have one, I suggest [vim-packager](https://github.com/kristijanhusak/vim-packager)
-```vimL
-function! PackagerInit() abort
-  packadd vim-packager
-  call packager#init()
-  call packager#add('kristijanhusak/vim-packager', { 'type': 'opt' })
-  call packager#add('tpope/vim-dadbod')
-  call packager#add('kristijanhusak/vim-dadbod-ui')
-endfunction
-
-" This is just an example. Keep this out of version control. Check for more examples below.
-let g:dbs = {
-\  'dev': 'postgres://postgres:mypassword@localhost:5432/my-dev-db'
-\ }
-```
-
 Configuration with [lazy.nvim](https://github.com/folke/lazy.nvim)
 ```lua
 return {
   'kristijanhusak/vim-dadbod-ui',
   dependencies = {
     { 'tpope/vim-dadbod', lazy = true },
-    { 'kristijanhusak/vim-dadbod-completion', ft = { 'sql', 'mysql', 'plsql' }, lazy = true },
+    { 'kristijanhusak/vim-dadbod-completion', ft = { 'sql', 'mysql', 'plsql' }, lazy = true }, -- Optional
   },
   cmd = {
     'DBUI',
@@ -64,6 +48,13 @@ return {
     vim.g.db_ui_use_nerd_fonts = 1
   end,
 }
+```
+
+Or [vim-plug](https://github.com/junegunn/vim-plug)
+```vim
+Plug 'tpope/vim-dadbod'
+Plug 'kristijanhusak/vim-dadbod-ui'
+Plug 'kristijanhusak/vim-dadbod-completion' "Optional
 ```
 
 After installation, run `:DBUI`, which should open up a drawer with all databases provided.
@@ -167,6 +158,9 @@ To view from which source the database is, press `H` in drawer.
 If there are duplicate connection names from same source, warning will be shown and first one added will be preserved.
 
 ## Settings
+
+An overview of all settings and their default values can be found at `:help vim-dadbod-ui`. 
+
 ### Table helpers
 Table helper is a predefined query that is available for each table in the list.
 Currently, default helper that each scheme has for it's tables is `List`, which for most schemes defaults to `g:db_ui_default_query`.
@@ -290,9 +284,12 @@ Any of these mappings can be overridden:
 autocmd FileType dbui nmap <buffer> v <Plug>(DBUI_SelectLineVsplit)
 ```
 
-If you don't want any mappings to be added, add this to vimrc:
+If you don't want mappings to be added, add this to vimrc:
 ```vimL
-let g:db_ui_disable_mappings = 1
+let g:db_ui_disable_mappings = 1       " Disable all mappings
+let g:db_ui_disable_mappings_dbui = 1  " Disable mappings in DBUI drawer
+let g:db_ui_disable_mappings_dbout = 1 " Disable mappings in DB output
+let g:db_ui_disable_mappings_sql = 1   " Disable mappings in SQL buffers
 ```
 
 ## Toggle showing postgres views in the drawer

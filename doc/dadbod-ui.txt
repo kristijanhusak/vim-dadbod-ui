@@ -42,15 +42,33 @@ Requirements:
 - https://github.com/tpope/vim-dadbod
 
 Install with your favorite package manager. If you don't have one, I suggest
-`vim-packager` https://github.com/Kristijanhusak/vim-packager:
+
+Configuration with lazy.nvim (https://github.com/folke/lazy.nvim)
 >
-  function! PackagerInit() abort
-    packadd vim-packager
-    call packager#init()
-    call packager#add('kristijanhusak/vim-packager', { 'type': 'opt' })
-    call packager#add('tpope/vim-dadbod')
-    call packager#add('kristijanhusak/vim-dadbod-ui')
-  endfunction
+    return {
+      'kristijanhusak/vim-dadbod-ui',
+      dependencies = {
+        { 'tpope/vim-dadbod', lazy = true },
+        { 'kristijanhusak/vim-dadbod-completion', ft = { 'sql', 'mysql', 'plsql' }, lazy = true }, -- Optional
+      },
+      cmd = {
+        'DBUI',
+        'DBUIToggle',
+        'DBUIAddConnection',
+        'DBUIFindBuffer',
+      },
+      init = function()
+        -- Your DBUI configuration
+        vim.g.db_ui_use_nerd_fonts = 1
+      end,
+    }
+<
+
+Or vim-plug (https://github.com/junegunn/vim-plug)
+>
+    Plug 'tpope/vim-dadbod'
+    Plug 'kristijanhusak/vim-dadbod-ui'
+    Plug 'kristijanhusak/vim-dadbod-completion' "Optional
 <
 
 Define a connection |vim-dadbod-ui-connections|
@@ -605,6 +623,27 @@ g:db_ui_win_position
 					      *g:db_ui_disable_mappings*
 g:db_ui_disable_mappings
 		If this is set to `1`, no default mappings are defined.
+
+		Default value: `0`
+
+					      *g:db_ui_disable_mappings_dbui*
+g:db_ui_disable_mappings_dbui
+		If this is set to `1`, no default mappings for DBUI drawer
+		are defined.
+
+		Default value: `0`
+
+					      *g:db_ui_disable_mappings_dbout*
+g:db_ui_disable_mappings_dbout
+		If this is set to `1`, no default mappings for dbout buffers
+		are defined.
+
+		Default value: `0`
+
+					      *g:db_ui_disable_mappings_sql*
+g:db_ui_disable_mappings_sql
+		If this is set to `1`, no default mappings for SQL buffers
+		are defined.
 
 		Default value: `0`
 
