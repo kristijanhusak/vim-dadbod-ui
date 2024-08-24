@@ -647,6 +647,16 @@ g:db_ui_disable_mappings_sql
 
 		Default value: `0`
 
+					      *g:db_ui_disable_mappings_javascript*
+g:db_ui_disable_mappings_javascript
+		If this is set to `1`, no default mappings for Javascript buffers
+		are defined.
+		Note that these mappings are set only when buffer is created
+		with vim-dadbod-ui, to not interfere with default javascript
+		behavior.
+
+		Default value: `0`
+
 					      *g:db_ui_bind_param_pattern*
 g:db_ui_bind_param_pattern
 		Change the regex pattern used to match bind params.

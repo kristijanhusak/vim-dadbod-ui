@@ -159,7 +159,7 @@ If there are duplicate connection names from same source, warning will be shown 
 
 ## Settings
 
-An overview of all settings and their default values can be found at `:help vim-dadbod-ui`. 
+An overview of all settings and their default values can be found at `:help vim-dadbod-ui`.
 
 ### Table helpers
 Table helper is a predefined query that is available for each table in the list.
@@ -290,6 +290,7 @@ let g:db_ui_disable_mappings = 1       " Disable all mappings
 let g:db_ui_disable_mappings_dbui = 1  " Disable mappings in DBUI drawer
 let g:db_ui_disable_mappings_dbout = 1 " Disable mappings in DB output
 let g:db_ui_disable_mappings_sql = 1   " Disable mappings in SQL buffers
+let g:db_ui_disable_mappings_javascript = 1   " Disable mappings in Javascript buffers (for Mongodb)
 ```
 
 ## Toggle showing postgres views in the drawer

@@ -428,6 +428,10 @@ function! s:dbui.populate_schema_info(db) abort
   let a:db.quote = get(scheme_info, 'quote', 0)
   let a:db.default_scheme = get(scheme_info, 'default_scheme', '')
   let a:db.filetype = get(scheme_info, 'filetype', db#adapter#call(url, 'input_extension', [], 'sql'))
+  " Properly map mongodb js to javascript
+  if a:db.filetype ==? 'js'
+    let a:db.filetype = 'javascript'
+  endif
 endfunction
 
 " Resolve only urls for DBs that are files
