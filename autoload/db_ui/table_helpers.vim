@@ -182,6 +182,14 @@ let s:sqlserver = {
       \ 'Describe': 'exec sp_help ''{schema}.{table}''',
 \   }
 
+let s:duckdb = {
+      \ 'List': g:db_ui_default_query,
+      \ 'Columns': "SELECT column_name, data_type, is_nullable, column_default FROM temp.information_schema.columns WHERE table_name = '{table}'",
+      \ 'Indexes': "SELECT * FROM duckdb_indexes() WHERE table_name = '{table}'",
+      \ 'Foreign Keys': "SELECT * FROM duckdb_constraints() WHERE table_name = '{table}' AND constraint_type = 'FOREIGN KEY'",
+      \ 'Primary Keys': "SELECT * FROM duckdb_constraints() WHERE table_name = '{table}' AND constraint_type = 'PRIMARY KEY'"
+      \ }
+
 let s:helpers = {
       \ 'bigquery': s:bigquery,
       \ 'postgresql': s:postgres,
@@ -191,6 +199,7 @@ let s:helpers = {
       \ 'sqlite': s:sqlite,
       \ 'sqlserver': s:sqlserver,
       \ 'mongodb': { 'List': '{table}.find()'},
+      \ 'duckdb': s:duckdb,
       \  }
 
 let s:all = {}
