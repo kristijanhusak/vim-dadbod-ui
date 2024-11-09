@@ -95,7 +95,14 @@ function! s:notification_nvim_notify(msg, opts) abort
   if get(a:opts, 'delay')
     let opts.timeout = { 'timeout': a:opts.delay }
   endif
-  return luaeval('vim.notify(_A[1], _A[2], _A[3])', [a:msg, type, opts])
+
+  let log_levels = {
+    \ 'info': luaeval("vim.log.levels.INFO"),
+    \ 'error': luaeval("vim.log.levels.ERROR"),
+    \ 'warning': luaeval("vim.log.levels.WARN")
+  \ }
+
+  return luaeval('vim.notify(_A[1], _A[2], _A[3])', [a:msg, log_levels[type], opts])
 endfunction
 
 function! s:notification_nvim(msg, opts) abort
