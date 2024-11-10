@@ -111,18 +111,19 @@ function! db_ui#dbout#yank_header() abort
   endif
 
   let cell_line_number = s:get_cell_line_number(scheme)
-  let table_line = '-'
+  let table_line = get(scheme, 'table_line', '-')
+  let table_edge_offset = get(scheme, 'table_edge_offset', 0)
   let column_line = getline(cell_line_number-1)
   let underline = getline(cell_line_number)
-  let from = 0
-  let to = 0
-  let i = 0
+  let from = table_edge_offset
+  let to = table_edge_offset
+  let i = table_edge_offset
   let columns=[]
-  let lastcol = strlen(underline)
-  while i <= lastcol
-    if underline[i] !=? table_line || i == lastcol
+  let lastcol = strcharlen(underline)
+  while i <= lastcol - table_edge_offset
+    if strcharpart(underline, i, 1) !=? table_line || i == lastcol
       let to = i-1
-      call add(columns, trim(column_line[from:to]))
+      call add(columns, trim(strcharpart(column_line, from, to - from + 1)))
       let from = i+1
     endif
     let i += 1
