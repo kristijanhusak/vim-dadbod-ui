@@ -60,15 +60,15 @@ function! db_ui#dbout#get_cell_value() abort
   endif
 
   let cell_line_number = s:get_cell_line_number(scheme)
-  let cell_range = s:get_cell_range(cell_line_number, getcurpos(), scheme)
-  let field_value = getline('.')[(cell_range.from):(cell_range.to)]
-  let start_spaces = len(matchstr(field_value, '^[[:blank:]]*'))
-  let end_spaces = len(matchstr(field_value, '[[:blank:]]*$'))
+  let cell_range = s:get_cell_range(cell_line_number, getcursorcharpos(), scheme)
+  let field_value = strcharpart(getline('.'), cell_range.from, cell_range.to - cell_range.from + 1)
+  let start_spaces = strcharlen(matchstr(field_value, '^[[:blank:]]*'))
+  let end_spaces = strcharlen(matchstr(field_value, '[[:blank:]]*$'))
   let old_selection = &selection
   set selection=inclusive
   let from = cell_range.from + start_spaces + 1
   let to = cell_range.to - end_spaces + 1
-  call cursor(line('.'), from)
+  call setcursorcharpos(line('.'), from)
   let motion = max([(to - from), 0])
   let cmd = 'normal!v'
   if motion > 0
@@ -137,12 +137,12 @@ function! s:get_cell_range(cell_line_number, curpos, scheme) abort
   endif
 
   let line = getline(a:cell_line_number)
-  let table_line = '-'
+  let table_line = get(a:scheme, 'table_line', '-')
 
   let col = a:curpos[2] - 1
   let from = 0
 
-  while col >= 0 && line[col] ==? table_line
+  while col >= 0 && strcharpart(line, col, 1) ==? table_line
     let from = col
     let col -= 1
   endwhile
@@ -150,7 +150,7 @@ function! s:get_cell_range(cell_line_number, curpos, scheme) abort
   let col = a:curpos[2] - 1
   let to = 0
 
-  while col <= len(line) && line[col] ==? table_line
+  while col <= strcharlen(line) && strcharpart(line, col, 1) ==? table_line
     let to = col
     let col += 1
   endwhile
