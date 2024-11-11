@@ -245,6 +245,7 @@ let s:schemas = {
       \ 'oracle': s:oracle,
       \ 'bigquery': s:bigquery,
       \ 'duckdb': s:duckdb,
+      \ 'md': s:duckdb,
       \ }
 
 if !exists('g:db_adapter_postgres')

@@ -211,6 +211,7 @@ let s:helpers = {
       \ 'oracle': s:oracle,
       \ 'sqlite': s:sqlite,
       \ 'duckdb': s:duckdb,
+      \ 'md': s:duckdb,
       \ 'sqlserver': s:sqlserver,
       \ 'mongodb': { 'List': '{table}.find()'},
       \  }
