@@ -76,6 +76,7 @@ let s:duckdb = {
       \ 'table_line': '─',
       \ 'table_edge_offset': 1,
       \ 'header_rows': 2,
+      \ 'quote': 1,
       \ }
 
 let s:sqlserver_foreign_keys_query = "
