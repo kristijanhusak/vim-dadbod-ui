@@ -59,12 +59,17 @@ let s:postgresql = {
       \ }
 
 let s:duckdb_list_schema_query = "
-    \ SELECT database_name||'.'||schema_name as schema_name
-    \ FROM duckdb_schemas()"
+    \ SELECT schema_name as schema_name
+    \ FROM duckdb_schemas() as s
+    \ INNER JOIN duckdb_databases() as d on s.database_oid = d.database_oid
+    \ WHERE not d.internal and not s.internal"
 
 let s:duckdb_tables = "
-    \ SELECT database_name||'.'||schema_name as table_schema, table_name
-    \ FROM duckdb_tables()"
+    \ SELECT t.schema_name as table_schema, t.table_name
+    \ FROM duckdb_tables() as t
+    \ INNER JOIN duckdb_schemas() as s on t.schema_oid = s.oid
+    \ INNER JOIN duckdb_databases() as d on t.database_oid = d.database_oid
+    \ WHERE not d.internal and not s.internal"
 
 let s:duckdb = {
       \ 'args': ['-list', '-c'],
