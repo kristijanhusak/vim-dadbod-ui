@@ -113,23 +113,28 @@ function! db_ui#dbout#yank_header() abort
   let cell_line_number = s:get_cell_line_number(scheme)
   let table_line = get(scheme, 'table_line', '-')
   let table_edge_offset = get(scheme, 'table_edge_offset', 0)
-  let column_line = getline(cell_line_number-1)
+  let header_rows = get(scheme, 'header_rows', 1)
   let underline = getline(cell_line_number)
-  let from = table_edge_offset
-  let to = table_edge_offset
-  let i = table_edge_offset
-  let columns=[]
   let lastcol = strcharlen(underline)
-  while i <= lastcol - table_edge_offset
-    if strcharpart(underline, i, 1) !=? table_line || i == lastcol
-      let to = i-1
-      call add(columns, trim(strcharpart(column_line, from, to - from + 1)))
-      let from = i+1
-    endif
-    let i += 1
-  endwhile
-  let csv_columns = join(columns, ', ')
-  call setreg(v:register, csv_columns)
+  let csv_rows = []
+  for j in range(header_rows, 1, -1)
+    let column_line = getline(cell_line_number-j)
+    let from = table_edge_offset
+    let to = table_edge_offset
+    let i = table_edge_offset
+    let columns = []
+    while i <= lastcol - table_edge_offset
+      if strcharpart(underline, i, 1) !=? table_line || i == lastcol
+        let to = i-1
+        call add(columns, trim(strcharpart(column_line, from, to - from + 1)))
+        let from = i+1
+      endif
+      let i += 1
+    endwhile
+    let csv_columns = join(columns, ', ')
+    call add(csv_rows, csv_columns)
+  endfor
+  call setreg(v:register, join(csv_rows, "\n"))
 endfunction
 
 function! s:get_cell_range(cell_line_number, curpos, scheme) abort
