@@ -35,20 +35,27 @@ let s:postgres_list_schema_query = "
     \ order by nspname"
 
 if empty(g:db_ui_use_postgres_views)
-  let postgres_tables_and_views = "
-        \ SELECT table_schema, table_name FROM information_schema.tables ;"
+  let postgres_tables_and_views = '
+        \ SELECT table_schema, table_name FROM information_schema.tables ;'
+  let postgres_tables_and_views_size = '
+        \ SELECT table_schema, table_name, pg_total_relation_size(''"''||table_schema||''"."''||table_name||''"'') FROM information_schema.tables ;'
+
 else
-  let postgres_tables_and_views = "
-        \ SELECT table_schema, table_name FROM information_schema.tables UNION ALL
-        \ select schemaname, matviewname from pg_matviews;"
+  let postgres_tables_and_views = '
+        \ SELECT table_schema, table_name FROM information_schema.tables UNION ALL SELECT schemaname, matviewname from pg_matviews ;'
+  let postgres_tables_and_views_size = '
+        \ SELECT table_schema, table_name, pg_total_relation_size(''"''||table_schema||''"."''||table_name||''"'') FROM information_schema.tables UNION ALL SELECT schemaname, matviewname, null from pg_matviews ;'
+
 endif
 let s:postgres_tables_and_views = postgres_tables_and_views
+let s:postgres_tables_and_views_size = postgres_tables_and_views_size
 
 let s:postgresql = {
       \ 'args': ['-A', '-c'],
       \ 'foreign_key_query': s:postgres_foreign_key_query,
       \ 'schemes_query': s:postgres_list_schema_query,
       \ 'schemes_tables_query': s:postgres_tables_and_views,
+      \ 'schemes_tables_size_query': s:postgres_tables_and_views_size,
       \ 'select_foreign_key_query': 'select * from "%s"."%s" where "%s" = %s',
       \ 'cell_line_number': 2,
       \ 'cell_line_pattern': '^-\++-\+',
@@ -78,6 +85,22 @@ let s:sqlserver = {
       \   'foreign_key_query': trim(s:sqlserver_foreign_keys_query),
       \   'schemes_query': 'SELECT schema_name FROM INFORMATION_SCHEMA.SCHEMATA',
       \   'schemes_tables_query': 'SELECT table_schema, table_name FROM INFORMATION_SCHEMA.TABLES',
+      \   'schemes_tables_size_query':  'SELECT
+      \                                     s.name AS schema_name,
+      \                                     t.name AS table_name,
+      \                                     SUM(a.total_pages) * 8 * 1024 AS total_bytes
+      \                                  FROM
+      \                                      sys.tables t
+      \                                  INNER JOIN
+      \                                      sys.indexes i ON t.object_id = i.object_id
+      \                                  INNER JOIN
+      \                                      sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
+      \                                  INNER JOIN
+      \                                      sys.allocation_units a ON p.partition_id = a.container_id
+      \                                  INNER JOIN
+      \                                      sys.schemas s ON t.schema_id = s.schema_id
+      \                                  GROUP BY
+      \                                      t.name, s.name, p.rows',
       \   'select_foreign_key_query': 'select * from %s.%s where %s = %s',
       \   'cell_line_number': 2,
       \   'cell_line_pattern': '^-\+.-\+',
