@@ -176,7 +176,7 @@ change the prefix, change `g:db_ui_dotenv_variable_prefix` value.
 This option gives a bit more flexibility, but it's harder to keep it out of
 version control.
 vim-dadbod `g:db` variable is read first.
-`g:dbs` can be defined as a object, or as an array of objects:
+`g:dbs` can be defined as an object, or as an array of objects:
 
 Object example:
 >
