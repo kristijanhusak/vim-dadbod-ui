@@ -180,7 +180,7 @@ let s:oracle = {
       \   'filetype': 'plsql',
       \ }
 
-if get(g:, 'dbext_default_ORA_bin', '') == 'sql'
+if index(['sql', 'sqlcl'], get(g:, 'dbext_default_ORA_bin', '')) >= 0
   let s:oracle.parse_results = {results, min_len -> s:results_parser(s:strip_quotes(results[3:]), ',', min_len)}
   let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[3:]), ',', min_len)}
 endif
