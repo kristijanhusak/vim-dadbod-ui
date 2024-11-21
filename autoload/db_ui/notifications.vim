@@ -219,7 +219,7 @@ function! s:setup_colors() abort
     let normal_fg = '#FFFFFF'
   endif
 
-  call s:set_hl('NotificationInfo', normal_bg, normal_fg)
+  call s:set_hl('NotificationInfo', normal_fg, normal_bg)
   call s:set_hl('NotificationError', error_fg, error_bg)
   call s:set_hl('NotificationWarning', warning_fg, warning_bg)
 
