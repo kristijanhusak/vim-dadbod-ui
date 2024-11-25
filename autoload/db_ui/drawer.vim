@@ -458,12 +458,27 @@ function! s:drawer.add_db(db) abort
   endif
 endfunction
 
+function! s:drawer.get_table_label(table, tables, level)
+  if !g:db_ui_show_size || !self.show_details
+    let name = a:table
+  else
+    let icon = self.get_toggle_icon('table', a:tables.items[a:table])
+    let label = repeat(' ', shiftwidth() * a:level).icon.(!empty(icon) ? " " : "")
+    if strchars(label) + strchars(a:table) > g:db_ui_winwidth - 8
+      let name = strpart(a:table, 0, g:db_ui_winwidth - strchars(label) - 8).repeat(' ', 8 - len(a:tables.items[a:table].size)).a:tables.items[a:table].size
+    else
+      let name = a:table.repeat(' ', g:db_ui_winwidth - strchars(label) - strchars(a:table) - len(a:tables.items[a:table].size)).a:tables.items[a:table].size
+    endif
+  endif
+  return name
+endfunction
+
 function! s:drawer.render_tables(tables, db, path, level, schema) abort
   if !a:tables.expanded
     return
   endif
   for table in a:tables.list
-    call self.add(table, 'toggle', a:path.'->'.table, self.get_toggle_icon('table', a:tables.items[table]), a:db.key_name, a:level, { 'expanded': a:tables.items[table].expanded })
+    call self.add(self.get_table_label(table, a:tables, a:level), 'toggle', a:path.'->'.table, self.get_toggle_icon('table', a:tables.items[table]), a:db.key_name, a:level, { 'expanded': a:tables.items[table].expanded })
     if a:tables.items[table].expanded
       for [helper_name, helper] in items(a:db.table_helpers)
         call self.add(helper_name, 'open', 'table', g:db_ui_icons.tables, a:db.key_name, a:level + 1, {'table': table, 'content': helper, 'schema': a:schema })
@@ -628,10 +643,10 @@ function! s:drawer.populate_tables(db) abort
   return a:db
 endfunction
 
-function! s:drawer.populate_table_items(tables) abort
+function! s:drawer.populate_table_items(tables, sizes_by_table) abort
   for table in a:tables.list
     if !has_key(a:tables.items, table)
-      let a:tables.items[table] = {'expanded': 0 }
+      let a:tables.items[table] = {'expanded': 0, 'size': a:sizes_by_table[table] }
     endif
   endfor
 endfunction
@@ -643,10 +658,20 @@ function! s:drawer.populate_schemas(db) abort
   endif
   let scheme = db_ui#schemas#get(a:db.scheme)
   let schemas = scheme.parse_results(db_ui#schemas#query(a:db, scheme, scheme.schemes_query), 1)
-  let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme, scheme.schemes_tables_query), 2)
+  if !g:db_ui_show_size || !has_key(scheme, 'schemes_tables_size_query')
+    let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme, scheme.schemes_tables_query), 2)
+  else
+    let tables = scheme.parse_results(db_ui#schemas#query(a:db, scheme, scheme.schemes_tables_size_query), 3)
+  endif
   let schemas = filter(schemas, {i, v -> !self._is_schema_ignored(v)})
   let tables_by_schema = {}
-  for [scheme_name, table] in tables
+  let sizes_by_table = {}
+  for item in tables
+    if len(item) == 2
+      call add(item, '')
+    endif
+  endfor
+  for [scheme_name, table, size] in tables
     if self._is_schema_ignored(scheme_name)
       continue
     endif
@@ -655,6 +680,31 @@ function! s:drawer.populate_schemas(db) abort
     endif
     call add(tables_by_schema[scheme_name], table)
     call add(a:db.tables.list, table)
+    if size != ''
+      let num = str2nr(size, 10)
+      if num > 1099511627776
+        let num = num / 1073741824
+        let div = num % 1024 / 100
+        let num = num / 1024
+        let val = "TB"
+      elseif num > 1073741824
+        let num = num / 1048576
+        let div = num % 1024 / 100
+        let num = num / 1024
+        let val = "GB"
+      elseif num > 1048576
+        let num = num / 1024
+        let div = num % 1024 / 100
+        let num = num / 1024
+        let val = "MB"
+      else
+        let div = num % 1024 / 100
+        let num = num / 1024
+        let val = "KB"
+      endif
+      let size = num.'.'.div[0].' '.val
+    endif
+    let sizes_by_table[table] = size
   endfor
   let a:db.schemas.list = schemas
   for schema in schemas
@@ -670,7 +720,7 @@ function! s:drawer.populate_schemas(db) abort
 
     endif
     let a:db.schemas.items[schema].tables.list = sort(get(tables_by_schema, schema, []))
-    call self.populate_table_items(a:db.schemas.items[schema].tables)
+    call self.populate_table_items(a:db.schemas.items[schema].tables, sizes_by_table)
   endfor
   return a:db
 endfunction
