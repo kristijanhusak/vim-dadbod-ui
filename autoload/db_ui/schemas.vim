@@ -58,6 +58,32 @@ let s:postgresql = {
       \ 'quote': 1,
       \ }
 
+let s:duckdb_list_schema_query = "
+    \ SELECT schema_name as schema_name
+    \ FROM duckdb_schemas() as s
+    \ INNER JOIN duckdb_databases() as d on s.database_oid = d.database_oid
+    \ WHERE not d.internal and not s.internal"
+
+let s:duckdb_tables = "
+    \ SELECT t.schema_name as table_schema, t.table_name
+    \ FROM duckdb_tables() as t
+    \ INNER JOIN duckdb_schemas() as s on t.schema_oid = s.oid
+    \ INNER JOIN duckdb_databases() as d on t.database_oid = d.database_oid
+    \ WHERE not d.internal and not s.internal"
+
+let s:duckdb = {
+      \ 'args': ['-list', '-c'],
+      \ 'schemes_query': s:duckdb_list_schema_query,
+      \ 'schemes_tables_query': s:duckdb_tables,
+      \ 'parse_results': {results,min_len -> s:results_parser(filter(results, '!empty(v:val)')[1:-1], '|', min_len)},
+      \ 'cell_line_number': 4,
+      \ 'cell_line_pattern': '^├─\+┼─\+',
+      \ 'table_line': '─',
+      \ 'table_edge_offset': 1,
+      \ 'header_rows': 2,
+      \ 'quote': 1,
+      \ }
+
 let s:sqlserver_foreign_keys_query = "
       \ SELECT TOP 1 c2.table_name as foreign_table_name, kcu2.column_name as foreign_column_name, kcu2.table_schema as foreign_table_schema
       \ from   information_schema.table_constraints c
@@ -218,6 +244,8 @@ let s:schemas = {
       \ 'mariadb': s:mysql,
       \ 'oracle': s:oracle,
       \ 'bigquery': s:bigquery,
+      \ 'duckdb': s:duckdb,
+      \ 'md': s:duckdb,
       \ }
 
 if !exists('g:db_adapter_postgres')
