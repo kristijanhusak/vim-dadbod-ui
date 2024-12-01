@@ -849,6 +849,26 @@ g:Db_ui_buffer_name_generator
 <
 
 		Default value: `0`
+		
+					      *g:Db_ui_table_name_sorter
+g:Db_ui_table_name_sorter
+		Custom function for sorting table names.
+		Function accepts the table name list and return the sorted
+		table name list.
+		Note the uppercase `D`, which is required by vim for
+		functions.
+		Also, `make sure that name is always unique` to avoid any issues
+		with overlapping names.
+		Example:
+>
+		function s:table_name_sorter(tables)
+		  return sort(tables)
+		endfunction
+
+		let g:Db_ui_table_name_sorter = function('s:table_name_sorter')
+<
+
+		Default value: `0`
 
 					      *g:db_ui_default_query*
 g:db_ui_default_query (DEPRECATED)
