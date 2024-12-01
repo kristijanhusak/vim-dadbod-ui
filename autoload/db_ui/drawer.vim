@@ -462,7 +462,12 @@ function! s:drawer.render_tables(tables, db, path, level, schema) abort
   if !a:tables.expanded
     return
   endif
-  for table in a:tables.list
+  if type(g:Db_ui_table_name_sorter) ==? type(function('tr'))
+    let tables_list = call(g:Db_ui_table_name_sorter, [a:tables.list])
+  else
+    let tables_list = a:tables.list
+  endif
+  for table in tables_list
     call self.add(table, 'toggle', a:path.'->'.table, self.get_toggle_icon('table', a:tables.items[table]), a:db.key_name, a:level, { 'expanded': a:tables.items[table].expanded })
     if a:tables.items[table].expanded
       for [helper_name, helper] in items(a:db.table_helpers)
