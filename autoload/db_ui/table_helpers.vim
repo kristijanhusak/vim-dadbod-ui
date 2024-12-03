@@ -215,5 +215,15 @@ function! db_ui#table_helpers#get(scheme) abort
     let result = extend(result, get(g:db_ui_table_helpers, s:scheme_map[a:scheme], {}))
   endif
 
+  for [key, value] in items(result)
+    if value == ''
+      call remove(result, key)
+    endif
+  endfor
+
+  if empty(result)
+    let result['List'] = ''
+  endif
+
   return result
 endfunction

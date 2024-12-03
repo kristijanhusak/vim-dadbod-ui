@@ -189,6 +189,15 @@ let g:db_ui_table_helpers = {
 \ }
 ```
 
+Overriding a helper with an empty string will remove it.
+```vimL
+let g:db_ui_table_helpers = {
+\   'postgresql': {
+\     'List': ''
+\   }
+\ }
+```
+
 ### Auto execute query
 If this is set to `1`, opening any of the table helpers will also automatically execute the query.
 

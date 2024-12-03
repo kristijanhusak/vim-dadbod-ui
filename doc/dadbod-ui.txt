@@ -476,6 +476,16 @@ defaults by passing in the matching helper name. To override `List`, do this:
 	\ 	}
  	\ }
 
+Overriding a default helper with an empty string will remove it:
+
+>
+ 	let g:db_ui_table_helpers = {
+	\ 	'postgresql': {
+	\ 		'List': ''
+	\ 	}
+ 	\ }
+
+
 Note that `{last_query}` will be empty if no queries were ran before opening
 that helper. Also, in the `EXPLAIN` example above, running the explain helper
 and then running it again for another table will print double `EXPLAIN ANALYZE`
