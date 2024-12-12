@@ -95,6 +95,10 @@ function! s:notification_nvim_notify(msg, opts) abort
   if get(a:opts, 'delay')
     let opts.timeout = { 'timeout': a:opts.delay }
   endif
+  if (type ==? 'info')
+    let opts.id = 'vim-dadbod-ui-info'
+    let opts.replace = 'vim-dadbod-ui-info'
+  endif
 
   let log_levels = {
     \ 'info': luaeval("vim.log.levels.INFO"),
