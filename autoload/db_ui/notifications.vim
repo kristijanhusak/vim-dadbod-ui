@@ -52,6 +52,12 @@ function! s:notification(msg, opts) abort
     return
   endif
 
+  let type = get(a:opts, 'type', 'info')
+
+  if type ==? 'info' && g:db_ui_disable_info_notifications
+    return
+  endif
+
   let use_echo = get(a:opts, 'echo', 0)
   if !use_echo
     let use_echo = g:db_ui_force_echo_notifications

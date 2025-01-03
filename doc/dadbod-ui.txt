@@ -789,6 +789,12 @@ g:db_ui_force_echo_notifications
 
 		Default value: `0`
 
+					      *g:db_ui_disable_info_notifications*
+g:db_ui_disable_info_notifications
+		Disable all notifications with "info" severity.
+
+		Default value: `0`
+
 					     *g:db_ui_use_postgres_views*
 g:db_ui_use_postgres_views
     Toggle showing postgres views in the drawer.
@@ -849,7 +855,7 @@ g:Db_ui_buffer_name_generator
 <
 
 		Default value: `0`
-		
+
 					      *g:Db_ui_table_name_sorter
 g:Db_ui_table_name_sorter
 		Custom function for sorting table names.
