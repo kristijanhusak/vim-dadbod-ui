@@ -228,6 +228,11 @@ if !exists('g:db_adapter_sqlite3')
   let g:db_adapter_sqlite3 = 'db#adapter#sqlite#'
 endif
 
+if !exists('g:db_adapter_duckdb')
+  let g:db_adapter_duckdb = 'db#adapter#duckdb#'
+endif
+
+
 function! db_ui#schemas#get(scheme) abort
   return get(s:schemas, a:scheme, {})
 endfunction
