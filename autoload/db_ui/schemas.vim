@@ -221,12 +221,12 @@ let s:clickhouse_schemes_tables_query = "
       \ ORDER BY table_name"
 
 let s:clickhouse = {
-      \ 'args': ['-q', --format=CSV],
+      \ 'args': ['-q'],
       \ 'schemes_query': trim(s:clickhouse_schemes_query),
       \ 'schemes_tables_query': trim(s:clickhouse_schemes_tables_query),
       \ 'cell_line_number': 1,
       \ 'cell_line_pattern': '^.*$',
-      \ 'parse_results': {results, min_len -> s:results_parser(results, ',', min_len)},
+      \ 'parse_results': {results, min_len -> s:results_parser(results, '\t', min_len)},
       \ 'default_scheme': '',
       \ 'quote': 1,
       \ }
