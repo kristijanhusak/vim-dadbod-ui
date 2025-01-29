@@ -182,6 +182,11 @@ let s:sqlserver = {
       \ 'Describe': 'exec sp_help ''{schema}.{table}''',
 \   }
 
+let s:clickhouse = {
+      \ 'List': "select * from `{schema}`.`{table}` limit 100 Format PrettyCompactMonoBlock",
+      \ 'Columns': "select name from system.columns where database='{schema} and table={table}'",
+      \ }
+
 let s:helpers = {
       \ 'bigquery': s:bigquery,
       \ 'postgresql': s:postgres,
@@ -190,6 +195,7 @@ let s:helpers = {
       \ 'oracle': s:oracle,
       \ 'sqlite': s:sqlite,
       \ 'sqlserver': s:sqlserver,
+      \ 'clickhouse': s:clickhouse,
       \ 'mongodb': { 'List': '{table}.find()'},
       \  }
 
