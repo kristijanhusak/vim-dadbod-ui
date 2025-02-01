@@ -39,8 +39,7 @@ if empty(g:db_ui_use_postgres_views)
         \ SELECT table_schema, table_name FROM information_schema.tables ;"
 else
   let postgres_tables_and_views = "
-        \ SELECT table_schema, table_name FROM information_schema.tables UNION ALL
-        \ select schemaname, matviewname from pg_matviews;"
+        \ SELECT table_schema, table_name FROM information_schema.tables
 endif
 let s:postgres_tables_and_views = postgres_tables_and_views
 
