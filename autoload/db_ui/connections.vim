@@ -37,7 +37,18 @@ function! s:connections.delete(db) abort
   endif
 
   let file = self.read()
-  call filter(file, {i, conn -> !(conn.name ==? a:db.name && db_ui#resolve(conn.url) ==? db_ui#resolve(a:db.url) )})
+  let target_group = file
+
+  if a:db.path !=? ''
+    let target_group = self.find_group(a:db.path, file)
+  endif
+
+  if !has_key(a:db, 'url')
+    call filter(target_group, {i, conn -> conn.name !=? a:db.name})
+  else
+    call filter(target_group, {i, conn -> !(conn.name ==? a:db.name && db_ui#resolve(conn.url) ==? db_ui#resolve(a:db.url) )})
+  endif
+
   return self.write(file)
 endfunction
 
@@ -62,21 +73,38 @@ function! s:connections.add_full_url() abort
   return self.save(name, url)
 endfunction
 
-function! s:connections.rename(db) abort
+function! s:connections.enter_db_name(url) abort
+  let name = db_ui#utils#input('Enter name: ', split(a:url, '/')[-1])
+
+  if empty(trim(name))
+    throw 'Please enter valid name.'
+  endif
+
+  return name
+endfunction
+
+
+function! s:connections.rename_db(db) abort
   if a:db.source !=? 'file'
     return db_ui#notifications#error('Cannot edit connections added via variables.')
   endif
 
-  let connections = copy(self.read())
+  let connections = self.read()
+  let parent = self.find_group(a:db.path, connections)
+
   let idx = 0
   let entry = {}
-  for conn in connections
+  for conn in parent
     if conn.name ==? a:db.name && db_ui#resolve(conn.url) ==? a:db.url
       let entry = conn
       break
     endif
     let idx += 1
   endfor
+
+  if empty(entry)
+    return db_ui#notifications#error('Database not found.')
+  endif
 
   let url = entry.url
   try
@@ -99,8 +127,82 @@ function! s:connections.rename(db) abort
     return db_ui#notifications#error(v:exception)
   endtry
 
-  call remove(connections, idx)
-  let connections = insert(connections, {'name': name, 'url': url }, idx)
+  call remove(parent, idx)
+  call insert(parent, {'name': name, 'url': url }, idx)
+  return self.write(connections)
+endfunction
+
+function! s:connections.find_group(path, connections) abort
+  let target_group = a:connections
+  for group in split(a:path, '/')
+    let found = 0
+    for conn in target_group
+      if conn.name ==? group && has_key(conn, 'connections')
+        let target_group = conn.connections
+        let found = 1
+        break
+      endif
+    endfor
+    if !found
+      return db_ui#notifications#error('Group not found.')
+    endif
+  endfor
+  return target_group
+endfunction
+
+function! s:connections.get_or_create_group(path, connections) abort
+  let target_group = a:connections
+  for group in split(a:path, '/')
+    let found = 0
+    for conn in target_group
+      if conn.name ==? group && has_key(conn, 'connections')
+        let target_group = conn.connections
+        let found = 1
+        break
+      endif
+    endfor
+    if !found
+      call add(target_group, {'name': group, 'connections': []})
+      let target_group = target_group[-1].connections
+    endif
+  endfor
+  return target_group
+endfunction
+
+function! s:connections.rename_group(db) abort
+  if a:db.source !=? 'file'
+    return db_ui#notifications#error('Cannot edit connections added via variables.')
+  endif
+
+  let connections = self.read()
+  let parent = self.find_group(a:db.path, connections)
+
+  let idx = 0
+  let entry = {}
+  for conn in parent
+    if conn.name ==? a:db.name && has_key(conn, 'connections')
+      let entry = conn
+      break
+    endif
+    let idx += 1
+  endfor
+
+  if empty(entry)
+    return db_ui#notifications#error('Group not found.')
+  endif
+
+  let name = ''
+  try
+    let name = db_ui#utils#input('Edit group name: ', entry.name)
+    if empty(trim(name))
+      throw 'Please enter valid name.'
+    endif
+  catch /.*/
+    return db_ui#notifications#error(v:exception)
+  endtry
+
+  call remove(parent, idx)
+  call insert(parent, {'name': name, 'connections': entry.connections}, idx)
   return self.write(connections)
 endfunction
 
@@ -119,7 +221,7 @@ function! s:connections.get_file() abort
   return printf('%s/%s', save_folder, 'connections.json')
 endfunction
 
-function s:connections.save(name, url) abort
+function! s:connections.save(name, url) abort
   let file = self.get_file()
   let dir = fnamemodify(file, ':p:h')
 
@@ -131,15 +233,27 @@ function s:connections.save(name, url) abort
     call writefile(['[]'], file)
   endif
 
-  let file = self.read()
-  let existing_connection = filter(copy(file), 'v:val.name ==? a:name')
+  let connections = copy(self.read())
+  let target_group = connections
+
+  let db_name = a:name
+
+  if a:name[0] ==? '/'
+    let path_parts = split(a:name, '/')
+    let db_name = remove(path_parts, -1)
+    let target_group = self.get_or_create_group(join(path_parts, '/'), connections)
+  endif
+
+  let existing_connection = filter(copy(target_group), 'v:val.name ==? db_name')
   if !empty(existing_connection)
     call db_ui#notifications#error('Connection with that name already exists. Please enter different name.')
     return 0
   endif
-  call add(file, {'name': a:name, 'url': a:url})
-  return self.write(file)
+
+  call add(target_group, {'name': db_name, 'url': a:url})
+  return self.write(connections)
 endfunction
+
 
 function! s:connections.read() abort
   return db_ui#utils#readfile(self.get_file())
