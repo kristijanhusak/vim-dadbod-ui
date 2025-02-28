@@ -90,11 +90,11 @@ function! s:connections.rename_db(db) abort
   endif
 
   let connections = self.read()
-  let parent = self.find_group(a:db.path, connections)
+  let target_group = self.find_group(a:db.path, connections)
 
   let idx = 0
   let entry = {}
-  for conn in parent
+  for conn in target_group
     if conn.name ==? a:db.name && db_ui#resolve(conn.url) ==? a:db.url
       let entry = conn
       break
@@ -127,8 +127,8 @@ function! s:connections.rename_db(db) abort
     return db_ui#notifications#error(v:exception)
   endtry
 
-  call remove(parent, idx)
-  call insert(parent, {'name': name, 'url': url }, idx)
+  call remove(target_group, idx)
+  call insert(target_group, {'name': name, 'url': url }, idx)
   return self.write(connections)
 endfunction
 
@@ -175,11 +175,11 @@ function! s:connections.rename_group(db) abort
   endif
 
   let connections = self.read()
-  let parent = self.find_group(a:db.path, connections)
+  let target_group = self.find_group(a:db.path, connections)
 
   let idx = 0
   let entry = {}
-  for conn in parent
+  for conn in target_group
     if conn.name ==? a:db.name && has_key(conn, 'connections')
       let entry = conn
       break
@@ -201,8 +201,8 @@ function! s:connections.rename_group(db) abort
     return db_ui#notifications#error(v:exception)
   endtry
 
-  call remove(parent, idx)
-  call insert(parent, {'name': name, 'connections': entry.connections}, idx)
+  call remove(target_group, idx)
+  call insert(target_group, {'name': name, 'connections': entry.connections}, idx)
   return self.write(connections)
 endfunction
 

@@ -221,21 +221,21 @@ function! s:dbui.populate_dbs() abort
 
 endfunction
 
-function! s:dbui.populate_item(db) abort
-    if self.is_group(a:db)
-        return self.populate_group(a:db)
+function! s:dbui.populate_item(item) abort
+    if self.is_group(a:item)
+        return self.populate_group(a:item)
     endif
 
-    return self.populate_db(a:db)
+    return self.populate_db(a:item)
 endfunction
 
-function! s:dbui.populate_group(db) abort
-  for conn in a:db.connections
+function! s:dbui.populate_group(group) abort
+  for conn in a:group.connections
     call self.populate_item(conn)
   endfor
 
-  if !has_key(self.groups, a:db.key_name)
-    let self.groups[a:db.key_name] = self.generate_new_group_entry(a:db)
+  if !has_key(self.groups, a:group.key_name)
+    let self.groups[a:group.key_name] = self.generate_new_group_entry(a:group)
   endif
 endfunction
 
