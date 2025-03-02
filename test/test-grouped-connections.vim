@@ -8,8 +8,8 @@ function s:suite.after() abort
   call Cleanup()
 endfunction
 
-function! s:suite.should_prompt_to_enter_url_for_new_connection() abort
-  let g:test_connection_name = '/group/connection-file-db'
+function! s:suite.should_create_groups_and_connections() abort
+  let g:test_connection_name = '/group/connection-first-db'
   runtime autoload/db_ui/utils.vim
   function! db_ui#utils#input(name, val)
     if a:name ==? 'Enter connection url: '
@@ -21,19 +21,17 @@ function! s:suite.should_prompt_to_enter_url_for_new_connection() abort
     endif
   endfunction
 
-  call s:expect(&filetype).not.to_equal('dbui')
-  :DBUIAddConnection
   :DBUI
-  call s:expect(&filetype).to_equal('dbui')
+  norm A
   call s:expect(getline(1, '$')).to_equal(['▸ group'])
   norm o
-  call s:expect(getline(1, '$')).to_equal(['▾ group', '  ▸ connection-file-db'])
+  call s:expect(getline(1, '$')).to_equal(['▾ group', '  ▸ connection-first-db'])
   let g:test_connection_name = '/group/nested-group/connection-second-db'
   norm A
-  call s:expect(getline(1, '$')).to_equal(['▾ group', '  ▸ connection-file-db', '  ▸ nested-group'])
+  call s:expect(getline(1, '$')).to_equal(['▾ group', '  ▸ connection-first-db', '  ▸ nested-group'])
 endfunction
 
-function! s:suite.should_allow_renaming_connection() abort
+function! s:suite.should_allow_renaming_groups_and_connections() abort
   let g:test_group_name = 'edited-group-name'
   function! db_ui#utils#input(name, val)
     if a:name ==? 'Edit group name: '
@@ -51,13 +49,13 @@ function! s:suite.should_allow_renaming_connection() abort
   :DBUI
   norm r
   call s:expect(getline(1, '$')).to_equal(['▸ edited-group-name'])
+  norm ojr
   let g:test_group_name = 'edited-nested-group-name'
-  norm ojrA
-  norm jrA
+  norm jr
   call s:expect(getline(1, '$')).to_equal(['▾ edited-group-name', '  ▸ edited-db-name', '  ▸ edited-nested-group-name'])
 endfunction
 
-function! s:suite.should_delete_connection() abort
+function! s:suite.should_delete_group_and_connection() abort
   norm d
   call s:expect(getline(1, '$')).to_equal(['▾ edited-group-name', '  ▸ edited-db-name'])
   norm d
