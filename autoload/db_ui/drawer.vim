@@ -433,6 +433,11 @@ function! s:drawer.add_db(db) abort
       endfor
     endif
   endif
+  
+  if !has_key(g:db_ui_icons, 'saved_query')
+    let g:db_ui_icons.saved_query = g:db_ui_icons.tables
+  endif
+  
   call self.add('Saved queries ('.len(a:db.saved_queries.list).')', 'toggle', 'saved_queries', self.get_toggle_icon('saved_queries', a:db.saved_queries), a:db.key_name, 1, { 'expanded': a:db.saved_queries.expanded })
   if a:db.saved_queries.expanded
     for saved_query in a:db.saved_queries.list
@@ -498,6 +503,11 @@ function! s:drawer.toggle_line(edit_action) abort
   endif
 
   let db = self.dbui.dbs[item.dbui_db_key_name]
+
+  if item.type ==? 'saved_queries'
+    let db.saved_queries.expanded = !db.saved_queries.expanded
+    return self.render()
+  endif
 
   let tree = db
   if item.type !=? 'db'
@@ -690,6 +700,11 @@ endfunction
 
 function! s:drawer.get_nested(obj, val, ...) abort
   let default = get(a:, '1', 0)
+  
+  if a:val ==? 'saved_queries' && has_key(a:obj, 'saved_queries')
+    return a:obj.saved_queries
+  endif
+  
   let items = split(a:val, '->')
   let result = copy(a:obj)
 
