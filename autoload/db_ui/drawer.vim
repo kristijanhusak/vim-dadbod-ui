@@ -9,11 +9,6 @@ function db_ui#drawer#get()
   return s:drawer_instance
 endfunction
 
-" Default drawer sections and their order
-if !exists('g:db_ui_drawer_sections')
-  let g:db_ui_drawer_sections = ['new_query', 'buffers', 'saved_queries', 'schemas']
-endif
-
 function! s:drawer.new(dbui) abort
   let instance = copy(self)
   let instance.dbui = a:dbui
