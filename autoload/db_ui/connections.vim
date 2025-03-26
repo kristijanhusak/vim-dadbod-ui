@@ -47,6 +47,8 @@ function! s:connections.add_full_url() abort
   try
     let url = db_ui#resolve(db_ui#utils#input('Enter connection url: ', url))
     call db#url#parse(url)
+    " Attempt to resolve to check if it's valid url
+    call db#resolve(url)
   catch /.*/
     return db_ui#notifications#error(v:exception)
   endtry
@@ -80,6 +82,8 @@ function! s:connections.rename(db) abort
   try
     let url = db_ui#resolve(db_ui#utils#input('Edit connection url for "'.entry.name.'": ', url))
     call db#url#parse(url)
+    " Attempt to resolve to check if it's valid url
+    call db#resolve(url)
   catch /.*/
     return db_ui#notifications#error(v:exception)
   endtry
