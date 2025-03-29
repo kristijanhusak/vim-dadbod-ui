@@ -40,6 +40,12 @@ let s:mysql = {
       \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
       \ }
 
+let s:cassandra = {
+      \ 'List': 'SELECT * from {optional_schema}{table} LIMIT 200;',
+      \ 'Columns': "SELECT * FROM system_schema.columns WHERE keyspace_name='{dbname}' AND table_name='{table}';",
+      \ 'Indexes': "SELECT * FROM system_schema.indexes WHERE keyspace_name='{dbname}' AND table_name='{table}';",
+      \ }
+
 let s:oracle_from = "
       \FROM all_constraints N\n
       \JOIN all_cons_columns L\n\t
@@ -191,6 +197,7 @@ let s:helpers = {
       \ 'bigquery': s:bigquery,
       \ 'postgresql': s:postgres,
       \ 'mysql': s:mysql,
+      \ 'cassandra': s:cassandra,
       \ 'mariadb': s:mysql,
       \ 'oracle': s:oracle,
       \ 'sqlite': s:sqlite,
