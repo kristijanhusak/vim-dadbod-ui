@@ -4,6 +4,8 @@ nnoremap <silent><buffer> <Plug>(DBUI_YankHeader) :call db_ui#dbout#yank_header(
 nnoremap <silent><buffer> <Plug>(DBUI_ToggleResultLayout) :call db_ui#dbout#toggle_layout()<CR>
 omap <silent><buffer> ic :call db_ui#dbout#get_cell_value()<CR>
 
+setlocal foldmethod=expr foldexpr=db_ui#dbout#foldexpr(v:lnum) | silent! normal!zo
+
 if get(g:, 'db_ui_disable_mappings', 0) || get(g:, 'db_ui_disable_mappings_dbout', 0)
   finish
 endif
