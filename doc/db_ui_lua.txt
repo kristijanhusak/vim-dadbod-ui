@@ -1,0 +1,486 @@
+*db_ui_lua.txt*  Database UI for Neovim in Lua
+
+================================================================================
+CONTENTS                                                      *db-ui-lua-contents*
+
+1. Introduction.................................|db-ui-lua-intro|
+2. Installation.................................|db-ui-lua-installation|
+3. Configuration................................|db-ui-lua-configuration|
+4. Commands.....................................|db-ui-lua-commands|
+5. Mappings.....................................|db-ui-lua-mappings|
+6. API Functions................................|db-ui-lua-api|
+7. Database Connections.........................|db-ui-lua-connections|
+8. Migration Guide..............................|db-ui-lua-migration|
+9. Troubleshooting..............................|db-ui-lua-troubleshooting|
+
+================================================================================
+1. INTRODUCTION                                                  *db-ui-lua-intro*
+
+DB UI Lua is a complete rewrite of the popular vim-dadbod-ui plugin for
+Neovim, implemented entirely in Lua. It provides a simple UI for managing
+database connections and executing queries through vim-dadbod.
+
+Key improvements over the Vimscript version:
+- Native Lua performance and integration
+- Better error handling and validation
+- Enhanced configuration system
+- nvim-notify integration
+- Lazy loading for faster startup
+- Improved extensibility
+
+Requirements:
+- Neovim 0.7.0+
+- vim-dadbod plugin
+- A database client supported by vim-dadbod
+
+================================================================================
+2. INSTALLATION                                           *db-ui-lua-installation*
+
+Using lazy.nvim: >
+    {
+      'your-username/vim-dadbod-ui-lua',
+      dependencies = {
+        { 'tpope/vim-dadbod', lazy = true },
+        { 'kristijanhusak/vim-dadbod-completion', ft = { 'sql', 'mysql', 'plsql' }, lazy = true },
+      },
+      cmd = {
+        'DBUI',
+        'DBUIToggle', 
+        'DBUIAddConnection',
+        'DBUIFindBuffer',
+      },
+      config = function()
+        require('db_ui').setup({
+          use_nerd_fonts = true,
+        })
+      end,
+    }
+<
+
+Using packer.nvim: >
+    use {
+      'your-username/vim-dadbod-ui-lua',
+      requires = {
+        'tpope/vim-dadbod',
+        'kristijanhusak/vim-dadbod-completion', -- Optional
+      },
+      config = function()
+        require('db_ui').setup()
+      end
+    }
+<
+
+================================================================================
+3. CONFIGURATION                                         *db-ui-lua-configuration*
+
+The plugin is configured through the setup function. All configuration is
+optional and has sensible defaults.
+
+                                                                *db-ui-lua-setup*
+setup({config})
+    Configure the plugin with the provided options.
+
+    Parameters: ~
+        {config} (table) Configuration options
+
+Example configuration: >
+    require('db_ui').setup({
+      -- UI Configuration
+      use_nerd_fonts = true,
+      use_nvim_notify = true,
+      winwidth = 40,
+      win_position = 'left',
+      
+      -- Database Configuration  
+      save_location = '~/.local/share/db_ui',
+      tmp_query_location = '',
+      default_query = 'SELECT * from "{table}" LIMIT 200;',
+      
+      -- Execution Configuration
+      execute_on_save = true,
+      auto_execute_table_helpers = false,
+      
+      -- Mapping Configuration
+      disable_mappings = false,
+      disable_mappings_dbui = false,
+      disable_mappings_sql = false,
+      
+      -- Advanced Configuration
+      table_helpers = {},
+      bind_param_pattern = [[\w\+]],
+      debug = false,
+    })
+<
+
+                                                    *db-ui-lua-config-options*
+Configuration Options:
+
+use_nerd_fonts                                      *db-ui-lua-use-nerd-fonts*
+    Type: boolean
+    Default: false
+    
+    Enable nerd font icons in the UI.
+
+use_nvim_notify                                    *db-ui-lua-use-nvim-notify*
+    Type: boolean  
+    Default: false
+    
+    Use nvim-notify for notifications if available.
+
+winwidth                                                  *db-ui-lua-winwidth*
+    Type: number
+    Default: 40
+    
+    Width of the DBUI drawer window.
+
+win_position                                          *db-ui-lua-win-position*
+    Type: string
+    Default: 'left'
+    
+    Position of the DBUI drawer. Can be 'left' or 'right'.
+
+save_location                                        *db-ui-lua-save-location*
+    Type: string
+    Default: '~/.local/share/db_ui'
+    
+    Directory where saved queries and connections are stored.
+
+tmp_query_location                              *db-ui-lua-tmp-query-location*
+    Type: string
+    Default: ''
+    
+    Directory for temporary query files. If empty, uses system temp directory.
+
+default_query                                        *db-ui-lua-default-query*
+    Type: string
+    Default: 'SELECT * from "{table}" LIMIT 200;'
+    
+    Default query template for table helpers.
+
+execute_on_save                                    *db-ui-lua-execute-on-save*
+    Type: boolean
+    Default: true
+    
+    Automatically execute queries when SQL files are saved.
+
+auto_execute_table_helpers              *db-ui-lua-auto-execute-table-helpers*
+    Type: boolean
+    Default: false
+    
+    Automatically execute table helper queries when opened.
+
+disable_mappings                                  *db-ui-lua-disable-mappings*
+    Type: boolean
+    Default: false
+    
+    Disable all default key mappings.
+
+table_helpers                                        *db-ui-lua-table-helpers*
+    Type: table
+    Default: {}
+    
+    Custom table helper queries by database type.
+
+bind_param_pattern                              *db-ui-lua-bind-param-pattern*
+    Type: string
+    Default: [[\w\+]]
+    
+    Pattern for bind parameters in queries.
+
+debug                                                          *db-ui-lua-debug*
+    Type: boolean
+    Default: false
+    
+    Enable debug logging.
+
+================================================================================
+4. COMMANDS                                                 *db-ui-lua-commands*
+
+                                                                         *:DBUI*
+:DBUI
+    Open the database UI drawer. Supports command modifiers like :tab, :split.
+
+                                                                   *:DBUIToggle*
+:DBUIToggle
+    Toggle the database UI drawer. If open, close it. If closed, open it.
+
+                                                                    *:DBUIClose*
+:DBUIClose  
+    Close the database UI drawer.
+
+                                                            *:DBUIAddConnection*
+:DBUIAddConnection
+    Prompt to add a new database connection.
+
+                                                              *:DBUIFindBuffer*
+:DBUIFindBuffer
+    Find the current buffer in the DBUI drawer or assign it to a database.
+
+                                                           *:DBUIRenameBuffer*
+:DBUIRenameBuffer
+    Rename the current buffer or saved query.
+
+                                                          *:DBUILastQueryInfo*
+:DBUILastQueryInfo
+    Show information about the last executed query.
+
+================================================================================
+5. MAPPINGS                                                 *db-ui-lua-mappings*
+
+                                                      *db-ui-lua-mappings-dbui*
+DBUI Drawer Mappings:
+
+<Plug>(DBUI_SelectLine)                            *<Plug>(DBUI_SelectLine)*
+    Default: o, <CR>, <2-LeftMouse>
+    Open or toggle the item under cursor.
+
+<Plug>(DBUI_SelectLineVsplit)                *<Plug>(DBUI_SelectLineVsplit)*
+    Default: S
+    Open the item under cursor in a vertical split.
+
+<Plug>(DBUI_DeleteLine)                            *<Plug>(DBUI_DeleteLine)*
+    Default: d
+    Delete the connection or query under cursor.
+
+<Plug>(DBUI_Redraw)                                    *<Plug>(DBUI_Redraw)*
+    Default: R
+    Redraw and refresh the drawer.
+
+<Plug>(DBUI_AddConnection)                      *<Plug>(DBUI_AddConnection)*
+    Default: A
+    Add a new database connection.
+
+<Plug>(DBUI_ToggleDetails)                      *<Plug>(DBUI_ToggleDetails)*
+    Default: H
+    Toggle detailed view.
+
+<Plug>(DBUI_RenameLine)                            *<Plug>(DBUI_RenameLine)*
+    Default: r
+    Rename the current item.
+
+<Plug>(DBUI_Quit)                                        *<Plug>(DBUI_Quit)*
+    Default: q
+    Close the drawer.
+
+                                                *db-ui-lua-mappings-navigation*
+Navigation Mappings:
+
+<Plug>(DBUI_GotoFirstSibling)                *<Plug>(DBUI_GotoFirstSibling)*
+    Default: <C-k>
+    Go to the first sibling at the same level.
+
+<Plug>(DBUI_GotoLastSibling)                  *<Plug>(DBUI_GotoLastSibling)*
+    Default: <C-j>
+    Go to the last sibling at the same level.
+
+<Plug>(DBUI_GotoNextSibling)                  *<Plug>(DBUI_GotoNextSibling)*
+    Default: J
+    Go to the next sibling at the same level.
+
+<Plug>(DBUI_GotoPrevSibling)                  *<Plug>(DBUI_GotoPrevSibling)*
+    Default: K
+    Go to the previous sibling at the same level.
+
+<Plug>(DBUI_GotoParentNode)                    *<Plug>(DBUI_GotoParentNode)*
+    Default: <C-p>
+    Go to the parent node.
+
+<Plug>(DBUI_GotoChildNode)                      *<Plug>(DBUI_GotoChildNode)*
+    Default: <C-n>
+    Go to the first child node.
+
+                                                       *db-ui-lua-mappings-sql*
+SQL Buffer Mappings:
+
+<Plug>(DBUI_ExecuteQuery)                        *<Plug>(DBUI_ExecuteQuery)*
+    Default: <Leader>S
+    Execute the current query or visual selection.
+
+<Plug>(DBUI_SaveQuery)                              *<Plug>(DBUI_SaveQuery)*
+    Default: <Leader>W
+    Save the current query to a file.
+
+<Plug>(DBUI_EditBindParameters)            *<Plug>(DBUI_EditBindParameters)*
+    Default: <Leader>E
+    Edit bind parameters for the query.
+
+================================================================================
+6. API FUNCTIONS                                               *db-ui-lua-api*
+
+The plugin provides a Lua API for programmatic access.
+
+                                                              *db-ui-lua.open()*
+open({mods})
+    Open the database UI drawer.
+    
+    Parameters: ~
+        {mods} (string, optional) Command modifiers like 'tab' or 'split'
+
+                                                            *db-ui-lua.toggle()*
+toggle()
+    Toggle the database UI drawer.
+
+                                                             *db-ui-lua.close()*
+close()
+    Close the database UI drawer.
+
+                                                       *db-ui-lua.find_buffer()*
+find_buffer()
+    Find the current buffer in DBUI or assign it to a database.
+
+                                                  *db-ui-lua.connections_list()*
+connections_list()
+    Return a list of all configured database connections.
+    
+    Returns: ~
+        (table) List of connection objects
+
+                                                       *db-ui-lua.reset_state()*
+reset_state()
+    Reset all plugin state.
+
+                                                   *db-ui-lua.add_connection()*
+add_connection()
+    Interactively add a new database connection.
+
+                                                 *db-ui-lua.export_connections()*
+export_connections({filepath})
+    Export all connections to a JSON file.
+    
+    Parameters: ~
+        {filepath} (string) Path to export file
+
+                                                 *db-ui-lua.import_connections()*
+import_connections({filepath})
+    Import connections from a JSON file.
+    
+    Parameters: ~
+        {filepath} (string) Path to import file
+
+================================================================================
+7. DATABASE CONNECTIONS                                 *db-ui-lua-connections*
+
+The plugin supports multiple ways to define database connections:
+
+                                                 *db-ui-lua-connections-global*
+Global Variables:
+
+Single connection using vim.g.db: >
+    vim.g.db = 'postgresql://user:password@localhost/mydb'
+<
+
+Multiple connections using vim.g.dbs (dictionary format): >
+    vim.g.dbs = {
+      dev = 'postgresql://user:password@localhost/dev_db',
+      staging = 'mysql://user:password@staging-host/staging_db',
+    }
+<
+
+Multiple connections using vim.g.dbs (array format): >
+    vim.g.dbs = {
+      { name = 'dev', url = 'postgresql://user:password@localhost/dev_db' },
+      { name = 'staging', url = 'mysql://user:password@staging-host/staging_db' },
+    }
+<
+
+                                                    *db-ui-lua-connections-env*
+Environment Variables:
+
+Set DBUI_URL and optionally DBUI_NAME: >
+    export DBUI_URL="postgresql://user:password@localhost/mydb"
+    export DBUI_NAME="my_database"
+<
+
+Use custom prefixes (DB_UI_ by default): >
+    export DB_UI_DEV="postgresql://user:password@localhost/dev_db"
+    export DB_UI_PROD="postgresql://user:password@prod-host/prod_db"
+<
+
+                                                 *db-ui-lua-connections-dotenv*
+Dotenv Integration:
+
+Create a .env file in your project: >
+    DB_UI_DEV=postgresql://user:password@localhost/dev_db
+    DB_UI_STAGING=mysql://user:password@staging-host/staging_db
+    DB_UI_PROD=postgresql://user:password@prod-host/prod_db
+<
+
+                                                   *db-ui-lua-connections-file*
+Connections File:
+
+Connections are automatically saved to a JSON file in the save_location
+directory. You can manually edit this file or use the import/export functions.
+
+================================================================================
+8. MIGRATION GUIDE                                         *db-ui-lua-migration*
+
+                                              *db-ui-lua-migration-installation*
+Migration from Vimscript Version:
+
+1. Replace the plugin installation in your plugin manager
+2. Existing global variables will continue to work
+3. Optionally migrate to Lua configuration for better features
+
+                                              *db-ui-lua-migration-config*
+Configuration Migration:
+
+Before (Vimscript): >
+    let g:db_ui_use_nerd_fonts = 1
+    let g:db_ui_winwidth = 40
+    let g:db_ui_save_location = '~/.local/share/db_ui'
+<
+
+After (Lua): >
+    require('db_ui').setup({
+      use_nerd_fonts = true,
+      winwidth = 40,
+      save_location = '~/.local/share/db_ui',
+    })
+<
+
+                                               *db-ui-lua-migration-functions*
+Custom Function Migration:
+
+Before (Vimscript): >
+    function! MyCustomBufferNameGenerator(opts)
+      return a:opts.table . '-custom'
+    endfunction
+    let g:Db_ui_buffer_name_generator = function('MyCustomBufferNameGenerator')
+<
+
+After (Lua): >
+    require('db_ui').setup({
+      buffer_name_generator = function(opts)
+        return opts.table .. '-custom'
+      end
+    })
+<
+
+================================================================================
+9. TROUBLESHOOTING                                   *db-ui-lua-troubleshooting*
+
+                                                  *db-ui-lua-troubleshooting-debug*
+Enable Debug Mode:
+
+For detailed logging, enable debug mode: >
+    require('db_ui').setup({
+      debug = true,
+    })
+<
+
+                                                *db-ui-lua-troubleshooting-common*
+Common Issues:
+
+1. Commands not found: Ensure the plugin is loaded and setup() is called
+2. Connection issues: Verify database URLs and vim-dadbod installation  
+3. Mapping conflicts: Use disable options to prevent conflicts
+4. Performance issues: Check debug output for bottlenecks
+
+                                                 *db-ui-lua-troubleshooting-reset*
+Reset Plugin State:
+
+If the plugin gets into a bad state, reset it: >
+    :lua require('db_ui').reset_state()
+<
+
+vim:tw=78:ts=8:ft=help:norl: 
