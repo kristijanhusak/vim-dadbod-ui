@@ -184,7 +184,7 @@ let s:sqlserver = {
 
 let s:clickhouse = {
       \ 'List': "select * from `{schema}`.`{table}` limit 100 Format PrettyCompactMonoBlock",
-      \ 'Columns': "select name from system.columns where database='{schema} and table={table}'",
+      \ 'Columns': "select name from system.columns where database='{schema}' and table='{table}'",
       \ }
 
 let s:helpers = {
