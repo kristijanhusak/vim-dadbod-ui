@@ -176,7 +176,7 @@ change the prefix, change `g:db_ui_dotenv_variable_prefix` value.
 This option gives a bit more flexibility, but it's harder to keep it out of
 version control.
 vim-dadbod `g:db` variable is read first.
-`g:dbs` can be defined as a object, or as an array of objects:
+`g:dbs` can be defined as an object, or as an array of objects:
 
 Object example:
 >
@@ -789,6 +789,12 @@ g:db_ui_force_echo_notifications
 
 		Default value: `0`
 
+					      *g:db_ui_disable_info_notifications*
+g:db_ui_disable_info_notifications
+		Disable all notifications with "info" severity.
+
+		Default value: `0`
+
 					     *g:db_ui_use_postgres_views*
 g:db_ui_use_postgres_views
     Toggle showing postgres views in the drawer.
@@ -849,6 +855,39 @@ g:Db_ui_buffer_name_generator
 <
 
 		Default value: `0`
+
+					      *g:Db_ui_table_name_sorter
+g:Db_ui_table_name_sorter
+		Custom function for sorting table names.
+		Function accepts the table name list and return the sorted
+		table name list.
+		Note the uppercase `D`, which is required by vim for
+		functions.
+		Also, `make sure that name is always unique` to avoid any issues
+		with overlapping names.
+		Example:
+>
+		function s:table_name_sorter(tables)
+		  return sort(tables)
+		endfunction
+
+		let g:Db_ui_table_name_sorter = function('s:table_name_sorter')
+<
+
+		Default value: `0`
+
+					      *g:db_ui_drawer_sections*
+g:db_ui_drawer_sections
+		This value defines which sections appear in the drawer and in
+		what order. Available sections are: 'new_query', 'buffers',
+		'saved_queries', and 'schemas'. If not set, all sections
+		are shown in the default order.
+
+		Example to only show schemas/tables and new query:
+>
+		let g:db_ui_drawer_sections = ['schemas', 'new_query']
+<
+		Default value: `['new_query', 'buffers', 'saved_queries', 'schemas']`
 
 					      *g:db_ui_default_query*
 g:db_ui_default_query (DEPRECATED)

@@ -206,7 +206,7 @@ let s:oracle = {
       \   'filetype': 'plsql',
       \ }
 
-if get(g:, 'dbext_default_ORA_bin', '') == 'sql'
+if index(['sql', 'sqlcl'], get(g:, 'dbext_default_ORA_bin', '')) >= 0
   let s:oracle.parse_results = {results, min_len -> s:results_parser(s:strip_quotes(results[3:]), ',', min_len)}
   let s:oracle.parse_virtual_results = {results, min_len -> s:results_parser(s:strip_quotes(results[3:]), ',', min_len)}
 endif
@@ -236,6 +236,28 @@ let s:bigquery = {
       \ }
 
 
+let s:clickhouse_schemes_query = "
+      \ SELECT name as schema_name
+      \ FROM system.databases
+      \ ORDER BY name"
+
+let s:clickhouse_schemes_tables_query = "
+      \ SELECT database AS table_schema, name AS table_name
+      \ FROM system.tables
+      \ ORDER BY table_name"
+
+let s:clickhouse = {
+      \ 'args': ['-q'],
+      \ 'schemes_query': trim(s:clickhouse_schemes_query),
+      \ 'schemes_tables_query': trim(s:clickhouse_schemes_tables_query),
+      \ 'cell_line_number': 1,
+      \ 'cell_line_pattern': '^.*$',
+      \ 'parse_results': {results, min_len -> s:results_parser(results, '\t', min_len)},
+      \ 'default_scheme': '',
+      \ 'quote': 1,
+      \ }
+
+" Add ClickHouse to the schemas dictionary
 let s:schemas = {
       \ 'postgres': s:postgresql,
       \ 'postgresql': s:postgresql,
@@ -246,7 +268,9 @@ let s:schemas = {
       \ 'bigquery': s:bigquery,
       \ 'duckdb': s:duckdb,
       \ 'md': s:duckdb,
+      \ 'clickhouse': s:clickhouse,
       \ }
+
 
 if !exists('g:db_adapter_postgres')
   let g:db_adapter_postgres = 'db#adapter#postgresql#'
