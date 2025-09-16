@@ -46,18 +46,19 @@ let s:duckdb_table_comments_query = "
     \    s.comment AS schema_comment,\n
     \    d.comment AS database_comment\n
     \FROM duckdb_tables() AS t\n
+    \INNER JOIN (SELECT current_database() AS database_name) USING (database_name)\n
     \INNER JOIN duckdb_schemas() AS s ON t.schema_oid = s.oid\n
     \INNER JOIN duckdb_databases() AS d ON t.database_oid = d.database_oid\n
     \WHERE t.schema_name = '{schema}' AND t.table_name = '{table}'"
 
 let s:duckdb = {
       \ 'List': 'SELECT * FROM {optional_schema}"{table}" LIMIT 200',
-      \ 'Columns': "SELECT * FROM duckdb_columns() where table_name = '{table}' and schema_name = '{schema}'",
+      \ 'Columns': "SELECT * FROM duckdb_columns() INNER JOIN (SELECT current_database() AS database_name) USING (database_name) where table_name = '{table}' and schema_name = '{schema}'",
       \ 'Describe': 'DESCRIBE {optional_schema}"{table}"',
-      \ 'Indexes': "SELECT * FROM duckdb_indexes() where table_name = '{table}' and schema_name = '{schema}'",
-      \ 'Constraints': "SELECT * FROM duckdb_constraints() where table_name = '{table}' and schema_name = '{schema}'",
+      \ 'Indexes': "SELECT * FROM duckdb_indexes() INNER JOIN (SELECT current_database() AS database_name) USING (database_name) where table_name = '{table}' and schema_name = '{schema}'",
+      \ 'Constraints': "SELECT * FROM duckdb_constraints() INNER JOIN (SELECT current_database() AS database_name) USING (database_name) where table_name = '{table}' and schema_name = '{schema}'",
       \ 'Table Comments': s:duckdb_table_comments_query,
-      \ 'Column Comments': "SELECT column_name, comment FROM duckdb_columns() where table_name = '{table}' and schema_name = '{schema}'",
+      \ 'Column Comments': "SELECT column_name, comment FROM duckdb_columns() INNER JOIN (SELECT current_database() AS database_name) USING (database_name) where table_name = '{table}' and schema_name = '{schema}'",
       \ 'Summarize': 'SUMMARIZE {optional_schema}"{table}"',
       \ }
 
