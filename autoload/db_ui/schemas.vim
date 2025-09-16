@@ -61,8 +61,7 @@ let s:postgresql = {
 let s:duckdb_list_schema_query = "
     \ SELECT schema_name as schema_name
     \ FROM duckdb_schemas() as s
-    \ INNER JOIN duckdb_databases() as d on s.database_oid = d.database_oid
-    \ WHERE not d.internal and not s.internal"
+    \ INNER JOIN (SELECT current_database() as database_name) USING (database_name);"
 
 let s:duckdb_tables = "
     \ SELECT t.schema_name as table_schema, t.table_name
