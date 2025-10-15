@@ -4,9 +4,9 @@ endfunction
 
 function! s:results_parser(results, delimiter, min_len) abort
   if a:min_len ==? 1
-    return filter(a:results, '!empty(trim(v:val))')
+    return filter(map(a:results, 'trim(v:val)'), '!empty(v:val)')
   endif
-  let mapped = map(a:results, {_,row -> filter(split(row, a:delimiter), '!empty(trim(v:val))')})
+  let mapped = map(a:results, {_,row -> filter(map(split(row, a:delimiter), 'trim(v:val)'), '!empty(v:val)')})
   if a:min_len > 1
     return filter(mapped, 'len(v:val) ==? '.a:min_len)
   endif
@@ -103,6 +103,17 @@ let s:mysql = {
       \ 'layout_flag': '\\G',
       \ 'quote': 0,
       \ 'filetype': 'mysql',
+      \ }
+
+let s:cassandra = {
+      \ 'schemes_query': 'SELECT keyspace_name FROM system_schema.keyspaces;',
+      \ 'schemes_tables_query': 'SELECT keyspace_name, table_name FROM system_schema.tables;',
+      \ 'cell_line_number': 3,
+      \ 'cell_line_pattern': '^-\++-\+',
+      \ 'requires_stdin': v:true,
+      \ 'parse_results': {results, min_len -> s:results_parser(results[3:-2], '|', min_len)},
+      \ 'default_scheme': '',
+      \ 'quote': 0,
       \ }
 
 let s:oracle_args = join(
@@ -237,6 +248,7 @@ let s:schemas = {
       \ 'postgresql': s:postgresql,
       \ 'sqlserver': s:sqlserver,
       \ 'mysql': s:mysql,
+      \ 'cassandra': s:cassandra,
       \ 'mariadb': s:mysql,
       \ 'oracle': s:oracle,
       \ 'bigquery': s:bigquery,
