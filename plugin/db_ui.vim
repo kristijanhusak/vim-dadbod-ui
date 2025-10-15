@@ -64,6 +64,7 @@ let g:db_ui_icons = {
       \   'schema': s:expanded_icon,
       \   'tables': s:expanded_icon,
       \   'table': s:expanded_icon,
+      \   'group': s:expanded_icon,
       \ },
       \ 'collapsed': {
       \   'db': s:collapsed_icon,
@@ -73,6 +74,7 @@ let g:db_ui_icons = {
       \   'schema': s:collapsed_icon,
       \   'tables': s:collapsed_icon,
       \   'table': s:collapsed_icon,
+      \   'group': s:collapsed_icon,
       \ },
       \ 'saved_query': '*',
       \ 'new_query': '+',
@@ -93,6 +95,7 @@ if g:db_ui_use_nerd_fonts
         \   'schema': s:expanded_icon.' 󰙅',
         \   'tables': s:expanded_icon.' 󰓱',
         \   'table': s:expanded_icon.' ',
+        \   'group': s:expanded_icon.' 󰒋',
         \ },
         \ 'collapsed': {
         \   'db': s:collapsed_icon.' 󰆼',
@@ -102,6 +105,7 @@ if g:db_ui_use_nerd_fonts
         \   'schema': s:collapsed_icon.' 󰙅',
         \   'tables': s:collapsed_icon.' 󰓱',
         \   'table': s:collapsed_icon.' ',
+        \   'group': s:collapsed_icon.' 󰒋',
         \ },
         \ 'saved_query': '  ',
         \ 'new_query': '  󰓰',
