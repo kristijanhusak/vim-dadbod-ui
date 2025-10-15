@@ -52,6 +52,12 @@ function! s:notification(msg, opts) abort
     return
   endif
 
+  let type = get(a:opts, 'type', 'info')
+
+  if type ==? 'info' && g:db_ui_disable_info_notifications
+    return
+  endif
+
   let use_echo = get(a:opts, 'echo', 0)
   if !use_echo
     let use_echo = g:db_ui_force_echo_notifications
@@ -94,6 +100,9 @@ function! s:notification_nvim_notify(msg, opts) abort
   let opts = { 'title': title }
   if get(a:opts, 'delay')
     let opts.timeout = { 'timeout': a:opts.delay }
+  endif
+  if (type ==? 'info')
+    let opts.id = 'vim-dadbod-ui-info'
   endif
 
   let log_levels = {

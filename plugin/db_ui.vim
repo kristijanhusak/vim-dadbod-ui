@@ -25,6 +25,7 @@ let g:db_ui_show_help = get(g:, 'db_ui_show_help', 1)
 let g:db_ui_use_nerd_fonts = get(g:, 'db_ui_use_nerd_fonts', 0)
 let g:db_ui_execute_on_save = get(g:, 'db_ui_execute_on_save', 1)
 let g:db_ui_force_echo_notifications = get(g:, 'db_ui_force_echo_notifications', 0)
+let g:db_ui_disable_info_notifications = get(g:, 'db_ui_disable_info_notifications', 0)
 let g:db_ui_use_nvim_notify = get(g:, 'db_ui_use_nvim_notify', 0)
 let g:Db_ui_buffer_name_generator = get(g:, 'Db_ui_buffer_name_generator', 0)
 let g:Db_ui_table_name_sorter = get(g:, 'Db_ui_table_name_sorter', 0)
@@ -32,6 +33,8 @@ let g:db_ui_debug = get(g:, 'db_ui_debug', 0)
 let g:db_ui_hide_schemas = get(g:, 'db_ui_hide_schemas', [])
 let g:db_ui_bind_param_pattern = get(g: , 'db_ui_bind_param_pattern', ':\w\+')
 let g:db_ui_is_oracle_legacy = get(g:, 'db_ui_is_oracle_legacy', 0)
+let g:db_ui_drawer_sections = get(g:, 'db_ui_drawer_sections', ['new_query', 'buffers', 'saved_queries', 'schemas'])
+
 let s:dbui_icons = get(g:, 'db_ui_icons', {})
 let s:expanded_icon = get(s:dbui_icons, 'expanded', '▾')
 let s:collapsed_icon = get(s:dbui_icons, 'collapsed', '▸')
@@ -120,7 +123,6 @@ augroup dbui
   autocmd!
   autocmd BufRead,BufNewFile *.dbout set filetype=dbout
   autocmd BufReadPost *.dbout nested call db_ui#save_dbout(expand('<afile>'))
-  autocmd FileType dbout setlocal foldmethod=expr foldexpr=db_ui#dbout#foldexpr(v:lnum) | silent! normal!zo
   autocmd FileType dbout,dbui autocmd BufEnter,WinEnter <buffer> stopinsert
 augroup END
 
