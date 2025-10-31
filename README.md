@@ -78,7 +78,7 @@ let g:db_ui_env_variable_name = 'DATABASE_NAME'
 ```
 
 Optionally you can leverage [dotenv.vim](https://github.com/tpope/vim-dotenv)
-to specific any number of connections in an `.env` file by using a specific
+to specify any number of connections in an `.env` file by using a specific
 prefix (defaults to `DB_UI_`). The latter part of the env variable becomes the
 name of the connection (lowercased)
 
