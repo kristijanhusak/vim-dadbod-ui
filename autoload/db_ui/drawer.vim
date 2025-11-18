@@ -408,6 +408,10 @@ endfunction
 function! s:drawer.add_db(db) abort
   let db_name = a:db.name
 
+  if get(a:db, 'read_only', 0)
+    let db_name = '[READ-ONLY] ' . db_name
+  endif
+
   if !empty(a:db.conn_error)
     let db_name .= ' '.g:db_ui_icons.connection_error
   elseif !empty(a:db.conn)

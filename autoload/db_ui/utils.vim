@@ -60,3 +60,56 @@ function! db_ui#utils#print_debug(msg) abort
 
   echom '[DBUI Debug] '.string(a:msg)
 endfunction
+
+function! db_ui#utils#is_query_mutation(query) abort
+  let blocked_keywords = [
+        \ 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'ALTER',
+        \ 'TRUNCATE', 'REPLACE', 'MERGE',
+        \ 'GRANT', 'REVOKE', 'RENAME',
+        \ 'CREATE TABLE', 'CREATE INDEX', 'CREATE DATABASE',
+        \ 'CREATE SCHEMA', 'CREATE VIEW', 'CREATE FUNCTION',
+        \ 'CREATE PROCEDURE', 'CREATE TRIGGER'
+        \ ]
+
+  let upper_query = toupper(trim(a:query))
+
+  " Remove single line comments
+  let upper_query = substitute(upper_query, '--[^\n]*', '', 'g')
+  " Remove multi-line comments
+  let upper_query = substitute(upper_query, '/\*\_.\{-}\*/', '', 'g')
+  " Remove string literals to avoid false positives
+  let upper_query = substitute(upper_query, '''[^'']*''', '''''', 'g')
+  let upper_query = substitute(upper_query, '"[^"]*"', '""', 'g')
+  let upper_query = trim(upper_query)
+
+  " Split by semicolons to check each statement
+  let statements = split(upper_query, ';')
+  
+  for statement in statements
+    let statement = trim(statement)
+    if empty(statement)
+      continue
+    endif
+    
+    " Check for blocked mutation keywords at the start of each statement
+    for blocked_keyword in blocked_keywords
+      if statement =~# '^\s*' . blocked_keyword . '\>'
+        return 1
+      endif
+
+      " Check for WITH clause followed by mutation
+      if statement =~# '^\s*WITH\s\+.\{-}\s\+' . blocked_keyword . '\>'
+        return 1
+      endif
+    endfor
+  endfor
+
+  return 0
+endfunction
+
+function! db_ui#utils#validate_query_for_read_only(query) abort
+  if db_ui#utils#is_query_mutation(a:query)
+    return 'Mutation queries are not allowed in read-only mode'
+  endif
+  return ''
+endfunction
