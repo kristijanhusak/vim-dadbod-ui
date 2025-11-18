@@ -24,6 +24,9 @@ function! s:suite.should_allow_select_queries() abort
 endfunction
 
 function! s:suite.should_handle_multi_statement_queries() abort
+  " The original bug report case - SELECT followed by DELETE
+  call s:expect(db_ui#utils#is_query_mutation("SELECT\n    *\nFROM\n    user_entity\nLIMIT 10;\n\nDELETE FROM user_entity WHERE user_id = 'x'")).to_be_true()
+  
   call s:expect(db_ui#utils#is_query_mutation("SELECT * FROM users;\nDELETE FROM users WHERE id = 1")).to_be_true()
   call s:expect(db_ui#utils#is_query_mutation("SELECT * FROM users;\nSELECT * FROM posts")).to_be_false()
 endfunction
