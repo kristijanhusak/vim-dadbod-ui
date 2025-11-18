@@ -22,6 +22,7 @@ Features:
 * Save queries on single location for later use
 * Define custom table helpers
 * Bind parameters (see `:help vim-dadbod-ui-bind-parameters`)
+* Read-only mode for production database safety
 * Autocompletion with [vim-dadbod-completion](https://github.com/kristijanhusak/vim-dadbod-completion)
 * Jump to foreign keys from the dadbod output (see `:help <Plug>(DBUI_JumpToForeignKey)`)
 * Support for nerd fonts (see `:help g:db_ui_use_nerd_fonts`)
@@ -151,11 +152,30 @@ Just make sure to **NOT COMMIT** these. I suggest using project local vim config
 Using `:DBUIAddConnection` command or pressing `A` in dbui drawer opens up a prompt to enter database url and name,
 that will be saved in `g:db_ui_save_location` connections file. These connections are available from everywhere.
 
+When adding a connection, you'll be prompted whether it should be read-only to prevent mutation queries.
+
 #### Connection related notes
 It is possible to have two connections with same name, but from different source.
 for example, you can have `my-db` in env variable, in `g:dbs` and in saved connections.
 To view from which source the database is, press `H` in drawer.
 If there are duplicate connection names from same source, warning will be shown and first one added will be preserved.
+
+### Read-only mode
+Connections can be marked as read-only to prevent accidental data modifications in production databases.
+Read-only mode blocks INSERT, UPDATE, DELETE, DROP, ALTER, and other mutation queries while allowing SELECT queries.
+
+To mark a connection as read-only, add `"read_only": 1` to your `connections.json`:
+```json
+[
+  {
+    "name": "production",
+    "url": "postgresql://user:pass@host:5432/db",
+    "read_only": 1
+  }
+]
+```
+
+Read-only connections show `[READ-ONLY]` in the drawer and statusline.
 
 ## Settings
 

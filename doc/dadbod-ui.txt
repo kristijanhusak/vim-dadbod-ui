@@ -904,41 +904,27 @@ g:db_ui_drawer_sections
 ==============================================================================
 12. Read-only mode				*vim-dadbod-ui-read-only*
 
-Connections can be marked as read-only to prevent accidental execution of
-mutation queries. This is especially useful for production databases where
-you want to prevent data modifications.
-
-Read-only connections block execution of:
-  - INSERT, UPDATE, DELETE
-  - DROP, ALTER, TRUNCATE
-  - CREATE (tables, indexes, schemas, etc.)
-  - GRANT, REVOKE, RENAME
-  - REPLACE, MERGE
+Connections can be marked as read-only to prevent accidental data
+modifications in production databases. Read-only mode blocks mutation queries
+(INSERT, UPDATE, DELETE, DROP, ALTER, etc.) while allowing SELECT queries.
 
 When adding a connection via |DBUIAddConnection|, you'll be prompted to mark
-it as read-only.
-
-To mark existing connections as read-only, edit the `connections.json` file
-in your |g:db_ui_save_location| directory:
+it as read-only. To manually mark connections as read-only, edit the
+`connections.json` file in your |g:db_ui_save_location| directory:
 >
     [
       {
         "name": "production",
-        "url": "postgresql://user:pass@host:5432/dbname",
+        "url": "postgresql://user:pass@host:5432/db",
         "read_only": 1
       }
     ]
 <
 
-Read-only connections display `[READ-ONLY]` in the drawer and in the
-statusline when working with query buffers from that connection.
+Read-only connections display `[READ-ONLY]` in the drawer and statusline.
 
-Important notes:
-- The validation scans ALL statements in your buffer/selection
-- If ANY statement is a mutation, the entire execution is blocked
-- Mutation keywords in comments or string literals are ignored
-- Example: "SELECT * FROM users; DELETE FROM users" will be blocked
-  because the second statement is a mutation
+Note: The validator scans all statements in your buffer. If any statement
+is a mutation, the entire execution is blocked.
 
 
 					      *g:db_ui_default_query*
