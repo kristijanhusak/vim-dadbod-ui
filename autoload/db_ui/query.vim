@@ -154,6 +154,7 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   let b:dbui_table_name = get(a:opts, 'table', '')
   let b:dbui_schema_name = get(a:opts, 'schema', '')
   let b:db = a:db.conn
+  let b:dbui_read_only = get(a:db, 'read_only', 0)
   let is_existing_buffer = get(a:opts, 'existing_buffer', 0)
   let is_tmp = self.drawer.dbui.is_tmp_location_buffer(a:db, a:buffer_name)
   let db_buffers = self.drawer.dbui.dbs[a:db.key_name].buffers
@@ -213,12 +214,22 @@ endfunction
 function! s:query.execute_query(...) abort
   let is_visual_mode = get(a:, 1, 0)
   let lines = self.get_lines(is_visual_mode)
+  
+  " Check for read-only mode
+  let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
+  if get(db, 'read_only', 0)
+    let query_text = join(lines, "\n")
+    let error = db_ui#utils#validate_query_for_read_only(query_text)
+    if !empty(error)
+      return db_ui#notifications#error(error)
+    endif
+  endif
+  
   call s:start_query()
   if !is_visual_mode && search(s:bind_param_rgx, 'n') <= 0
     call db_ui#utils#print_debug({ 'message': 'Executing whole buffer', 'command': '%DB' })
     silent! exe '%DB'
   else
-    let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
     call self.execute_lines(db, lines, is_visual_mode)
   endif
   let has_async = exists('*db#cancel')

@@ -157,7 +157,11 @@ function! db_ui#statusline(...)
       call add(content, entry)
     endif
   endfor
-  return prefix.join(content, separator)
+  let result = prefix.join(content, separator)
+  if get(b:, 'dbui_read_only', 0)
+    let result = '[READ-ONLY] ' . result
+  endif
+  return result
 endfunction
 
 function! s:dbui.new() abort
@@ -259,7 +263,8 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'schema_support': 0,
         \ 'quote': 0,
         \ 'default_scheme': '',
-        \ 'filetype': ''
+        \ 'filetype': '',
+        \ 'read_only': get(a:db, 'read_only', 0)
         \ }
 
   call self.populate_schema_info(db)
@@ -288,7 +293,7 @@ function! s:dbui.populate_from_global_variable() abort
   if exists('g:db') && !empty(g:db)
     let url = self.resolve_url_global_variable(g:db)
     let gdb_name = split(url, '/')[-1]
-    call self.add_if_not_exists(gdb_name, url, 'g:dbs')
+    call self.add_if_not_exists(gdb_name, url, 'g:dbs', 0)
   endif
 
   if !exists('g:dbs') || empty(g:dbs)
@@ -297,13 +302,14 @@ function! s:dbui.populate_from_global_variable() abort
 
   if type(g:dbs) ==? type({})
     for [db_name, Db_url] in items(g:dbs)
-      call self.add_if_not_exists(db_name, self.resolve_url_global_variable(Db_url), 'g:dbs')
+      call self.add_if_not_exists(db_name, self.resolve_url_global_variable(Db_url), 'g:dbs', 0)
     endfor
     return self
   endif
 
   for db in g:dbs
-    call self.add_if_not_exists(db.name, self.resolve_url_global_variable(db.url), 'g:dbs')
+    let read_only = get(db, 'read_only', 0)
+    call self.add_if_not_exists(db.name, self.resolve_url_global_variable(db.url), 'g:dbs', read_only)
   endfor
 
   return self
@@ -326,7 +332,7 @@ function! s:dbui.populate_from_dotenv() abort
   for [name, url] in items(all_envs)
     if stridx(name, prefix) != -1
       let db_name = tolower(join(split(name, prefix)))
-      call self.add_if_not_exists(db_name, url, 'dotenv')
+      call self.add_if_not_exists(db_name, url, 'dotenv', 0)
     endif
   endfor
 endfunction
@@ -350,7 +356,7 @@ function! s:dbui.populate_from_env() abort
           \ printf('Found %s variable for db url, but unable to parse the name. Please provide name via %s', g:db_ui_env_variable_url, g:db_ui_env_variable_name))
   endif
 
-  call self.add_if_not_exists(env_name, env_url, 'env')
+  call self.add_if_not_exists(env_name, env_url, 'env', 0)
   return self
 endfunction
 
@@ -371,20 +377,25 @@ function! s:dbui.populate_from_connections_file() abort
   let file = db_ui#utils#readfile(self.connections_path)
 
   for conn in file
-    call self.add_if_not_exists(conn.name, conn.url, 'file')
+    call self.add_if_not_exists(conn.name, conn.url, 'file', get(conn, 'read_only', 0))
   endfor
 
   return self
 endfunction
 
-function! s:dbui.add_if_not_exists(name, url, source) abort
+function! s:dbui.add_if_not_exists(name, url, source, ...) abort
   let existing = get(filter(copy(self.dbs_list), 'v:val.name ==? a:name && v:val.source ==? a:source'), 0, {})
   if !empty(existing)
     return db_ui#notifications#warning(printf('Warning: Duplicate connection name "%s" in "%s" source. First one added has precedence.', a:name, a:source))
   endif
-  return add(self.dbs_list, {
+  let read_only = get(a:, 1, 0)
+  let entry = {
         \ 'name': a:name, 'url': db_ui#resolve(a:url), 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
-        \ })
+        \ }
+  if read_only
+    let entry.read_only = read_only
+  endif
+  return add(self.dbs_list, entry)
 endfunction
 
 function! s:dbui.is_tmp_location_buffer(db, buf) abort

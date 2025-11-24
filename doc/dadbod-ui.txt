@@ -21,6 +21,7 @@ vim-dadbod-ui			    *vim-dadbod-ui*
 9. Functions				    |vim-dadbod-ui-functions|
 10. Autocommands 			    |vim-dadbod-ui-autocommands|
 11. Highlights 			            |vim-dadbod-ui-highlights|
+12. Read-only mode			    |vim-dadbod-ui-read-only|
 
 ==============================================================================
 1. Introduction					*vim-dadbod-ui-introduction*
@@ -34,6 +35,7 @@ Main features:
 3. Save queries on single location for later use
 4. Define custom table helpers
 5. Bind parameters
+6. Read-only mode for production database safety
 
 ==============================================================================
 2. Install					*vim-dadbod-ui-install*
@@ -898,6 +900,32 @@ g:db_ui_drawer_sections
 		let g:db_ui_drawer_sections = ['schemas', 'new_query']
 <
 		Default value: `['new_query', 'buffers', 'saved_queries', 'schemas']`
+
+==============================================================================
+12. Read-only mode				*vim-dadbod-ui-read-only*
+
+Connections can be marked as read-only to prevent accidental data
+modifications in production databases. Read-only mode blocks mutation queries
+(INSERT, UPDATE, DELETE, DROP, ALTER, etc.) while allowing SELECT queries.
+
+When adding a connection via |DBUIAddConnection|, you'll be prompted to mark
+it as read-only. To manually mark connections as read-only, edit the
+`connections.json` file in your |g:db_ui_save_location| directory:
+>
+    [
+      {
+        "name": "production",
+        "url": "postgresql://user:pass@host:5432/db",
+        "read_only": 1
+      }
+    ]
+<
+
+Read-only connections display `[READ-ONLY]` in the drawer and statusline.
+
+Note: The validator scans all statements in your buffer. If any statement
+is a mutation, the entire execution is blocked.
+
 
 					      *g:db_ui_default_query*
 g:db_ui_default_query (DEPRECATED)

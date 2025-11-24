@@ -59,7 +59,13 @@ function! s:connections.add_full_url() abort
     return db_ui#notifications#error(v:exception)
   endtry
 
-  return self.save(name, url)
+  let read_only = 0
+  let read_only_choice = confirm('Should this connection be read-only (prevents mutation queries)?', "&No\n&Yes")
+  if read_only_choice ==? 2
+    let read_only = 1
+  endif
+
+  return self.save(name, url, read_only)
 endfunction
 
 function! s:connections.rename(db) abort
@@ -99,8 +105,17 @@ function! s:connections.rename(db) abort
     return db_ui#notifications#error(v:exception)
   endtry
 
+  let read_only = get(entry, 'read_only', 0)
+  let read_only_default = read_only ? 2 : 1
+  let read_only_choice = confirm('Should this connection be read-only (prevents mutation queries)?', "&No\n&Yes", read_only_default)
+  let read_only = read_only_choice ==? 2 ? 1 : 0
+
   call remove(connections, idx)
-  let connections = insert(connections, {'name': name, 'url': url }, idx)
+  let new_conn = {'name': name, 'url': url}
+  if read_only
+    let new_conn.read_only = 1
+  endif
+  let connections = insert(connections, new_conn, idx)
   return self.write(connections)
 endfunction
 
@@ -119,7 +134,7 @@ function! s:connections.get_file() abort
   return printf('%s/%s', save_folder, 'connections.json')
 endfunction
 
-function s:connections.save(name, url) abort
+function s:connections.save(name, url, ...) abort
   let file = self.get_file()
   let dir = fnamemodify(file, ':p:h')
 
@@ -137,7 +152,12 @@ function s:connections.save(name, url) abort
     call db_ui#notifications#error('Connection with that name already exists. Please enter different name.')
     return 0
   endif
-  call add(file, {'name': a:name, 'url': a:url})
+  let read_only = get(a:, 1, 0)
+  let conn = {'name': a:name, 'url': a:url}
+  if read_only
+    let conn.read_only = 1
+  endif
+  call add(file, conn)
   return self.write(file)
 endfunction
 
