@@ -899,6 +899,18 @@ g:db_ui_drawer_sections
 <
 		Default value: `['new_query', 'buffers', 'saved_queries', 'schemas']`
 
+					      *g:db_ui_dbout_list_sort*
+g:db_ui_dbout_list_sort
+		Controls the sort order of the "Query results" list in the
+		drawer. Set to 'asc' to sort from oldest to latest, or
+		'desc' to sort from latest to oldest.
+
+		Example to show latest query results first:
+>
+		let g:db_ui_dbout_list_sort = 'desc'
+<
+		Default value: `'asc'`
+
 					      *g:db_ui_default_query*
 g:db_ui_default_query (DEPRECATED)
 		This value was intially used as a default value for the table
