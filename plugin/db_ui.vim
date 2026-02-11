@@ -34,6 +34,7 @@ let g:db_ui_hide_schemas = get(g:, 'db_ui_hide_schemas', [])
 let g:db_ui_bind_param_pattern = get(g: , 'db_ui_bind_param_pattern', ':\w\+')
 let g:db_ui_is_oracle_legacy = get(g:, 'db_ui_is_oracle_legacy', 0)
 let g:db_ui_drawer_sections = get(g:, 'db_ui_drawer_sections', ['new_query', 'buffers', 'saved_queries', 'schemas'])
+let g:db_ui_dbout_list_sort = get(g:, 'db_ui_dbout_list_sort', 'asc')
 
 let s:dbui_icons = get(g:, 'db_ui_icons', {})
 let s:expanded_icon = get(s:dbui_icons, 'expanded', '▾')

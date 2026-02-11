@@ -754,5 +754,6 @@ function! s:drawer._is_schema_ignored(schema_name)
 endfunction
 
 function! s:sort_dbout(a1, a2)
-  return str2nr(fnamemodify(a:a1, ':t:r')) - str2nr(fnamemodify(a:a2, ':t:r'))
+  let l:result = str2nr(fnamemodify(a:a1, ':t:r')) - str2nr(fnamemodify(a:a2, ':t:r'))
+  return g:db_ui_dbout_list_sort ==? 'desc' ? -l:result : l:result
 endfunction
