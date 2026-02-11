@@ -163,6 +163,7 @@ endfunction
 function! s:dbui.new() abort
   let instance = copy(self)
   let instance.dbs = {}
+  let instance.groups = {}
   let instance.dbs_list = []
   let instance.save_path = ''
   let instance.connections_path = ''
@@ -215,16 +216,52 @@ function! s:dbui.populate_dbs() abort
   call self.populate_from_connections_file()
 
   for db in self.dbs_list
-    let key_name = printf('%s_%s', db.name, db.source)
-    if !has_key(self.dbs, key_name) || db.url !=? self.dbs[key_name].url
-      let new_entry = self.generate_new_db_entry(db)
-      if !empty(new_entry)
-        let self.dbs[key_name] = new_entry
-      endif
-    else
-      let self.dbs[key_name] = self.drawer.populate(self.dbs[key_name])
-    endif
+    call self.populate_item(db)
   endfor
+
+endfunction
+
+function! s:dbui.populate_item(item) abort
+    if self.is_group(a:item)
+        return self.populate_group(a:item)
+    endif
+
+    return self.populate_db(a:item)
+endfunction
+
+function! s:dbui.populate_group(group) abort
+  for conn in a:group.connections
+    call self.populate_item(conn)
+  endfor
+
+  if !has_key(self.groups, a:group.key_name)
+    let self.groups[a:group.key_name] = self.generate_new_group_entry(a:group)
+  endif
+endfunction
+
+function! s:dbui.populate_db(db) abort
+  let key_name = a:db.key_name
+
+  if !has_key(self.dbs, key_name) || a:db.url !=? self.dbs[key_name].url
+    let new_entry = self.generate_new_db_entry(a:db)
+
+    if !empty(new_entry)
+      let self.dbs[key_name] = new_entry
+    endif
+
+  else
+    let self.dbs[key_name] = self.drawer.populate(self.dbs[key_name])
+  endif
+endfunction
+
+function! s:dbui.generate_new_group_entry(db) abort
+  return {
+        \ 'name': a:db.name,
+        \ 'source': a:db.source,
+        \ 'expanded': 0,
+        \ 'key_name': a:db.key_name,
+        \ 'path': a:db.path,
+        \ }
 endfunction
 
 function! s:dbui.generate_new_db_entry(db) abort
@@ -235,7 +272,7 @@ function! s:dbui.generate_new_db_entry(db) abort
   let db_name = substitute(get(parsed_url, 'path', ''), '^\/', '', '')
   let save_path = ''
   if !empty(self.save_path)
-    let save_path = printf('%s/%s', self.save_path, a:db.name)
+    let save_path = printf('%s/%s/%s', self.save_path, a:db.path, a:db.name)
   endif
   let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".a:db.name."-" || fnamemodify(v:val, ":t") =~? "^".a:db.name."-"')
 
@@ -255,11 +292,12 @@ function! s:dbui.generate_new_db_entry(db) abort
         \ 'save_path': save_path,
         \ 'db_name': !empty(db_name) ? db_name : a:db.name,
         \ 'name': a:db.name,
-        \ 'key_name': printf('%s_%s', a:db.name, a:db.source),
+        \ 'key_name': a:db.key_name,
         \ 'schema_support': 0,
         \ 'quote': 0,
         \ 'default_scheme': '',
-        \ 'filetype': ''
+        \ 'filetype': '',
+        \ 'path': a:db.path,
         \ }
 
   call self.populate_schema_info(db)
@@ -288,7 +326,7 @@ function! s:dbui.populate_from_global_variable() abort
   if exists('g:db') && !empty(g:db)
     let url = self.resolve_url_global_variable(g:db)
     let gdb_name = split(url, '/')[-1]
-    call self.add_if_not_exists(gdb_name, url, 'g:dbs')
+    call self.add_if_not_exists(gdb_name, url, '', 'g:dbs')
   endif
 
   if !exists('g:dbs') || empty(g:dbs)
@@ -297,13 +335,13 @@ function! s:dbui.populate_from_global_variable() abort
 
   if type(g:dbs) ==? type({})
     for [db_name, Db_url] in items(g:dbs)
-      call self.add_if_not_exists(db_name, self.resolve_url_global_variable(Db_url), 'g:dbs')
+      call self.add_if_not_exists(db_name, self.resolve_url_global_variable(Db_url), '', 'g:dbs')
     endfor
     return self
   endif
 
   for db in g:dbs
-    call self.add_if_not_exists(db.name, self.resolve_url_global_variable(db.url), 'g:dbs')
+    call self.add_if_not_exists(db.name, self.resolve_url_global_variable(db.url), '', 'g:dbs')
   endfor
 
   return self
@@ -326,7 +364,7 @@ function! s:dbui.populate_from_dotenv() abort
   for [name, url] in items(all_envs)
     if stridx(name, prefix) != -1
       let db_name = tolower(join(split(name, prefix)))
-      call self.add_if_not_exists(db_name, url, 'dotenv')
+      call self.add_if_not_exists(db_name, url, '', 'dotenv')
     endif
   endfor
 endfunction
@@ -350,7 +388,7 @@ function! s:dbui.populate_from_env() abort
           \ printf('Found %s variable for db url, but unable to parse the name. Please provide name via %s', g:db_ui_env_variable_url, g:db_ui_env_variable_name))
   endif
 
-  call self.add_if_not_exists(env_name, env_url, 'env')
+  call self.add_if_not_exists(env_name, env_url, '', 'env')
   return self
 endfunction
 
@@ -371,20 +409,69 @@ function! s:dbui.populate_from_connections_file() abort
   let file = db_ui#utils#readfile(self.connections_path)
 
   for conn in file
-    call self.add_if_not_exists(conn.name, conn.url, 'file')
+    call self.process_connection(conn, [])
   endfor
 
   return self
 endfunction
 
-function! s:dbui.add_if_not_exists(name, url, source) abort
-  let existing = get(filter(copy(self.dbs_list), 'v:val.name ==? a:name && v:val.source ==? a:source'), 0, {})
+function! s:dbui.process_connection(conn, parent_groups) abort
+  if self.is_group(a:conn)
+    let new_groups = copy(a:parent_groups)
+    call add(new_groups, a:conn.name)
+
+    for c in a:conn.connections
+      call self.process_connection(c, new_groups)
+    endfor
+    return
+  endif
+
+  let group_path = join(a:parent_groups, '/')
+  call self.add_if_not_exists(a:conn.name, a:conn.url, group_path, 'file')
+endfunction
+
+function! s:dbui.add_if_not_exists(name, url, group_path, source) abort
+  let dbs_list = self.get_target_list(a:group_path, a:source)
+  let existing = get(filter(copy(dbs_list), 'v:val.name ==? a:name && v:val.source ==? a:source'), 0, {})
+
   if !empty(existing)
     return db_ui#notifications#warning(printf('Warning: Duplicate connection name "%s" in "%s" source. First one added has precedence.', a:name, a:source))
   endif
-  return add(self.dbs_list, {
-        \ 'name': a:name, 'url': db_ui#resolve(a:url), 'source': a:source, 'key_name': printf('%s_%s', a:name, a:source)
+
+  return add(dbs_list, {
+        \ 'name': a:name,
+        \ 'url': db_ui#resolve(a:url),
+        \ 'source': a:source,
+        \ 'key_name': empty(a:group_path) ? printf('%s_%s', a:name, a:source) : printf('%s/%s_%s', a:group_path, a:name, a:source),
+        \ 'path': a:group_path,
         \ })
+endfunction
+
+function! s:dbui.get_target_list(group_path, source) abort
+  let dbs_list = self.dbs_list
+
+  if !empty(a:group_path)
+    let groups = split(a:group_path, '/')
+    let current_path = ''
+
+    for group in groups
+      let existing_group = get(filter(copy(dbs_list), 'v:val.name ==? group && v:val.source ==? a:source'), 0, {})
+      if empty(existing_group)
+        let existing_group = {
+              \ 'name': group,
+              \ 'source': a:source,
+              \ 'key_name': printf('%s/%s_%s', current_path, group, a:source),
+              \ 'connections': [],
+              \ 'path': current_path,
+              \ }
+        call add(dbs_list, existing_group)
+      endif
+      let dbs_list = existing_group.connections
+      let current_path = printf('%s/%s', current_path, group)
+    endfor
+  endif
+
+  return dbs_list
 endfunction
 
 function! s:dbui.is_tmp_location_buffer(db, buf) abort
@@ -484,4 +571,12 @@ function! s:get_db(saved_query_db) abort
   let selected_db = s:dbui_instance.dbs_list[selection - 1]
   let selected_db = s:dbui_instance.dbs[selected_db.key_name]
   return selected_db
+endfunction
+
+function! s:dbui.is_group(item) abort
+  return has_key(a:item, 'connections')
+endfunction
+
+function! s:dbui.is_connection(item) abort
+  return has_key(a:item, 'url')
 endfunction

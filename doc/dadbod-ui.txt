@@ -233,9 +233,19 @@ Other solution is to have it as a function that resolves a value dynamically.
 
 Executing |DBUIAddConnection| opens up a prompt to enter connection that will
 be saved in a `connections.json` file in |g:db_ui_save_location| folder. These
-connections will be available from everywhere. If you want to delete certain
-connection, open up DBUI drawer and press `d` (|<Plug>(DBUI_DeleteLine|) on
-the connection you want to delete.
+connections will be available from everywhere. 
+
+To add a connection to a group, prefix the connection name with the group path,
+starting with a forward slash. For example:
+- "/Production/users" adds a connection named "users" to the "Production" group
+- "/Production/EU/orders" adds a connection named "orders" to the "EU" subgroup
+  under "Production"
+
+If the specified groups don't exist, they will be created automatically.
+
+If you want to delete a connection or group, open up DBUI drawer and press `d`
+(|<Plug>(DBUI_DeleteLine|) on the connection or group you want to delete. When
+deleting a group, all connections within that group will also be deleted.
 
 ==============================================================================
 
@@ -698,6 +708,7 @@ g:db_ui_icons
 		          \   'schema': '-',
 		          \   'tables': '-',
 		          \   'table': '-',
+			  \   'group': '-',
 			  \ },
 			  \ 'collapsed': {
 		          \   'db': '+',
@@ -707,6 +718,7 @@ g:db_ui_icons
 		          \   'schema': '+',
 		          \   'tables': '+',
 		          \   'table': '+',
+			  \   'group': '+',
 			  \ },
 			\ }
 <
@@ -721,6 +733,7 @@ g:db_ui_icons
 		    'schema': '▾',
 		    'tables': '▾',
 		    'table': '▾',
+		    'group': '▾',
 		  },
 		  'collapsed': {
 		    'db': '▸',
@@ -730,6 +743,7 @@ g:db_ui_icons
 		    'schema': '▸',
 		    'tables': '▸',
 		    'table': '▸',
+		    'group': '▸',
 		  },
 		  'saved_query': '*',
 		  'new_query': '+',
@@ -755,6 +769,7 @@ g:db_ui_use_nerd_fonts
 		    'schema': '▾ פּ',
 		    'tables': '▾ 藺',
 		    'table': '▾ ',
+		    'group': '▾ 󰒋',
 		  },
 		  'collapsed': {
 		    'db': '▸ ',
@@ -764,6 +779,7 @@ g:db_ui_use_nerd_fonts
 		    'schema': '▸ פּ',
 		    'tables': '▸ 藺',
 		    'table': '▸ ',
+		    'group': '▸ 󰒋',
 		  },
 		  'saved_query': '',
 		  'new_query': '璘',
