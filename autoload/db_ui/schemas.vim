@@ -137,7 +137,7 @@ function! s:get_oracle_queries()
   let schemes_query = "
       \SELECT /*csv*/ username
       \ FROM all_users U
-      \ WHERE 1 = 1 
+      \ WHERE 1 = 1
       \ " . common_condition . "
       \ ORDER BY username"
 
@@ -213,12 +213,14 @@ let s:bigquery = {
 let s:clickhouse_schemes_query = "
       \ SELECT name as schema_name
       \ FROM system.databases
-      \ ORDER BY name"
+      \ ORDER BY name
+      \ FORMAT TabSeparated"
 
 let s:clickhouse_schemes_tables_query = "
       \ SELECT database AS table_schema, name AS table_name
       \ FROM system.tables
-      \ ORDER BY table_name"
+      \ ORDER BY table_name
+      \ FORMAT TabSeparated"
 
 let s:clickhouse = {
       \ 'args': ['-q'],
