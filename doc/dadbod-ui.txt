@@ -376,10 +376,15 @@ ic
 					      *<Plug>(DBUI_ExecuteQuery)*
 <Plug>(DBUI_ExecuteQuery)
 		Execute query in sql buffer. Supports normal and visual mode.
-		Normal mode executes all content in a file, where visual mode
+		Normal mode executes all content in the buffer, where visual mode
 		executes only the selected content.
 
 		By default, mapped to `<Leader>S`.
+
+					      *<Plug>(DBUI_ExecuteQueryAtCursor)*
+<Plug>(DBUI_ExecuteQueryAtCursor)
+		Execute the SQL query under the cursor in normal mode. 
+		In visual mode, executes the selected content.
 
 					      *<Plug>(DBUI_ToggleResultLayout)*
 <Plug>(DBUI_ToggleResultLayout)
