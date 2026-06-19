@@ -40,6 +40,28 @@ let s:mysql = {
       \ 'Primary Keys': "SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = '{schema}' AND TABLE_NAME = '{table}' AND CONSTRAINT_TYPE = 'PRIMARY KEY'",
       \ }
 
+let s:duckdb_table_comments_query = "
+    \SELECT\n
+    \    t.comment AS table_comment,\n
+    \    s.comment AS schema_comment,\n
+    \    d.comment AS database_comment\n
+    \FROM duckdb_tables() AS t\n
+    \INNER JOIN (SELECT current_database() AS database_name) USING (database_name)\n
+    \INNER JOIN duckdb_schemas() AS s ON t.schema_oid = s.oid\n
+    \INNER JOIN duckdb_databases() AS d ON t.database_oid = d.database_oid\n
+    \WHERE t.schema_name = '{schema}' AND t.table_name = '{table}'"
+
+let s:duckdb = {
+      \ 'List': 'SELECT * FROM {optional_schema}"{table}" LIMIT 200',
+      \ 'Columns': "SELECT * FROM duckdb_columns() INNER JOIN (SELECT current_database() AS database_name) USING (database_name) where table_name = '{table}' and schema_name = '{schema}'",
+      \ 'Describe': 'DESCRIBE {optional_schema}"{table}"',
+      \ 'Indexes': "SELECT * FROM duckdb_indexes() INNER JOIN (SELECT current_database() AS database_name) USING (database_name) where table_name = '{table}' and schema_name = '{schema}'",
+      \ 'Constraints': "SELECT * FROM duckdb_constraints() INNER JOIN (SELECT current_database() AS database_name) USING (database_name) where table_name = '{table}' and schema_name = '{schema}'",
+      \ 'Table Comments': s:duckdb_table_comments_query,
+      \ 'Column Comments': "SELECT column_name, comment FROM duckdb_columns() INNER JOIN (SELECT current_database() AS database_name) USING (database_name) where table_name = '{table}' and schema_name = '{schema}'",
+      \ 'Summarize': 'SUMMARIZE {optional_schema}"{table}"',
+      \ }
+
 let s:oracle_from = "
       \FROM all_constraints N\n
       \JOIN all_cons_columns L\n\t
@@ -194,6 +216,8 @@ let s:helpers = {
       \ 'mariadb': s:mysql,
       \ 'oracle': s:oracle,
       \ 'sqlite': s:sqlite,
+      \ 'duckdb': s:duckdb,
+      \ 'md': s:duckdb,
       \ 'sqlserver': s:sqlserver,
       \ 'clickhouse': s:clickhouse,
       \ 'mongodb': { 'List': '{table}.find()'},
