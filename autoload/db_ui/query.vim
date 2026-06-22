@@ -173,6 +173,8 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   nnoremap <silent><buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
   nnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :call <sid>method('execute_query')<CR>
   vnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :<C-u>call <sid>method('execute_query', 1)<CR>
+  nnoremap <silent><buffer><Plug>(DBUI_ExecuteQueryAtCursor) :call <sid>method('execute_query_at_cursor')<CR>
+  vnoremap <silent><buffer><Plug>(DBUI_ExecuteQueryAtCursor) :<C-u>call <sid>method('execute_query', 1)<CR>
   if is_tmp && is_sql
     nnoremap <silent><buffer><silent><Plug>(DBUI_SaveQuery) :call <sid>method('save_query')<CR>
   endif
@@ -231,6 +233,32 @@ function! s:query.execute_query(...) abort
   let self.last_query = lines
 endfunction
 
+function! s:query.execute_query_at_cursor(...) abort
+  " the visual mode has no sense when running query at cursor, 
+  " this should fallback to classic execution.
+  let is_visual_mode = get(a:, 1, 0)
+  if is_visual_mode
+    return self.execute_query(1)
+  endif
+
+  let lines = self.get_query_under_cursor()
+  if empty(lines)
+    return db_ui#notifications#info('No query under cursor.')
+  endif
+
+  call s:start_query()
+  let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
+  call self.execute_lines(db, lines, 0)
+  let has_async = exists('*db#cancel')
+  if has_async
+    call db_ui#notifications#info('Executing query...')
+  endif
+  if !has_async
+    call s:print_query_time()
+  endif
+  let self.last_query = lines
+endfunction
+
 function! s:query.execute_lines(db, lines, is_visual_mode) abort
   let filename = tempname().'.'.db#adapter#call(a:db.conn, 'input_extension', [], 'sql')
   let lines = copy(a:lines)
@@ -250,7 +278,8 @@ function! s:query.execute_lines(db, lines, is_visual_mode) abort
     return lines
   endif
 
-  if empty(should_inject_vars)
+  " Use visual range only when in visual mode (selection is set); otherwise use file
+  if empty(should_inject_vars) && a:is_visual_mode
     call db_ui#utils#print_debug({'message': 'Executing visual selection', 'command': "'<,'>DB"})
     exe "'<,'>DB"
   else
@@ -274,6 +303,73 @@ function! s:query.get_lines(is_visual_mode) abort
   let lines = split(@@, "\n")
   let &selection = sel_save
   let @@ = reg_save
+  return lines
+endfunction
+
+" Returns the SQL query under the cursor bounded by semicolon
+function! s:query.get_query_under_cursor() abort
+  let cur_line = line('.')
+  let cur_col = col('.')
+
+  " Find the previous semicolon (end of the preceding query)
+  let save_cursor = getpos('.')
+  if cur_col > 1
+    call cursor(cur_line, cur_col - 1)
+  endif
+  let [prev_line, prev_col] = searchpos(';', 'bWn')
+  call setpos('.', save_cursor)
+
+  " Find the next semicolon (end of the current query)
+  let [next_line, next_col] = searchpos(';', 'Wn')
+
+  " Start position, after the previous semicolon or start of buffer
+  if prev_line == 0
+    let start_line = 1
+    let start_col = 1
+  else
+    let prev_linetext = getline(prev_line)
+    if prev_col >= len(prev_linetext)
+      let start_line = prev_line + 1
+      let start_col = 1
+    else
+      let start_line = prev_line
+      let start_col = prev_col + 1
+    endif
+  endif
+
+  " End position, at the next semicolon or end of buffer
+  if next_line == 0
+    let end_line = line('$')
+    let last_linetext = getline(end_line)
+    let end_col = max([1, len(last_linetext)])
+  else
+    let end_line = next_line
+    let end_col = next_col
+  endif
+
+  " Ensure we have a valid range
+  if start_line > end_line || (start_line == end_line && start_col > end_col)
+    return []
+  endif
+
+  " Build the list of lines for the query (with column bounds on first/last line)
+  let lines = []
+  if start_line == end_line
+    let linetext = getline(start_line)
+    let segment = strpart(linetext, start_col - 1, end_col - start_col + 1)
+    if !empty(trim(segment))
+      call add(lines, segment)
+    endif
+  else
+    let first_linetext = getline(start_line)
+    call add(lines, strpart(first_linetext, start_col - 1))
+    for lnum in range(start_line + 1, end_line - 1)
+      call add(lines, getline(lnum))
+    endfor
+    let last_linetext = getline(end_line)
+    call add(lines, strpart(last_linetext, 0, end_col))
+  endif
+
   return lines
 endfunction
 
