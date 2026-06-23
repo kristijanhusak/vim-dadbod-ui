@@ -151,6 +151,12 @@ Just make sure to **NOT COMMIT** these. I suggest using project local vim config
 Using `:DBUIAddConnection` command or pressing `A` in dbui drawer opens up a prompt to enter database url and name,
 that will be saved in `g:db_ui_save_location` connections file. These connections are available from everywhere.
 
+To add a connection to a group, prefix the name with a group path, starting with a forward slash:
+* `/Production/users` adds a connection named "users" to the "Production" group
+* `/Production/EU/orders` adds a connection named "orders" to the "EU" subgroup under "Production"
+
+Groups can be nested to create hierarchical organization. Non-existent groups will be created automatically.
+
 #### Connection related notes
 It is possible to have two connections with same name, but from different source.
 for example, you can have `my-db` in env variable, in `g:dbs` and in saved connections.

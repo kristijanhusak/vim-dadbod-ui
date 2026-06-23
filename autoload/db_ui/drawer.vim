@@ -251,8 +251,12 @@ function! s:drawer.rename_line() abort
     return self.rename_buffer(item.file_path, item.dbui_db_key_name, get(item, 'saved', 0))
   endif
 
-  if item.type ==? 'db'
-    return self.get_connections().rename(self.dbui.dbs[item.dbui_db_key_name])
+  if item.type ==? 'db' 
+    return self.get_connections().rename_db(self.dbui.dbs[item.dbui_db_key_name])
+  endif
+
+  if item.type ==? 'group'
+    return self.get_connections().rename_group(self.dbui.groups[item.dbui_db_key_name])
   endif
 
   return
@@ -332,10 +336,7 @@ function! s:drawer.render(...) abort
   call self.render_help()
 
   for db in self.dbui.dbs_list
-    if get(opts, 'queries', 0)
-      call self.load_saved_queries(self.dbui.dbs[db.key_name])
-    endif
-    call self.add_db(self.dbui.dbs[db.key_name])
+    call self.add_connection_item(db, opts, 0)
   endfor
 
   if empty(self.dbui.dbs_list)
@@ -406,8 +407,38 @@ function! s:drawer.add(label, action, type, icon, dbui_db_key_name, level, ...)
   call add(self.content, opts)
 endfunction
 
-function! s:drawer.add_db(db) abort
+function! s:drawer.add_connection_item(item, opts, level) abort
+  if self.dbui.is_group(a:item)
+    return self.add_group(a:item, a:opts, a:level)
+  endif
+
+  if get(a:opts, 'queries', 0)
+    call self.load_saved_queries(self.dbui.dbs[a:item.key_name])
+  endif
+
+  call self.add_db(self.dbui.dbs[a:item.key_name], a:level)
+endfunction
+
+function! s:drawer.add_group(group, opts, level) abort
+  let group = a:group
+  let opts = a:opts
+  let level = a:level
+
+  let expanded = get(self.dbui.groups[group.key_name], 'expanded', 0)
+
+  call self.add(group.name, 'toggle', 'group', self.get_toggle_icon('group', self.dbui.groups[group.key_name]), group.key_name, level, { 'expanded': expanded })
+
+  if expanded
+    for conn in group.connections
+      call self.add_connection_item(conn, opts, level + 1)
+    endfor
+endif
+
+endfunction
+
+function! s:drawer.add_db(db, level) abort
   let db_name = a:db.name
+  let level = a:level
 
   if !empty(a:db.conn_error)
     let db_name .= ' '.g:db_ui_icons.connection_error
@@ -419,7 +450,7 @@ function! s:drawer.add_db(db) abort
     let db_name .= ' ('.a:db.scheme.' - '.a:db.source.')'
   endif
 
-  call self.add(db_name, 'toggle', 'db', self.get_toggle_icon('db', a:db), a:db.key_name, 0, { 'expanded': a:db.expanded })
+  call self.add(db_name, 'toggle', 'db', self.get_toggle_icon('db', a:db), a:db.key_name, level, { 'expanded': a:db.expanded })
   if !a:db.expanded
     return a:db
   endif
@@ -427,13 +458,13 @@ function! s:drawer.add_db(db) abort
   " Render sections based on g:db_ui_drawer_sections configuration
   for section in g:db_ui_drawer_sections
     if section ==# 'new_query'
-      call self._render_new_query_section(a:db)
+      call self._render_new_query_section(a:db, level+1)
     elseif section ==# 'buffers' && !empty(a:db.buffers.list)
-      call self._render_buffers_section(a:db)
+      call self._render_buffers_section(a:db, level+1)
     elseif section ==# 'saved_queries'
-      call self._render_saved_queries_section(a:db)
+      call self._render_saved_queries_section(a:db, level+1)
     elseif section ==# 'schemas'
-      call self._render_schemas_section(a:db)
+      call self._render_schemas_section(a:db, level+1)
     endif
   endfor
 endfunction
@@ -477,6 +508,12 @@ function! s:drawer.toggle_line(edit_action) abort
     return self.get_query().open(item, a:edit_action)
   endif
 
+  if item.type ==? 'group'
+    let group = self.dbui.groups[item.dbui_db_key_name]
+    let group.expanded = !group.expanded
+    return self.render()
+  endif
+
   let db = self.dbui.dbs[item.dbui_db_key_name]
 
   let tree = db
@@ -507,12 +544,20 @@ function! s:drawer.delete_line() abort
     return
   endif
 
-  if item.action ==? 'toggle' && item.type ==? 'db'
+  if item.action ==? 'toggle' &&  item.type ==? 'db' 
     let db = self.dbui.dbs[item.dbui_db_key_name]
     if db.source !=? 'file'
       return db_ui#notifications#error('Cannot delete this connection.')
     endif
     return self.delete_connection(db)
+  endif
+
+  if item.type ==? 'group' 
+    let group = self.dbui.groups[item.dbui_db_key_name]
+    if group.source !=? 'file'
+      return db_ui#notifications#error('Cannot delete this group.')
+    endif
+    return self.get_connections().delete(group)
   endif
 
   if item.action !=? 'open' || item.type !=? 'buffer'
@@ -699,48 +744,48 @@ function! s:drawer.get_buffer_name(db, buffer)
   return substitute(name, '^'.db_ui#utils#slug(a:db.name).'-', '', '')
 endfunction
 
-function! s:drawer._render_new_query_section(db) abort
-  call self.add('New query', 'open', 'query', g:db_ui_icons.new_query, a:db.key_name, 1)
+function! s:drawer._render_new_query_section(db, level) abort
+  call self.add('New query', 'open', 'query', g:db_ui_icons.new_query, a:db.key_name, a:level)
 endfunction
 
-function! s:drawer._render_buffers_section(db) abort
-  call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', self.get_toggle_icon('buffers', a:db.buffers), a:db.key_name, 1, { 'expanded': a:db.buffers.expanded })
+function! s:drawer._render_buffers_section(db, level) abort
+  call self.add('Buffers ('.len(a:db.buffers.list).')', 'toggle', 'buffers', self.get_toggle_icon('buffers', a:db.buffers), a:db.key_name, a:level, { 'expanded': a:db.buffers.expanded })
   if a:db.buffers.expanded
     for buf in a:db.buffers.list
       let buflabel = self.get_buffer_name(a:db, buf)
       if self.dbui.is_tmp_location_buffer(a:db, buf)
         let buflabel .= ' *'
       endif
-      call self.add(buflabel, 'open', 'buffer', g:db_ui_icons.buffers, a:db.key_name, 2, { 'file_path': buf })
+      call self.add(buflabel, 'open', 'buffer', g:db_ui_icons.buffers, a:db.key_name, a:level+1, { 'file_path': buf })
     endfor
   endif
 endfunction
 
-function! s:drawer._render_saved_queries_section(db) abort
-  call self.add('Saved queries ('.len(a:db.saved_queries.list).')', 'toggle', 'saved_queries', self.get_toggle_icon('saved_queries', a:db.saved_queries), a:db.key_name, 1, { 'expanded': a:db.saved_queries.expanded })
+function! s:drawer._render_saved_queries_section(db, level) abort
+  call self.add('Saved queries ('.len(a:db.saved_queries.list).')', 'toggle', 'saved_queries', self.get_toggle_icon('saved_queries', a:db.saved_queries), a:db.key_name, a:level, { 'expanded': a:db.saved_queries.expanded })
   if a:db.saved_queries.expanded
     for saved_query in a:db.saved_queries.list
-      call self.add(fnamemodify(saved_query, ':t'), 'open', 'buffer', g:db_ui_icons.saved_query, a:db.key_name, 2, { 'file_path': saved_query, 'saved': 1 })
+      call self.add(fnamemodify(saved_query, ':t'), 'open', 'buffer', g:db_ui_icons.saved_query, a:db.key_name, a:level+1, { 'file_path': saved_query, 'saved': 1 })
     endfor
   endif
 endfunction
 
-function! s:drawer._render_schemas_section(db) abort
+function! s:drawer._render_schemas_section(db, level) abort
   if a:db.schema_support
-    call self.add('Schemas ('.len(a:db.schemas.items).')', 'toggle', 'schemas', self.get_toggle_icon('schemas', a:db.schemas), a:db.key_name, 1, { 'expanded': a:db.schemas.expanded })
+    call self.add('Schemas ('.len(a:db.schemas.items).')', 'toggle', 'schemas', self.get_toggle_icon('schemas', a:db.schemas), a:db.key_name, a:level, { 'expanded': a:db.schemas.expanded })
     if a:db.schemas.expanded
       for schema in a:db.schemas.list
         let schema_item = a:db.schemas.items[schema]
         let tables = schema_item.tables
-        call self.add(schema.' ('.len(tables.items).')', 'toggle', 'schemas->items->'.schema, self.get_toggle_icon('schema', schema_item), a:db.key_name, 2, { 'expanded': schema_item.expanded })
+        call self.add(schema.' ('.len(tables.items).')', 'toggle', 'schemas->items->'.schema, self.get_toggle_icon('schema', schema_item), a:db.key_name, a:level+1, { 'expanded': schema_item.expanded })
         if schema_item.expanded
-          call self.render_tables(tables, a:db,'schemas->items->'.schema.'->tables->items', 3, schema)
+          call self.render_tables(tables, a:db,'schemas->items->'.schema.'->tables->items', a:level+2, schema)
         endif
       endfor
     endif
   else
-    call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_toggle_icon('tables', a:db.tables), a:db.key_name, 1, { 'expanded': a:db.tables.expanded })
-    call self.render_tables(a:db.tables, a:db, 'tables->items', 2, '')
+    call self.add('Tables ('.len(a:db.tables.items).')', 'toggle', 'tables', self.get_toggle_icon('tables', a:db.tables), a:db.key_name, a:level, { 'expanded': a:db.tables.expanded })
+    call self.render_tables(a:db.tables, a:db, 'tables->items', a:level+1, '')
   endif
 endfunction
 
