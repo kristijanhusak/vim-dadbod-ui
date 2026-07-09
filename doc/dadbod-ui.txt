@@ -451,7 +451,7 @@ Table helper is a predefined query that is easily available for each table.
 By default, all database schemes available in `vim-dadbod` have a `List` table
 helper, which is just a simple query to list the data from the table.
 Certain schemes (postgesql, mysql, sqlite) have few more helpers, like
-`Indexes`, `Forein Keys`, `Primary Keys`, etc.
+`Indexes`, `Foreign Keys`, `Primary Keys`, etc.
 
 To define your own helper for a specific scheme, add it through
 `g:db_ui_table_helpers` variable like this:
