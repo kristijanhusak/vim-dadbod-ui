@@ -110,8 +110,8 @@ let s:oracle_args = join(
            \  'SET linesize 4000',
            \  'SET pagesize 4000',
            \  'COLUMN owner FORMAT a20',
-           \  'COLUMN table_name FORMAT a25',
-           \  'COLUMN column_name FORMAT a25',
+           \  'COLUMN table_name FORMAT a' . g:db_ui_trim,
+           \  'COLUMN column_name FORMAT a' . g:db_ui_trim,
            \  '%s',
       \    ],
       \    ";\n"
