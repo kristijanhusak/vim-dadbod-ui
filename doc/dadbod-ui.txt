@@ -381,7 +381,19 @@ ic
 
 		By default, mapped to `<Leader>S`.
 
-					      *<Plug>(DBUI_ToggleResultLayout)*
+						      *<Plug>(DBUI_ExportQueryCSV)*
+<Plug>(DBUI_ExportQueryCSV)
+		Export query results directly to a CSV file. In sql buffers,
+		normal mode exports all content in a file and visual mode exports
+		only the selected content. In `.dbout` buffers, it re-runs the
+		query that produced the current result buffer.
+
+		For generated table helper queries ending in a trailing LIMIT,
+		see |g:db_ui_export_csv_strip_limit|.
+
+		By default, mapped to `<Leader>X`.
+
+						      *<Plug>(DBUI_ToggleResultLayout)*
 <Plug>(DBUI_ToggleResultLayout)
 		Toggle expanded view in the results buffer (column and value
 		per line). Currently supported only for MySQL and PostgreSQL.
@@ -911,7 +923,20 @@ g:db_ui_dbout_list_sort
 <
 		Default value: `'asc'`
 
-					      *g:db_ui_default_query*
+						      *g:db_ui_export_csv_strip_limit*
+g:db_ui_export_csv_strip_limit
+		Controls whether CSV export removes a trailing LIMIT clause from
+		the query before running the export. This is useful when exporting
+		from generated table helper queries that default to LIMIT 200.
+
+		Allowed values:
+		`ask` prompts each time a trailing LIMIT is detected.
+		`1` always strips the trailing LIMIT.
+		`0` never strips the trailing LIMIT.
+
+		Default value: `ask`
+
+						      *g:db_ui_default_query*
 g:db_ui_default_query (DEPRECATED)
 		This value was intially used as a default value for the table
 		queries. It is still used as a default value for certain

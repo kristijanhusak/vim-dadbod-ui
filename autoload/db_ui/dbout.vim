@@ -103,6 +103,15 @@ function! db_ui#dbout#toggle_layout() abort
   let b:db_ui_expanded_layout = !expanded_layout
 endfunction
 
+function! db_ui#dbout#export_csv() abort
+  let input = get(b:db, 'input', '')
+  if empty(input) || !filereadable(input)
+    return db_ui#notifications#error('Unable to find original query for CSV export.')
+  endif
+
+  return db_ui#query#export_csv(readfile(input), b:db)
+endfunction
+
 function! db_ui#dbout#yank_header() abort
   let parsed = db#url#parse(db_ui#resolve(b:db))
   let scheme = db_ui#schemas#get(parsed.scheme)

@@ -394,6 +394,7 @@ function! s:drawer.render_help() abort
     call self.add('" <Leader>W - (sql) Save currently opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>E - (sql) Edit bind parameters in opened query', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>S - (sql) Execute query in visual or normal mode', 'noaction', 'help', '', '', 0)
+    call self.add('" <Leader>X - (sql/.dbout) Export query results to CSV', 'noaction', 'help', '', '', 0)
     call self.add('" <C-]> - (.dbout) Go to entry from foreign key cell', 'noaction', 'help', '', '', 0)
     call self.add('" <motion>ic - (.dbout) Operator pending mapping for cell value', 'noaction', 'help', '', '', 0)
     call self.add('" <Leader>R - (.dbout) Toggle expanded view', 'noaction', 'help', '', '', 0)

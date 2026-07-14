@@ -287,6 +287,8 @@ For queries, filetype is automatically set to `sql`. Also, two mappings is added
 
 * \<Leader>W - Permanently save query for later use (`<Plug>(DBUI_SaveQuery)`)
 * \<Leader>E - Edit bind parameters (`<Plug>(DBUI_EditBindParameters)`)
+* \<Leader>S - Execute query (`<Plug>(DBUI_ExecuteQuery)`)
+* \<Leader>X - Export query results to CSV (`<Plug>(DBUI_ExportQueryCSV)`)
 
 Any of these mappings can be overridden:
 ```vimL

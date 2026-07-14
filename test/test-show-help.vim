@@ -33,9 +33,10 @@ function! s:suite.should_show_help_text() abort
   call s:expect(getline(14)).to_equal('" <Leader>W - (sql) Save currently opened query')
   call s:expect(getline(15)).to_equal('" <Leader>E - (sql) Edit bind parameters in opened query')
   call s:expect(getline(16)).to_equal('" <Leader>S - (sql) Execute query in visual or normal mode')
-  call s:expect(getline(17)).to_equal('" <C-]> - (.dbout) Go to entry from foreign key cell')
-  call s:expect(getline(18)).to_equal('" <motion>ic - (.dbout) Operator pending mapping for cell value')
-  call s:expect(getline(19)).to_equal('" <Leader>R - (.dbout) Toggle expanded view')
+  call s:expect(getline(17)).to_equal('" <Leader>X - (sql/.dbout) Export query results to CSV')
+  call s:expect(getline(18)).to_equal('" <C-]> - (.dbout) Go to entry from foreign key cell')
+  call s:expect(getline(19)).to_equal('" <motion>ic - (.dbout) Operator pending mapping for cell value')
+  call s:expect(getline(20)).to_equal('" <Leader>R - (.dbout) Toggle expanded view')
   normal ?
   call s:expect(getline(1)).to_equal('" Press ? for help')
   call s:expect(getline(2)).to_be_empty()

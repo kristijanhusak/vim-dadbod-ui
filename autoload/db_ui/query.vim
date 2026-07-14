@@ -173,6 +173,8 @@ function! s:query.setup_buffer(db, opts, buffer_name, was_single_win) abort
   nnoremap <silent><buffer><Plug>(DBUI_EditBindParameters) :call <sid>method('edit_bind_parameters')<CR>
   nnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :call <sid>method('execute_query')<CR>
   vnoremap <silent><buffer><Plug>(DBUI_ExecuteQuery) :<C-u>call <sid>method('execute_query', 1)<CR>
+  nnoremap <silent><buffer><Plug>(DBUI_ExportQueryCSV) :call <sid>method('export_csv')<CR>
+  vnoremap <silent><buffer><Plug>(DBUI_ExportQueryCSV) :<C-u>call <sid>method('export_csv', 1)<CR>
   if is_tmp && is_sql
     nnoremap <silent><buffer><silent><Plug>(DBUI_SaveQuery) :call <sid>method('save_query')<CR>
   endif
@@ -260,6 +262,140 @@ function! s:query.execute_lines(db, lines, is_visual_mode) abort
   endif
 
   return lines
+endfunction
+
+function! db_ui#query#export_csv_from_buffer(...) abort
+  if empty(s:query_instance) || !has_key(s:query_instance, 'export_csv')
+    return db_ui#notifications#error('Unable to export CSV. Not a valid dbui query buffer.')
+  endif
+
+  return s:query_instance.export_csv(get(a:, 1, 0))
+endfunction
+
+function! db_ui#query#export_csv(lines, db, ...) abort
+  let default_path = get(a:, 1, s:default_csv_path())
+  return s:export_csv(a:lines, a:db, default_path)
+endfunction
+
+function! s:query.export_csv(...) abort
+  let is_visual_mode = get(a:, 1, 0)
+  let lines = self.get_lines(is_visual_mode)
+  let db = self.drawer.dbui.dbs[b:dbui_db_key_name]
+  let should_inject_vars = match(join(lines), s:bind_param_rgx) > -1
+  if should_inject_vars
+    try
+      let lines = self.inject_variables(lines)
+    catch /.*/
+      return db_ui#notifications#error(v:exception)
+    endtry
+  endif
+
+  return s:export_csv(lines, db.conn, s:default_csv_path())
+endfunction
+
+function! s:default_csv_path() abort
+  let name = fnamemodify(expand('%:t'), ':r')
+  if empty(name)
+    let name = 'query'
+  endif
+
+  return fnamemodify(name.'.csv', ':p')
+endfunction
+
+function! s:export_csv(lines, db, default_path) abort
+  try
+    let query = s:prepare_export_query(a:lines)
+    if empty(trim(query))
+      throw 'No query to export.'
+    endif
+
+    let path = db_ui#utils#input('Export CSV to: ', a:default_path)
+    if empty(trim(path))
+      throw 'No export path provided.'
+    endif
+
+    let result = s:run_csv_query(a:db, query)
+    call writefile(result.lines, path)
+    return db_ui#notifications#info('Exported '.result.rows.' rows to '.path)
+  catch /.*/
+    return db_ui#notifications#error(v:exception)
+  endtry
+endfunction
+
+function! s:prepare_export_query(lines) abort
+  let query = join(a:lines, "\n")
+  if query !~? '\_s\+limit\_s\+\d\+\_s*;\?\_s*$'
+    return query
+  endif
+
+  let strip_limit = g:db_ui_export_csv_strip_limit
+  if type(strip_limit) == v:t_string && strip_limit ==# 'ask'
+    let strip_limit = confirm('Remove trailing LIMIT for CSV export?', "&Yes\n&No", 1) == 1
+  endif
+
+  if !strip_limit
+    return query
+  endif
+
+  return substitute(query, '\c\_s\+limit\_s\+\d\+\_s*;\?\_s*$', '', '')
+endfunction
+
+function! s:run_csv_query(db, query) abort
+  let db_url = type(a:db) == v:t_string ? a:db : get(a:db, 'db_url', '')
+  let scheme = tolower(get(db#url#parse(db_url), 'scheme', ''))
+
+  if scheme ==# 'sqlite'
+    let lines = db#systemlist(db#adapter#dispatch(db_url, 'command') + ['-header', '-csv', a:query])
+    return { 'lines': lines, 'rows': max([len(lines) - 1, 0]) }
+  endif
+
+  if scheme ==# 'postgres' || scheme ==# 'postgresql'
+    let lines = db#systemlist(db#adapter#dispatch(db_url, 'interactive', ['--csv', '-q', '-c', a:query]))
+    return { 'lines': lines, 'rows': max([len(lines) - 1, 0]) }
+  endif
+
+  if scheme ==# 'bigquery'
+    let lines = db#systemlist(db#adapter#dispatch(db_url, 'filter') + ['--format=csv', a:query])
+    return { 'lines': lines, 'rows': max([len(lines) - 1, 0]) }
+  endif
+
+  if scheme ==# 'clickhouse'
+    let query = substitute(a:query, ';\s*$', '', '').' FORMAT CSVWithNames'
+    let lines = db#systemlist(db#adapter#dispatch(db_url, 'interactive') + ['--query', query])
+    return { 'lines': lines, 'rows': max([len(lines) - 1, 0]) }
+  endif
+
+  if scheme ==# 'mysql' || scheme ==# 'mariadb'
+    let lines = db#systemlist(db#adapter#dispatch(db_url, 'interactive') + ['--batch', '--raw', '--execute', a:query])
+    let lines = map(lines, {_, line -> s:csv_line(split(line, "\t", 1))})
+    return { 'lines': lines, 'rows': max([len(lines) - 1, 0]) }
+  endif
+
+  if scheme ==# 'sqlserver'
+    let query = 'SET NOCOUNT ON; '.a:query
+    let output = db#systemlist(db#adapter#dispatch(db_url, 'interactive') + ['-W', '-s', "\t", '-Q', query])
+    let lines = db_ui#query#sqlserver_to_csv(output)
+    return { 'lines': lines, 'rows': max([len(lines) - 1, 0]) }
+  endif
+
+  throw 'CSV export is not supported for '.scheme.' yet.'
+endfunction
+
+function! db_ui#query#sqlserver_to_csv(output) abort
+  let lines = filter(copy(a:output), {_, line -> !empty(line) && line !~# '^\(-\+\t\)*-\+$'})
+  return map(lines, {_, line -> s:csv_line(split(line, "\t", 1))})
+endfunction
+
+function! s:csv_line(values) abort
+  return join(map(copy(a:values), {_, value -> s:csv_value(value)}), ',')
+endfunction
+
+function! s:csv_value(value) abort
+  let value = type(a:value) == v:t_string ? a:value : string(a:value)
+  if value =~# '[,"\r\n]'
+    return '"'.substitute(value, '"', '""', 'g').'"'
+  endif
+  return value
 endfunction
 
 function! s:query.get_lines(is_visual_mode) abort

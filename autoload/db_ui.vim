@@ -128,6 +128,14 @@ function! db_ui#print_last_query_info() abort
   return db_ui#notifications#info(content, {'echo': 1})
 endfunction
 
+function! db_ui#export_csv() abort
+  if &filetype ==# 'dbout'
+    return db_ui#dbout#export_csv()
+  endif
+
+  return db_ui#query#export_csv_from_buffer()
+endfunction
+
 function! db_ui#statusline(...)
   let db_key_name = get(b:, 'dbui_db_key_name', '')
   let dbout = get(b:, 'db', '')
