@@ -53,7 +53,7 @@ function! s:query.generate_buffer_name(db, opts) abort
   let buffer_name = db_ui#utils#slug(printf('%s-%s', a:db.name, suffix))
   let buffer_name = printf('%s-%s', buffer_name, time)
   if type(g:Db_ui_buffer_name_generator) ==? type(function('tr'))
-    let buffer_name = printf('%s-%s', a:db.name, call(g:Db_ui_buffer_name_generator, [a:opts]))
+    let buffer_name = printf('%s-%s', db_ui#utils#slug(a:db.name), call(g:Db_ui_buffer_name_generator, [a:opts]))
   endif
 
   if !empty(self.drawer.dbui.tmp_location)

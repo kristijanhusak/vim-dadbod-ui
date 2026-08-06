@@ -237,7 +237,8 @@ function! s:dbui.generate_new_db_entry(db) abort
   if !empty(self.save_path)
     let save_path = printf('%s/%s', self.save_path, a:db.name)
   endif
-  let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".a:db.name."-" || fnamemodify(v:val, ":t") =~? "^".a:db.name."-"')
+  let db_name_slug = db_ui#utils#slug(a:db.name)
+  let buffers = filter(copy(self.old_buffers), 'fnamemodify(v:val, ":e") =~? "^".db_name_slug."-" || fnamemodify(v:val, ":t") =~? "^".db_name_slug."-"')
 
   let db = {
         \ 'url': a:db.url,
